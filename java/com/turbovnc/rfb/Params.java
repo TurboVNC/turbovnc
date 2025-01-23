@@ -622,7 +622,7 @@ public final class Params {
   "when the latter changes.", true);
 
   public ServerNameParameter server =
-  new ServerNameParameter("Server", this, false,
+  new ServerNameParameter("Server", this, false, false,
   "The VNC server to which to connect.  This can be specified in the " +
   "format {host}[:{display_number}], {host}::{port}, or {host}::{uds_path}, " +
   "where {host} is the host name or IP address of the machine on which the " +
@@ -638,9 +638,7 @@ public final class Params {
    "you to remotely start a new TurboVNC session or to choose an existing " +
    "session to which to connect.\n " : "\n ") +
 
-  "When using the Tunnel parameter" +
-  (Utils.getBooleanProperty("turbovnc.viajump", true) ?
-   " or the Via parameter with an SSH gateway" : "") +
+  "When using the Tunnel parameter or the Jump parameter" +
   (Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
    " or the TurboVNC Session Manager, " : ", ") +
   "the SSH username (default = local username) can be specified by " +
@@ -1008,12 +1006,12 @@ public final class Params {
 
   public BoolParameter extSSH =
   new BoolParameter("ExtSSH", this, false, true,
-  "When using the Via or Tunnel parameters, use an external SSH client " +
-  "instead of the built-in SSH client.  The external SSH client command can " +
-  "be specified using the ExtSSHCommand parameter, and you can also use the " +
-  "ExtSSHTemplate parameter to specify the SSH command-line template for " +
-  "creating the tunnel.  If ExtSSHTemplate is set, then an external SSH " +
-  "client is automatically used.\n " +
+  "When using the Tunnel, Jump, or Via parameter, use an external SSH " +
+  "client instead of the built-in SSH client.  The external SSH client " +
+  "command can be specified using the ExtSSHCommand parameter, and you can " +
+  "also use the ExtSSHTemplate parameter to specify the SSH command-line " +
+  "template for creating the tunnel.  If ExtSSHTemplate is set, then an " +
+  "external SSH client is automatically used.\n " +
 
   (Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
    "When using the TurboVNC Session Manager, this parameter is effectively " +
@@ -1030,23 +1028,23 @@ public final class Params {
 
   public StringParameter extSSHTemplate =
   new StringParameter("ExtSSHTemplate", this, false, true,
-  "SSH command-line template to use when creating an SSH tunnel for the Via " +
-  "or Tunnel parameter with an external SSH client\n " +
+  "SSH command-line template to use when creating an SSH tunnel for the " +
+  "Tunnel, Jump, or Via parameter with an external SSH client\n " +
 
   "Patterns beginning with the \"%\" character are expanded as follows:\r " +
   "%% --> a literal \"%\" character\r " +
-  "%G --> gateway host name or IP address, including the SSH username if " +
-  "specified\r " +
+  "%G --> jump/gateway host name or IP address, including the SSH username " +
+  "and/or the jump host's SSH port if specified\r " +
   "%H --> remote VNC host name or IP address, including the SSH username if " +
-  "specified (if using the Via parameter, then the VNC host is specified " +
-  "from the point of view of the gateway)\r " +
+  "specified (if using the Jump or Via parameter, then the VNC host is " +
+  "specified from the point of view of the jump/gateway host)\r " +
   "%L --> local TCP port number\r " +
   "%R --> remote TCP port number or the escaped name of a Unix domain " +
   "socket on the VNC host\r " +
   "%S --> the external SSH client command, which can be specified using " +
   "the ExtSSHCommand parameter\n " +
 
-  "%H and %R are required.  %G is also required if using the Via " +
+  "%H and %R are required.  %G is also required if using the Jump or Via " +
   "parameter.  %L is also required for TCP connections.  For Unix domain " +
   "socket connections, %L can be used to forward a local TCP port to the " +
   "remote Unix domain socket (for instance, by specifying a template of " +
@@ -1059,16 +1057,44 @@ public final class Params {
   "template defaults to one of the following values:\n " +
 
   "Default SSH command-line templates for TCP connections\r " +
-  "Via parameter:     " +
-  com.turbovnc.vncviewer.Tunnel.DEFAULT_VIA_CMD + "\r " +
-  "Tunnel parameter:  " +
-  com.turbovnc.vncviewer.Tunnel.DEFAULT_TUNNEL_CMD + "\n " +
+  "Tunnel parameter:       " +
+  com.turbovnc.vncviewer.Tunnel.DEFAULT_TUNNEL_CMD + "\r " +
+  "Jump parameter:         " +
+  com.turbovnc.vncviewer.Tunnel.DEFAULT_JUMP_CMD + "\r " +
+  "Via parameter:          " +
+  com.turbovnc.vncviewer.Tunnel.DEFAULT_VIA_CMD + "\n " +
 
   "Default SSH command-line templates for Unix domain socket connections\r " +
-  "Via parameter:     " +
-  com.turbovnc.vncviewer.Tunnel.DEFAULT_VIA_CMD_UDS + "\r " +
-  "Tunnel parameter:  " +
-  com.turbovnc.vncviewer.Tunnel.DEFAULT_TUNNEL_CMD_UDS, null);
+  "Tunnel parameter:       " +
+  com.turbovnc.vncviewer.Tunnel.DEFAULT_TUNNEL_CMD_UDS + "\r " +
+  "Jump or Via parameter:  " +
+  com.turbovnc.vncviewer.Tunnel.DEFAULT_JUMP_CMD_UDS, null);
+
+  public ServerNameParameter jump =
+  new ServerNameParameter("Jump", this, true, false,
+  "Intermediate SSH server (\"jump host\") through which the final SSH " +
+  "connection to the VNC host should be made.  This can be specified in the " +
+  "format [{ssh_user}@]{jump_host}[:{ssh_port}], where {ssh_user} is the " +
+  "SSH username on the jump host (default = local username) and {ssh_port} " +
+  "is the TCP port on which the jump host's SSH server is listening " +
+  "(default = the default value of the SSHPort parameter.)  This parameter " +
+  "is functionally equivalent to the ProxyJump OpenSSH configuration " +
+  "keyword.  Note that when using this parameter, the VNC host should be " +
+  "specified from the point of view of the jump host.  Specifying this " +
+  "parameter effectively sets the Tunnel parameter.\n " +
+
+  "For Unix domain socket connections, this parameter is equivalent to the " +
+  "Via parameter.  For TCP connections, this parameter creates a " +
+  "multi-level SSH tunnel to the VNC host, which ensures that the VNC " +
+  "connection is encrypted on the server-area network and eliminates the " +
+  "need to open RFB ports in the VNC host's firewall.  The Via parameter, " +
+  "on the other hand, creates an SSH tunnel to the gateway host and " +
+  "forwards the RFB/TCP connection directly to the VNC host from the " +
+  "gateway host.\n " +
+
+  "When using the built-in SSH client, this parameter and the ProxyJump " +
+  "OpenSSH configuration keyword do not allow multiple comma-separated SSH " +
+  "hops to be specified.", null);
 
   public BoolParameter localUsernameLC =
   new BoolParameter("LocalUsernameLC", this, false, false,
@@ -1205,23 +1231,22 @@ public final class Params {
   public IntParameter sshPort =
   new IntParameter("SSHPort", this, false, false,
   "When using the built-in SSH client, this parameter specifies the TCP " +
-  "port on which the SSH server is listening.", 22, 0, 65535);
+  "port on which the VNC host's or gateway host's SSH server is listening.  " +
+  "This parameter does not apply to jump hosts.", 22, 0, 65535);
 
   public BoolParameter tunnel =
   new BoolParameter("Tunnel", this, true, false,
-  "Setting this parameter is functionally equivalent to using the Via " +
-  "parameter with an SSH gateway, except that the gateway host is assumed " +
-  "to be the same as the VNC host, so you do not need to specify it " +
-  "separately.\n " +
+  "Setting this parameter is equivalent to using the Via parameter with an " +
+  "SSH gateway, except that the gateway host is assumed to be the same as " +
+  "the VNC host, so you do not need to specify it separately.\n " +
 
   (Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
    "When using the TurboVNC Session Manager, this parameter is effectively " +
-   "set unless the SessMgrAuto parameter is disabled or the Via parameter " +
-   "is specified.\n " : "") +
+   "set unless the SessMgrAuto parameter is disabled.\n " : "") +
 
   "This parameter is effectively set if the Server parameter specifies a " +
-  "Unix domain socket connection to a remote host and the Via parameter is " +
-  "not specified.", false);
+  "Unix domain socket connection to a remote host.  This parameter is also " +
+  "effectively set if the Jump parameter is specified.", false);
 
   public StringParameter user =
   new StringParameter("User", this, true, false,
@@ -1233,7 +1258,7 @@ public final class Params {
   "schemes that require a username.", null);
 
   public ServerNameParameter via =
-  new ServerNameParameter("Via", this, true,
+  new ServerNameParameter("Via", this, true, true,
   "SSH server or UltraVNC repeater (\"gateway\") through which the VNC " +
   "connection should be tunneled.  This can be specified in the format " +
   "[{ssh_user}@]{gateway_host}, {gateway_host}:{repeater_display_number}, " +
@@ -1251,13 +1276,7 @@ public final class Params {
 
   "When using an SSH gateway, the SSH username (default = local username) " +
   "can be specified by prefixing the gateway host with the username " +
-  "followed by @." +
-
-  (Utils.getBooleanProperty("turbovnc.viajump", true) ?
-   "\n Note that the Tunnel parameter produces better performance than the " +
-   "Via parameter when the gateway host is the same as the VNC host, since " +
-   "the Tunnel parameter avoids an unnecessary two-level SSH tunnel." : ""),
-  null);
+  "followed by @.", null);
 
   public StringParameter x509ca =
   new StringParameter("X509CA", this, true, false,

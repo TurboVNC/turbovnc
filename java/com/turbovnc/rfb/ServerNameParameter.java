@@ -1,4 +1,4 @@
-/* Copyright (C) 2013, 2015, 2018, 2020-2024 D. R. Commander.
+/* Copyright (C) 2013, 2015, 2018, 2020-2025 D. R. Commander.
  *                                           All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -22,8 +22,8 @@ package com.turbovnc.rfb;
 public final class ServerNameParameter extends StringParameter {
 
   public ServerNameParameter(String name, Params params, boolean isGUI,
-                             String desc, String defValue) {
-    super(name, params, isGUI, false, desc, defValue);
+                             boolean advanced, String desc, String defValue) {
+    super(name, params, isGUI, advanced, desc, defValue);
     setDefault(defValue);
   }
 

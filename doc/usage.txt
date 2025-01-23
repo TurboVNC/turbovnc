@@ -279,10 +279,10 @@ will, by default, use Anonymous TLS encryption.  (Refer to
 to secure the TurboVNC connection using SSH rather than Anonymous TLS
 encryption, particularly if one does not want to open additional ports in the
 host's firewall.  This can easily be accomplished using the TurboVNC Viewer's
-''Via'' and ''Tunnel'' parameters (or the equivalent GUI options, which are
+''Tunnel'' and ''Jump'' parameters (or the equivalent GUI options, which are
 located under the "Security" tab in the TurboVNC Viewer Options dialog.)
 
-The TurboVNC Viewer's ''Via'' and ''Tunnel'' parameters take advantage of the
+The TurboVNC Viewer's ''Tunnel'' and ''Jump'' parameters take advantage of the
 port forwarding feature in SSH.  For instance, running
 
 	#Pverb: <<---
@@ -296,32 +296,26 @@ is the equivalent of running
 	__vncviewer__ localhost::__fp__
 	---
 
-and running
+where __''fp''__ is a free TCP port on the client machine (this is
+automatically determined by the TurboVNC Viewer.)  Similarly, running
 
 	#Pverb: <<---
-	__vncviewer__ -via __gateway-user__@__gateway-host__ __vnc-user__@__vnc-host__:__n__
+	__vncviewer__ -jump __jump-user__@__jump-host__:__jump-port__ __vnc-user__@__vnc-host__:__n__
 	---
 
 is the equivalent of running
 
 	#Pverb: <<---
-	ssh -J __gateway-user__@__gateway-host__ -L __fp__:localhost:__5900+n__ __vnc-user__@__vnc-host__
+	ssh -J __jump-user__@__jump-host__:__jump-port__ -L __fp__:localhost:__5900+n__ __vnc-user__@__vnc-host__
 	__vncviewer__ localhost::__fp__
 	---
-
-where __''fp''__ is a free TCP port on the client machine (this is
-automatically determined by the TurboVNC Viewer.)
 
 	!!! In the above examples, __''vncviewer''__ is the command used to launch
 	the TurboVNC Viewer-- ''/opt/TurboVNC/bin/vncviewer'' on Linux/Un*x and Mac
 	systems and ''c:\\Program Files\\TurboVNC\\vncviewer.bat'' on Windows
 	systems.
 
-	!!! The ''Tunnel'' parameter produces better performance than the ''Via''
-	parameter when the SSH and VNC hosts are the same machine, since the
-	''Tunnel'' parameter avoids an unnecessary two-level SSH tunnel.
-
-	!!! When using the ''Via'' parameter, the VNC host is specified from the
+	!!! When using the ''Jump'' parameter, the VNC host is specified from the
 	point of view of the gateway host.
 
 ** Requiring SSH Tunneling

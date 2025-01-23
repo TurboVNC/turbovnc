@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2025-01-13T14:33:46">
+<meta name="date" content="2025-01-23T12:47:25">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1021,12 +1021,12 @@ use Anonymous TLS encryption.  (Refer to Chapter
 preferable to secure the TurboVNC connection using SSH rather than 
 Anonymous TLS encryption, particularly if one does not want to open 
 additional ports in the host&rsquo;s firewall.  This can easily be 
-accomplished using the TurboVNC Viewer&rsquo;s <code>Via</code> and 
-<code>Tunnel</code> parameters (or the equivalent GUI options, which are 
+accomplished using the TurboVNC Viewer&rsquo;s <code>Tunnel</code> and 
+<code>Jump</code> parameters (or the equivalent GUI options, which are 
 located under the &ldquo;Security&rdquo; tab in the TurboVNC Viewer 
 Options dialog.)</p>
 
-<p>The TurboVNC Viewer&rsquo;s <code>Via</code> and <code>Tunnel</code> 
+<p>The TurboVNC Viewer&rsquo;s <code>Tunnel</code> and <code>Jump</code> 
 parameters take advantage of the port forwarding feature in SSH.  For 
 instance, running</p>
 
@@ -1035,26 +1035,21 @@ instance, running</p>
 
 <pre class="verbatim">ssh -L <em>fp</em>:localhost:<em>5900+n</em> <em>user</em>@<em>host</em>
 <em>vncviewer</em> localhost::<em>fp</em></pre>
-<p>and running</p>
+<p>where <em><code>fp</code></em> is a free TCP port on the client machine 
+(this is automatically determined by the TurboVNC Viewer.)  Similarly, 
+running</p>
 
-<pre class="verbatim"><em>vncviewer</em> -via <em>gateway-user</em>@<em>gateway-host</em> <em>vnc-user</em>@<em>vnc-host</em>:<em>n</em></pre>
+<pre class="verbatim"><em>vncviewer</em> -jump <em>jump-user</em>@<em>jump-host</em>:<em>jump-port</em> <em>vnc-user</em>@<em>vnc-host</em>:<em>n</em></pre>
 <p>is the equivalent of running</p>
 
-<pre class="verbatim">ssh -J <em>gateway-user</em>@<em>gateway-host</em> -L <em>fp</em>:localhost:<em>5900+n</em> <em>vnc-user</em>@<em>vnc-host</em>
+<pre class="verbatim">ssh -J <em>jump-user</em>@<em>jump-host</em>:<em>jump-port</em> -L <em>fp</em>:localhost:<em>5900+n</em> <em>vnc-user</em>@<em>vnc-host</em>
 <em>vncviewer</em> localhost::<em>fp</em></pre>
-<p>where <em><code>fp</code></em> is a free TCP port on the client machine 
-(this is automatically determined by the TurboVNC Viewer.)</p>
-
 <div class="important"><p class="important">
 In the above examples, <em><code>vncviewer</code></em> is the command used to launch the TurboVNC Viewer&ndash; <code>/opt/TurboVNC/bin/vncviewer</code> on Linux/Un*x and Mac systems and <code>c:\Program&nbsp;Files\TurboVNC\vncviewer.bat</code> on Windows systems.
 </p></div>
 
 <div class="important"><p class="important">
-The <code>Tunnel</code> parameter produces better performance than the <code>Via</code> parameter when the SSH and VNC hosts are the same machine, since the <code>Tunnel</code> parameter avoids an unnecessary two-level SSH tunnel.
-</p></div>
-
-<div class="important"><p class="important">
-When using the <code>Via</code> parameter, the VNC host is specified from the point of view of the gateway host.
+When using the <code>Jump</code> parameter, the VNC host is specified from the point of view of the gateway host.
 </p></div>
 
 
@@ -2996,42 +2991,6 @@ The Java system properties listed below can also be specified in
         The default behavior of the TurboVNC Viewer is to display the banner 
         message from the SSH server on the command line.  Enabling this property 
         causes the viewer to display the banner message in a dialog box instead.
-    </dd>
-</dl>
-
-<div class="table">
-<table class="standard">
-  <tr class="standard">
-    <td class="high standard">Java System Property</td>
-    <td class="standard"><code>turbovnc.viajump = <em>0 | 1</em></code></td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Summary</td>
-    <td class="standard">Disable/enable multi-level SSH tunneling with the <code>Via</code> parameter</td>
-  </tr>
-  <tr class="standard">
-    <td class="high standard">Default Value</td>
-    <td class="standard">Enabled</td>
-  </tr>
-</table>
-</div>
-
-
-<dl class="Description">
-    <dt class="Description-1 Description">Description</dt>
-    <dd class="Description-1 Description">
-        By default, the TurboVNC Viewer&rsquo;s <code>Via</code> parameter 
-        creates an intermediate SSH tunnel to the gateway host and uses that 
-        tunnel to create the final SSH tunnel to the VNC host.  This eliminates 
-        the need to open RFB ports in the VNC host&rsquo;s firewall, it ensures 
-        that the RFB connection is encrypted on the server-area network, and it 
-        allows the TurboVNC Session Manager to be used with TurboVNC hosts that 
-        are behind an SSH gateway. Disabling this property restores the behavior 
-        of version 3.1.x and prior of the TurboVNC Viewer, whereby the 
-        <code>Via</code> parameter creates an SSH tunnel to the gateway host and 
-        forwards the RFB connection directly to the VNC host from the gateway 
-        host.  Note that this property is effectively always enabled when using 
-        the TurboVNC Session Manager.
     </dd>
 </dl>
 

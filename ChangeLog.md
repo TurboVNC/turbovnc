@@ -65,23 +65,18 @@ username followed by @.  This fixes an issue whereby separate SSH usernames
 could not be specified for the `Server` and `Via` parameters.
 
 9. The TurboVNC Viewer's built-in SSH client now supports jump hosts, i.e.
-multi-hop/multi-level SSH tunneling.  If the `Via` parameter or the `ProxyJump`
-OpenSSH config file keyword is specified, the viewer now creates an
-intermediate SSH tunnel to the gateway host and uses that tunnel to create the
+multi-hop/multi-level SSH tunneling.  If the `Jump` parameter or the
+`ProxyJump` OpenSSH config file keyword is specified, the viewer now creates an
+intermediate SSH tunnel to the jump host and uses that tunnel to create the
 final SSH tunnel to the VNC host.  This eliminates the need to open RFB ports
 in the VNC host's firewall, it ensures that the RFB connection is encrypted on
 the server-area network, and it allows the TurboVNC Session Manager to be used
 with TurboVNC hosts that are behind an SSH gateway.  The OpenSSH config file
-can be used to specify more than two levels of SSH tunneling or to specify the
-SSH username and TCP port for a jump host.  Setting the `turbovnc.viajump` Java
-system property to `0` restores the previous behavior of the `Via` parameter
-(using SSH tunneling between the client and the gateway host but using a direct
-RFB connection between the gateway host and the VNC host.)
+can be used to specify more than two levels of SSH tunneling.
 
     Similarly, when using an external SSH client, the default SSH command-line
-template for TCP connections with the `Via` parameter now takes advantage of
-OpenSSH's ProxyJump feature.  As with the built-in SSH client, setting the
-`turbovnc.viajump` Java system property to `0` restores the previous behavior.
+template for TCP connections with the `Jump` parameter now takes advantage of
+OpenSSH's ProxyJump feature.
 
 10. The TurboVNC Viewer now supports bump scrolling in full-screen mode, which
 addresses a feature regression relative to the native Windows TurboVNC Viewer

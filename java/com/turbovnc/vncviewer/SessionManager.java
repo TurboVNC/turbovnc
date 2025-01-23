@@ -44,11 +44,23 @@ public final class SessionManager extends Tunnel {
     vlog.debug("Opening SSH connection to host " + host);
     VncViewer.noExceptionDialog =
       Utils.getBooleanProperty("turbovnc.sshkeytest", false);
-    params.sshSession =
-      createTunnelJSch(Hostname.getSSHUser(params.server.get()), host,
-                       params.sshPort.get(),
-                       Hostname.getSSHUser(params.via.get()),
-                       Hostname.getHost(params.via.get()), params);
+    int sshPort = params.sshPort.isDefault() ? -1 : params.sshPort.get();
+    // Via can be used as an alias for Jump if SessMgrAuto=1.  If
+    // SessMgrAuto=0, then Via uses multi-level SSH tunneling for the Session
+    // Manager's SSH connection, but it uses direct port forwarding for the
+    // RFB/SSH connection.
+    if (params.jump.get() != null)
+      params.sshSession =
+        createTunnelJSch(Hostname.getSSHUser(params.server.get()), host,
+                         sshPort, Hostname.getSSHUser(params.jump.get()),
+                         Hostname.getSSHHost(params.jump.get()),
+                         Hostname.getSSHPort(params.jump.get()), params);
+    else
+      params.sshSession =
+        createTunnelJSch(Hostname.getSSHUser(params.server.get()), host,
+                         sshPort, Hostname.getSSHUser(params.via.get()),
+                         Hostname.getSSHHost(params.via.get()), sshPort,
+                         params);
     if (Utils.getBooleanProperty("turbovnc.sshkeytest", false)) {
       System.out.println("SSH SUCCEEDED");
       System.exit(0);

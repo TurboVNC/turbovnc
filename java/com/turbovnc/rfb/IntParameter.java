@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2017-2018, 2022-2024 D. R. Commander.
+/* Copyright (C) 2012, 2017-2018, 2022-2025 D. R. Commander.
  *                                          All Rights Reserved.
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -100,6 +100,10 @@ public class IntParameter extends VoidParameter {
     if (defValue >= 0)
       return Integer.toString(defValue);
     return null;
+  }
+
+  public synchronized int getDefault() {
+    return defValue;
   }
 
   public synchronized String getStr() { return Integer.toString(value); }

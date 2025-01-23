@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2016, 2018, 2020, 2022-2024 D. R. Commander.
+/* Copyright (C) 2012, 2016, 2018, 2020, 2022-2025 D. R. Commander.
  *                                                 All Rights Reserved.
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -80,11 +80,24 @@ public final class Hostname {
       return null;
 
     int atPos = vncServerName.lastIndexOf('@');
-    String sshUser = null;
 
     if (atPos > 0)
       return vncServerName.substring(0, atPos);
     return null;
+  }
+
+  public static String getSSHHost(String vncServerName) {
+    if (vncServerName == null)
+      return null;
+
+    int colonPos = getColonPos(vncServerName);
+    int atPos = vncServerName.lastIndexOf('@');
+
+    if (colonPos == atPos + 1 || atPos == vncServerName.length() - 1)
+      return null;
+    if (colonPos == -1 || colonPos < atPos)
+      colonPos = vncServerName.length();
+    return vncServerName.substring(atPos + 1, colonPos);
   }
 
   public static String getHost(String vncServerName) {
@@ -99,6 +112,21 @@ public final class Hostname {
     if (colonPos == -1 || colonPos < atPos)
       colonPos = vncServerName.length();
     return vncServerName.substring(atPos + 1, colonPos);
+  }
+
+  public static int getSSHPort(String vncServerName) {
+    int colonPos = getColonPos(vncServerName);
+
+    if (colonPos >= 0 && colonPos != vncServerName.length() - 1) {
+      try {
+        int port = Integer.parseInt(vncServerName.substring(colonPos + 1));
+        if (port >= 0 && port <= 65535)
+          return port;
+      } catch (NumberFormatException e) {
+      }
+    }
+
+    return -1;
   }
 
   public static int getPort(String vncServerName) {

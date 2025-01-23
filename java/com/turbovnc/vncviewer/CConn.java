@@ -121,18 +121,20 @@ public final class CConn extends CConnection implements UserPasswdGetter,
 
       // A Unix domain socket connection to a remote host requires an SSH
       // tunnel.
-      if (params.udsPath != null && params.via.get() == null &&
-          !params.tunnel.get() && !host.equals("localhost"))
+      if (params.udsPath != null && params.jump.get() == null &&
+          params.via.get() == null && !params.tunnel.get() &&
+          !host.equals("localhost"))
         params.tunnel.set(true);
 
-      if (params.udsPath != null && params.via.get() == null &&
-          !params.tunnel.get())
+      if (params.udsPath != null && params.jump.get() == null &&
+          params.via.get() == null && !params.tunnel.get())
         params.stdioSocket = Tunnel.connectUDSDirect(params.udsPath);
       else if (params.via.get() != null &&
                Hostname.getColonPos(params.via.get()) >= 0) {
         host = Hostname.getHost(params.via.get());
         port = Hostname.getPort(params.via.get());
-      } else if (params.via.get() != null || params.tunnel.get() ||
+      } else if (params.jump.get() != null || params.via.get() != null ||
+                 params.tunnel.get() ||
                  (port == 0 && params.sessMgrAuto.get())) {
         if (port == 0) {
           try {
