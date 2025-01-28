@@ -85,6 +85,11 @@ OpenSSH's ProxyJump feature.
     For compatibility with OpenSSH, the TurboVNC Viewer accepts `-J` as a
 command-line alias for the `Jump` parameter.
 
+    The `Via` parameter has been retained for backward compatibility, but since
+it is now essentially a less secure and usable variant of the `Jump` parameter,
+it has been moved to the advanced usage screen and is no longer exposed in the
+TurboVNC Viewer Options dialog.
+
 11. The TurboVNC Viewer now supports bump scrolling in full-screen mode, which
 addresses a feature regression relative to the native Windows TurboVNC Viewer
 in TurboVNC 2.2.x.  A new parameter (`BumpScroll`) can be used to disable bump

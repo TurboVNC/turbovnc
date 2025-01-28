@@ -79,7 +79,7 @@ public class Tunnel {
         String vncHost, gatewayStr;
         int sshPort = params.sshPort.isDefault() ? -1 : params.sshPort.get();
 
-        if (params.jump.get() != null) {
+        if (params.jump.get() != null && !params.tunnel.get()) {
           gatewayStr = Hostname.getHost(params.server.get());
           if (params.sshSession == null) {
             vncHost = gatewayStr;
@@ -96,8 +96,7 @@ public class Tunnel {
           String gatewaySSHUser, gatewayHost;
 
           boolean tunnel = params.tunnel.get() ||
-                           (params.sessMgrActive &&
-                            params.sessMgrAuto.get());
+                           (params.sessMgrActive && params.sessMgrAuto.get());
 
           if (tunnel) {
             gatewaySSHUser = Hostname.getSSHUser(params.server.get());

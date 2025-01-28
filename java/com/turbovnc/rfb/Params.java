@@ -1033,8 +1033,9 @@ public final class Params {
 
   "Patterns beginning with the \"%\" character are expanded as follows:\r " +
   "%% --> a literal \"%\" character\r " +
-  "%G --> jump/gateway host name or IP address, including the SSH username " +
-  "and/or the jump host's SSH port if specified\r " +
+  "%G --> the value of the Jump or Via parameter (the jump/gateway host " +
+  "name or IP address, including the SSH username and/or the jump host's " +
+  "SSH port if specified)\r " +
   "%H --> remote VNC host name or IP address, including the SSH username if " +
   "specified (if using the Jump or Via parameter, then the VNC host is " +
   "specified from the point of view of the jump/gateway host)\r " +
@@ -1072,25 +1073,24 @@ public final class Params {
 
   public ServerNameParameter jump =
   new ServerNameParameter("Jump", this, true, false,
-  "Intermediate SSH server (\"jump host\") through which the final SSH " +
-  "connection to the VNC host should be made.  This can be specified in the " +
-  "format [{ssh_user}@]{jump_host}[:{ssh_port}], where {ssh_user} is the " +
-  "SSH username on the jump host (default = local username) and {ssh_port} " +
+  "Tunnel the VNC connection through the specified SSH server (\"jump " +
+  "host\") as well as through the SSH server running on the VNC host.  The " +
+  "jump host can be specified in the format " +
+  "[{ssh_user}@]{jump_host}[:{ssh_port}], where {ssh_user} is the SSH " +
+  "username on the jump host (default = local username) and {ssh_port} " +
   "is the TCP port on which the jump host's SSH server is listening " +
   "(default = the default value of the SSHPort parameter.)  This parameter " +
   "is functionally equivalent to the ProxyJump OpenSSH configuration " +
-  "keyword.  Note that when using this parameter, the VNC host should be " +
-  "specified from the point of view of the jump host.  Specifying this " +
-  "parameter effectively sets the Tunnel parameter.\n " +
+  "keyword.  When using this parameter, the VNC host should be specified " +
+  "from the point of view of the jump host.\n " +
 
   "For Unix domain socket connections, this parameter is equivalent to the " +
   "Via parameter.  For TCP connections, this parameter creates a " +
   "multi-level SSH tunnel to the VNC host, which ensures that the VNC " +
   "connection is encrypted on the server-area network and eliminates the " +
   "need to open RFB ports in the VNC host's firewall.  The Via parameter, " +
-  "on the other hand, creates an SSH tunnel to the gateway host and " +
-  "forwards the RFB/TCP connection directly to the VNC host from the " +
-  "gateway host.\n " +
+  "by comparison, creates an SSH tunnel to the gateway host and forwards " +
+  "the RFB/TCP connection directly to the VNC host from the gateway host.\n " +
 
   "When using the built-in SSH client, this parameter and the ProxyJump " +
   "OpenSSH configuration keyword do not allow multiple comma-separated SSH " +
@@ -1252,17 +1252,15 @@ public final class Params {
 
   public BoolParameter tunnel =
   new BoolParameter("Tunnel", this, true, false,
-  "Setting this parameter is equivalent to using the Via parameter with an " +
-  "SSH gateway, except that the gateway host is assumed to be the same as " +
-  "the VNC host, so you do not need to specify it separately.\n " +
+  "Tunnel the VNC connection through the SSH server running on the VNC " +
+  "host.\n " +
 
   (Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
    "When using the TurboVNC Session Manager, this parameter is effectively " +
    "set unless the SessMgrAuto parameter is disabled.\n " : "") +
 
   "This parameter is effectively set if the Server parameter specifies a " +
-  "Unix domain socket connection to a remote host.  This parameter is also " +
-  "effectively set if the Jump parameter is specified.", false);
+  "Unix domain socket connection to a remote host.", false);
 
   public StringParameter user =
   new StringParameter("User", this, true, false,
@@ -1274,25 +1272,21 @@ public final class Params {
   "schemes that require a username.", null);
 
   public ServerNameParameter via =
-  new ServerNameParameter("Via", this, true, true,
-  "SSH server or UltraVNC repeater (\"gateway\") through which the VNC " +
-  "connection should be tunneled.  This can be specified in the format " +
+  new ServerNameParameter("Via", this, false, true,
+  "Tunnel the VNC connection through the specified SSH server, or forward " +
+  "the VNC connection through the specified UltraVNC repeater " +
+  "(\"gateway.\")  The gateway can be specified in the format " +
   "[{ssh_user}@]{gateway_host}, {gateway_host}:{repeater_display_number}, " +
-  "or {gateway_host}::{repeater_port}.  Note that when using the Via " +
+  "or {gateway_host}::{repeater_port}, where {ssh_user} is the SSH username " +
+  "on the gateway host (default = local username).  When using this " +
   "parameter, the VNC host should be specified from the point of view of " +
-  "the gateway.  For example, specifying Via={gateway_host} " +
-  "Server=localhost:1 will cause the viewer to connect to display :1 on " +
-  "{gateway_host} through the SSH server running on the same host.  " +
-  "Similarly, specifying Via={gateway_host}:0 Server=localhost:1 will cause " +
-  "the viewer to connect to display :1 on {gateway_host} through the " +
-  "UltraVNC repeater running on the same host and listening on port 5900 " +
-  "(VNC display :0.)  If using the UltraVNC Repeater in \"Mode II\", " +
-  "specify ID:xxxx as the VNC server name, where xxxx is the ID number of " +
-  "the VNC server to which you want to connect.\n " +
+  "the gateway.  If using the UltraVNC Repeater in \"Mode II\", specify " +
+  "ID:xxxx as the VNC server name, where xxxx is the ID number of the VNC " +
+  "server to which you want to connect.\n " +
 
-  "When using an SSH gateway, the SSH username (default = local username) " +
-  "can be specified by prefixing the gateway host with the username " +
-  "followed by @.", null);
+  "Via=[{ssh_user}@]{vnc_host} Server=localhost:{display_number} is " +
+  "equivalent to Tunnel=1 Server=[{ssh_user}@]{vnc_host}:{display_number}.",
+  null);
 
   public StringParameter x509ca =
   new StringParameter("X509CA", this, true, false,
