@@ -64,7 +64,11 @@ should now be specified by prefixing the VNC host or the gateway host with the
 username followed by @.  This fixes an issue whereby separate SSH usernames
 could not be specified for the `Server` and `Via` parameters.
 
-9. The TurboVNC Viewer's built-in SSH client now supports jump hosts, i.e.
+9. For compatibility with OpenSSH, the TurboVNC Viewer now accepts `-F`, `-i`,
+and `-p` as command-line aliases for (respectively) the `SSHConfig`,
+`SSHKeyFile`, and `SSHPort` parameters.
+
+10. The TurboVNC Viewer's built-in SSH client now supports jump hosts, i.e.
 multi-hop/multi-level SSH tunneling.  If the `Jump` parameter or the
 `ProxyJump` OpenSSH config file keyword is specified, the viewer now creates an
 intermediate SSH tunnel to the jump host and uses that tunnel to create the
@@ -78,17 +82,20 @@ can be used to specify more than two levels of SSH tunneling.
 template for TCP connections with the `Jump` parameter now takes advantage of
 OpenSSH's ProxyJump feature.
 
-10. The TurboVNC Viewer now supports bump scrolling in full-screen mode, which
+    For compatibility with OpenSSH, the TurboVNC Viewer accepts `-J` as a
+command-line alias for the `Jump` parameter.
+
+11. The TurboVNC Viewer now supports bump scrolling in full-screen mode, which
 addresses a feature regression relative to the native Windows TurboVNC Viewer
 in TurboVNC 2.2.x.  A new parameter (`BumpScroll`) can be used to disable bump
 scrolling and use scrollbars instead.
 
-11. The Mac TurboVNC Viewer now hides the menu bar and dock in full-screen mode
+12. The Mac TurboVNC Viewer now hides the menu bar and dock in full-screen mode
 if bump scrolling is enabled.  Setting the `turbovnc.fshidedock` system
 property to `0` or `1` causes the viewer to always show or always hide the menu
 bar and dock in full-screen mode, irrespective of bump scrolling.
 
-12. The TurboVNC Server and Viewer now implement the Extended Mouse Buttons
+13. The TurboVNC Server and Viewer now implement the Extended Mouse Buttons
 RFB extension, which allows forward and back mouse button events to be
 transmitted to the VNC server.
 

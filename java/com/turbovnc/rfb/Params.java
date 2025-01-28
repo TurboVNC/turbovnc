@@ -1096,6 +1096,10 @@ public final class Params {
   "OpenSSH configuration keyword do not allow multiple comma-separated SSH " +
   "hops to be specified.", null);
 
+  private AliasParameter jAlias =
+  new AliasParameter("J", this,
+  "Alias for Jump (for compatibility with OpenSSH)", jump);
+
   public BoolParameter localUsernameLC =
   new BoolParameter("LocalUsernameLC", this, false, false,
   "When the SendLocalUsername parameter is set, or when using SSH " +
@@ -1189,6 +1193,10 @@ public final class Params {
   "TurboVNC Viewer parameters take precedence over the OpenSSH " +
   "configuration file.", Utils.getHomeDir() + ".ssh/config");
 
+  private AliasParameter fAlias =
+  new AliasParameter("F", this,
+  "Alias for SSHConfig (for compatibility with OpenSSH)", sshConfig);
+
   public StringParameter sshKey =
   new StringParameter("SSHKey", this, false, false,
   "When using the built-in SSH client with the publickey SSH authentication " +
@@ -1222,6 +1230,10 @@ public final class Params {
   "SSHKey parameter, and the IdentityFile OpenSSH configuration keyword are " +
   "not specified", null);
 
+  private AliasParameter iAlias =
+  new AliasParameter("i", this,
+  "Alias for SSHKeyFile (for compatibility with OpenSSH)", sshKeyFile);
+
   public StringParameter sshKeyPass =
   new StringParameter("SSHKeyPass", this, false, false,
   "When using the built-in SSH client with the publickey SSH authentication " +
@@ -1233,6 +1245,10 @@ public final class Params {
   "When using the built-in SSH client, this parameter specifies the TCP " +
   "port on which the VNC host's or gateway host's SSH server is listening.  " +
   "This parameter does not apply to jump hosts.", 22, 0, 65535);
+
+  private AliasParameter pAlias =
+  new AliasParameter("p", this,
+  "Alias for SSHPort (for compatibility with OpenSSH)", sshPort);
 
   public BoolParameter tunnel =
   new BoolParameter("Tunnel", this, true, false,
