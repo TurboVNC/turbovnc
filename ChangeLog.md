@@ -144,6 +144,11 @@ connection timeout specified using the `ConnectTimeout` OpenSSH config file
 keyword was interpreted as milliseconds rather than seconds.  This caused the
 SSH connection to fail if the timeout was too low.
 
+10. Fixed a regression introduced by 3.1 beta1[3] whereby the value of the
+TurboVNC Viewer's `Subsampling` parameter, if specified using the `Samp` alias,
+did not override per-host options that were previously saved by the TurboVNC
+Viewer Options dialog.
+
 
 3.1.3
 =====

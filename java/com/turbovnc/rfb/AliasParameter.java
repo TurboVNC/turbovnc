@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2018, 2022-2024 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012, 2018, 2022-2025 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -27,7 +27,11 @@ public final class AliasParameter extends VoidParameter {
     param = param_;
   }
 
-  public boolean set(String str) { return param.set(str); }
+  public boolean set(String str) {
+    boolean retval = param.set(str);
+    param.setCommandLine(isCommandLine());
+    return retval;
+  }
 
   public void reset() { param.reset(); }
 
