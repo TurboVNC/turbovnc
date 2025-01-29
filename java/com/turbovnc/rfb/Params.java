@@ -641,8 +641,8 @@ public final class Params {
   "When using the Tunnel parameter or the Jump parameter" +
   (Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
    " or the TurboVNC Session Manager, " : ", ") +
-  "the SSH username (default = local username) can be specified by " +
-  "prefixing the VNC host with the username followed by @.\n " +
+  "an SSH username (default = local username) can be specified by prefixing " +
+  "the VNC host with the username followed by @.\n " +
 
   "In Unix domain socket paths, ~ is expanded to the user's home directory " +
   "on the VNC host, %h is expanded to the VNC host name (from the point of " +
@@ -1257,7 +1257,8 @@ public final class Params {
 
   (Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
    "When using the TurboVNC Session Manager, this parameter is effectively " +
-   "set unless the SessMgrAuto parameter is disabled.\n " : "") +
+   "set unless the SessMgrAuto parameter is disabled or the Jump parameter " +
+   "is specified.\n " : "") +
 
   "This parameter is effectively set if the Server parameter specifies a " +
   "Unix domain socket connection to a remote host.", false);
@@ -1274,8 +1275,8 @@ public final class Params {
   public ServerNameParameter via =
   new ServerNameParameter("Via", this, false, true,
   "Tunnel the VNC connection through the specified SSH server, or forward " +
-  "the VNC connection through the specified UltraVNC repeater " +
-  "(\"gateway.\")  The gateway can be specified in the format " +
+  "the VNC connection through the specified UltraVNC repeater.  The SSH " +
+  "server or UltraVNC repeater (\"gateway\") can be specified in the format " +
   "[{ssh_user}@]{gateway_host}, {gateway_host}:{repeater_display_number}, " +
   "or {gateway_host}::{repeater_port}, where {ssh_user} is the SSH username " +
   "on the gateway host (default = local username).  When using this " +
