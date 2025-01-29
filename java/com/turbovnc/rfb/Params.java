@@ -925,7 +925,7 @@ public final class Params {
   "the VNC server.  You can generate an ASCII hex encrypted password on a " +
   "TurboVNC host by executing\n " +
 
-  "'echo {unencrypted_password} | /opt/TurboVNC/bin/vncpasswd -f | xxd -c 256 -ps'\n " +
+  "echo {unencrypted_password} | /opt/TurboVNC/bin/vncpasswd -f | xxd -c 256 -ps\n " +
 
   "This parameter allows a password to be supplied to the TurboVNC Viewer " +
   "without exposing the password as plain text.  However, the encryption " +
