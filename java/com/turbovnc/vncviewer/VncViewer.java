@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2018, 2020-2024 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2011-2018, 2020-2025 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2013, 2016 Brian P. Hinz
  * Copyright 2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
@@ -174,7 +174,8 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
   }
 
   static void setLookAndFeel() {
-    if (Utils.getBooleanProperty("turbovnc.autotest", false))
+    if (Utils.getBooleanProperty("turbovnc.autotest", false) ||
+        Utils.getBooleanProperty("turbovnc.sshkeytest", false))
       return;
 
     try {
@@ -251,7 +252,8 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
   }
 
   static void setGlobalInsets() {
-    if (Utils.getBooleanProperty("turbovnc.autotest", false))
+    if (Utils.getBooleanProperty("turbovnc.autotest", false) ||
+        Utils.getBooleanProperty("turbovnc.sshkeytest", false))
       return;
 
     try {
@@ -301,7 +303,8 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
   }
 
   public static void setBlitterDefaults() {
-    if (Utils.getBooleanProperty("turbovnc.autotest", false))
+    if (Utils.getBooleanProperty("turbovnc.autotest", false) ||
+        Utils.getBooleanProperty("turbovnc.sshkeytest", false))
       return;
 
     // Java 1.7 and later do not include hardware-accelerated 2D blitting
