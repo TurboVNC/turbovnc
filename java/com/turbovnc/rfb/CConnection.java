@@ -410,7 +410,7 @@ public abstract class CConnection extends CMsgHandler {
     // We cannot guarantee any synchronisation at this level
     flags = 0;
 
-    synchronized(this) {
+    synchronized (this) {
       writer().writeFence(flags, len, data);
     }
   }

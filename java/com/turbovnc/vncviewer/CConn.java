@@ -244,7 +244,7 @@ public final class CConn extends CConnection implements UserPasswdGetter,
   // block.
   public void blockCallback() {
     try {
-      synchronized(this) {
+      synchronized (this) {
         wait(0, 50000);
       }
     } catch (InterruptedException e) {
@@ -403,7 +403,7 @@ public final class CConn extends CConnection implements UserPasswdGetter,
       SystemException.checkException(e);
       throw new SystemException(e);
     }
-    synchronized(viewer) {
+    synchronized (viewer) {
       viewer.notify();
     }
   }

@@ -66,7 +66,7 @@ public class StreamDescriptor implements FileDescriptor {
 
   private void inThreadRun() {
     while (true) {
-      synchronized(this) {
+      synchronized (this) {
         // Wait until data has been removed from the input buffer
         while (inPos != inLen) {
           try {
@@ -84,14 +84,14 @@ public class StreamDescriptor implements FileDescriptor {
       try {
         n = inputStream.read(inBuffer, 0, inBuffer.length);
       } catch (IOException e) {
-        synchronized(this) {
+        synchronized (this) {
           error = e;
           notifyAll();
           return;
         }
       }
 
-      synchronized(this) {
+      synchronized (this) {
         if (n < 0) {  // EOF
           inLen = -1;
           notifyAll();
@@ -127,7 +127,7 @@ public class StreamDescriptor implements FileDescriptor {
 
   private void outThreadRun() {
     while (true) {
-      synchronized(this) {
+      synchronized (this) {
         // Wait until there is data in the output buffer
         while (outLen == 0) {
           try {
@@ -149,14 +149,14 @@ public class StreamDescriptor implements FileDescriptor {
         outputStream.write(outBuffer, 0, outLen);
         outputStream.flush();
       } catch (IOException e) {
-        synchronized(this) {
+        synchronized (this) {
           error = e;
           notifyAll();
           return;
         }
       }
 
-      synchronized(this) {
+      synchronized (this) {
         outLen = 0;
         notifyAll();
       }
