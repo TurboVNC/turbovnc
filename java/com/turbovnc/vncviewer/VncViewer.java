@@ -117,7 +117,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
     public Object invoke(Object proxy, Method method, Object[] args) {
       try {
         if (method.getName().equals("openFiles") && args[0] != null) {
-          synchronized(VncViewer.class) {
+          synchronized (VncViewer.class) {
             Class ofEventClass = Utils.JAVA_VERSION >= 9 ?
                 Class.forName("java.awt.desktop.OpenFilesEvent") :
                 Class.forName("com.apple.eawt.AppEvent$OpenFilesEvent");
@@ -228,7 +228,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
         // This allows us to trap Command-Q and shut things down properly.
         Runtime.getRuntime().addShutdownHook(new Thread() {
           public void run() {
-            synchronized(VncViewer.conns) {
+            synchronized (VncViewer.conns) {
               for (CConn cc : VncViewer.conns)
                 cc.close(false);
               VncViewer.conns.clear();
@@ -274,7 +274,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
       if (Utils.isX11()) {
         frame.addComponentListener(new ComponentAdapter() {
           public void componentResized(ComponentEvent e) {
-            synchronized(frame) {
+            synchronized (frame) {
               if (frame.isVisible() &&
                   frame.getExtendedState() == JFrame.NORMAL) {
                 insets = frame.getInsets();
@@ -285,7 +285,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
         });
         frame.setExtendedState(JFrame.NORMAL);
         frame.setVisible(true);
-        synchronized(frame) {
+        synchronized (frame) {
           while (insets == null)
             frame.wait();
         }
@@ -353,7 +353,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
   static void startViewer(String[] argv) {
     VncViewer viewer = new VncViewer(argv);
     if (Utils.isMac()) {
-      synchronized(VncViewer.class) {
+      synchronized (VncViewer.class) {
         if (fileName != null) {
           try {
             Params.load(fileName);
@@ -368,7 +368,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
     }
     viewer.start();
     try {
-      synchronized(viewer) {
+      synchronized (viewer) {
         viewer.wait();
       }
     } catch (InterruptedException e) {
@@ -602,7 +602,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
     Rectangle workArea = CConn.getMaxSpannedSize(true);
     int nTilesX, nTilesY;
 
-    synchronized(conns) {
+    synchronized (conns) {
       nTilesX = nTilesY = (int)Math.sqrt(conns.size());
       if (nTilesX * nTilesY < conns.size()) {
         nTilesX++;
@@ -686,7 +686,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
     if (reconnect && pane.getValue() == dlgOptions[0])
       start();
     else {
-      synchronized(this) {
+      synchronized (this) {
         this.notify();
       }
     }
@@ -795,7 +795,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
         if (cc == null) {
           cc = new CConn(this, sock);
           if (benchFile == null) {
-            synchronized(conns) {
+            synchronized (conns) {
               conns.add(cc);
             }
           }
@@ -846,7 +846,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
                 cc.state() == CConnection.RFBSTATE_INITIALISATION)
               cc.close(true);
           }
-          synchronized(conns) {
+          synchronized (conns) {
             conns.remove(cc);
           }
         }
@@ -859,13 +859,13 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
           if (cc != null) {
             cc.deleteWindow(true);
             cc.closeSocket();
-            synchronized(conns) {
+            synchronized (conns) {
               conns.remove(cc);
             }
           }
         } else {
           cc.closeSocket();
-          synchronized(conns) {
+          synchronized (conns) {
             conns.remove(cc);
           }
           cc = null;
@@ -1027,20 +1027,20 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
 
   // Is the keyboard grabbed by any TurboVNC Viewer window?
   public static boolean isKeyboardGrabbed() {
-    synchronized(VncViewer.class) {
+    synchronized (VncViewer.class) {
       return grabOwner != null;
     }
   }
 
   // Is the keyboard grabbed by a specific TurboVNC Viewer window?
   public static boolean isKeyboardGrabbed(Viewport viewport) {
-    synchronized(VncViewer.class) {
+    synchronized (VncViewer.class) {
       return grabOwner == viewport;
     }
   }
 
   public static void setGrabOwner(Viewport viewport) {
-    synchronized(VncViewer.class) {
+    synchronized (VncViewer.class) {
       grabOwner = viewport;
     }
   }

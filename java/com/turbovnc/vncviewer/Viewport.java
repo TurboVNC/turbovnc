@@ -489,7 +489,7 @@ public final class Viewport extends JFrame implements Runnable {
     if (Helper.isAvailable() && cc.cp.supportsGII && x11dpy == 0) {
       try {
         if (Utils.isMac()) {
-          synchronized(VncViewer.class) {
+          synchronized (VncViewer.class) {
             setupExtInput();
           }
         } else
@@ -597,7 +597,7 @@ public final class Viewport extends JFrame implements Runnable {
       }
       try {
         if (Utils.isMac()) {
-          synchronized(VncViewer.class) {
+          synchronized (VncViewer.class) {
             cleanupExtInput();
           }
         } else
@@ -642,7 +642,7 @@ public final class Viewport extends JFrame implements Runnable {
     boolean retval = false;
     if (Helper.isAvailable() && cc.cp.supportsGII && !Utils.isMac()) {
       boolean isExtEvent = false;
-      synchronized(lastEvent) {
+      synchronized (lastEvent) {
         try {
           isExtEvent = processExtInputEvent(type);
         } catch (UnsatisfiedLinkError e) {
@@ -698,7 +698,7 @@ public final class Viewport extends JFrame implements Runnable {
     if (devices == null)
       return;
 
-    synchronized(lastEvent) {
+    synchronized (lastEvent) {
       if (enteringProximity) {
         switch (pointingDeviceType) {
           case 1:  // pen
@@ -730,7 +730,7 @@ public final class Viewport extends JFrame implements Runnable {
     if (devices == null || windowID != x11win)
       return false;
 
-    synchronized(lastEvent) {
+    synchronized (lastEvent) {
       if (lastEvent.deviceID < 0)
         // No prior proximity event was received, so we don't know which
         // tablet device is generating this event.  Punt to the regular
@@ -747,7 +747,7 @@ public final class Viewport extends JFrame implements Runnable {
       SwingUtilities.invokeLater(
         new Runnable() {
           public void run() {
-            synchronized(lastEvent) {
+            synchronized (lastEvent) {
               Dimension winSize = sp.getSize();
               java.awt.Point spOffset = sp.getViewport().getViewPosition();
               ExtInputDevice dev = null;
