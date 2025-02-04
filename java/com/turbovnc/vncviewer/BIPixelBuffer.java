@@ -99,7 +99,7 @@ public class BIPixelBuffer extends PlatformPixelBuffer
     if (pix instanceof Image) {
       Image img = (Image)pix;
       clip = new Rectangle(x, y, w, h);
-      synchronized(clip) {
+      synchronized (clip) {
         tk.prepareImage(img, -1, -1, this);
         try {
           clip.wait(1000);
@@ -143,7 +143,7 @@ public class BIPixelBuffer extends PlatformPixelBuffer
     } else {
       if ((infoflags & ALLBITS) != 0) {
         if (clip != null) {
-          synchronized(clip) {
+          synchronized (clip) {
             Graphics2D graphics = (Graphics2D)image.getGraphics();
             graphics.drawImage(img, clip.x, clip.y, clip.width, clip.height,
                                null);
