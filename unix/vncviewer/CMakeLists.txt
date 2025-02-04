@@ -14,7 +14,7 @@ enable_language(OBJC)
 
 set(HELPER_SOURCES cocoa.m turbovnchelper.m JRSwizzle.m)
 add_library(turbovnchelper SHARED ${HELPER_SOURCES} keysym2ucs.c osx_to_qnum.c
-	${CMAKE_SOURCE_DIR}/common/turbojpeg-jni/turbojpeg-jni.c usocket.c)
+	${CMAKE_SOURCE_DIR}/common/turbojpeg-jni/turbojpeg-jni.c)
 set_target_properties(turbovnchelper PROPERTIES
 	LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/java)
 target_link_libraries(turbovnchelper "-framework Carbon -framework Cocoa"
@@ -56,7 +56,7 @@ find_package(JNI REQUIRED)
 
 include_directories(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2}
 	${CMAKE_SOURCE_DIR}/common/rfb ${TJPEG_INCLUDE_DIR})
-add_library(turbovnchelper SHARED turbovnchelper.c usocket.c
+add_library(turbovnchelper SHARED turbovnchelper.c
 	${CMAKE_SOURCE_DIR}/common/turbojpeg-jni/turbojpeg-jni.c)
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
 	set_target_properties(turbovnchelper PROPERTIES LINK_FLAGS "-lc -z defs")

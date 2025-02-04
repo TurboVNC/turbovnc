@@ -1,127 +1,177 @@
-/* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
-Copyright (c) 2002-2018 ymnk, JCraft,Inc. All rights reserved.
-Copyright (c) 2020 Jeremy Norris. All rights reserved.
-Copyright (c) 2024 D. R. Commander. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-  1. Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
-
-  2. Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in
-     the documentation and/or other materials provided with the distribution.
-
-  3. The names of the authors may not be used to endorse or promote products
-     derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL JCRAFT,
-INC. OR ANY CONTRIBUTORS TO THIS SOFTWARE BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ * Copyright (c) 2002-2018 ymnk, JCraft,Inc. All rights reserved.
+ * Copyright (c) 2025 D. R. Commander. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted
+ * provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this list of conditions
+ * and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list of
+ * conditions and the following disclaimer in the documentation and/or other materials provided with
+ * the distribution.
+ *
+ * 3. The names of the authors may not be used to endorse or promote products derived from this
+ * software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL JCRAFT, INC. OR ANY CONTRIBUTORS TO THIS SOFTWARE BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+ * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 package com.jcraft.jsch;
 
-import java.math.BigInteger;
 import java.util.Arrays;
 
-public abstract class KeyPairEdDSA extends KeyPair{
+abstract class KeyPairEdDSA extends KeyPair {
   private byte[] pub_array;
   private byte[] prv_array;
 
-  public KeyPairEdDSA(JSch jsch,
-                    byte[] pub_array,
-                    byte[] prv_array){
-    super(jsch);
+  KeyPairEdDSA(JSch.InstanceLogger instLogger, byte[] pub_array, byte[] prv_array) {
+    super(instLogger);
     this.pub_array = pub_array;
     this.prv_array = prv_array;
   }
 
   abstract String getSshName();
+
   abstract String getJceName();
 
-  void generate(int key_size) throws JSchException{
-    try{
-      Class c=Class.forName(JSch.getConfig("keypairgen.eddsa"));
-      KeyPairGenEdDSA keypairgen=
-        (KeyPairGenEdDSA)(c.getDeclaredConstructor().newInstance());
+  @Override
+  void generate(int key_size) throws JSchException {
+    try {
+      Class<? extends KeyPairGenEdDSA> c =
+          Class.forName(JSch.getConfig("keypairgen.eddsa")).asSubclass(KeyPairGenEdDSA.class);
+      KeyPairGenEdDSA keypairgen = c.getDeclaredConstructor().newInstance();
       keypairgen.init(getJceName(), getKeySize());
-      pub_array=keypairgen.getPub();
-      prv_array=keypairgen.getPrv();
+      pub_array = keypairgen.getPub();
+      prv_array = keypairgen.getPrv();
 
-      keypairgen=null;
-    }
-    catch(Exception e){
-      //System.err.println("KeyPairEdDSA: "+e);
-      if(e instanceof Throwable)
-        throw new JSchException(e.toString(), (Throwable)e);
-      throw new JSchException(e.toString());
+      keypairgen = null;
+    } catch (Exception | NoClassDefFoundError e) {
+      throw new JSchException(e.toString(), e);
     }
   }
 
   // These methods appear to be for writing keys to a file.
   // And since writing VENDOR_OPENSSH_V1 isn't supported yet, have these methods fail.
-  byte[] getBegin(){ throw new UnsupportedOperationException(); }
-  byte[] getEnd(){ throw new UnsupportedOperationException(); }
-  byte[] getPrivateKey(){ throw new UnsupportedOperationException(); }
+  @Override
+  byte[] getBegin() {
+    throw new UnsupportedOperationException();
+  }
 
-  boolean parse(byte [] plain){
+  @Override
+  byte[] getEnd() {
+    throw new UnsupportedOperationException();
+  }
 
-    // Only OPENSSH Key v1 Format supported for EdDSA keys
-    if(vendor != VENDOR_OPENSSH_V1) return false;
-    try{
-      // OPENSSH Key v1 Format
-      final Buffer buf = new Buffer(plain);
-      int checkInt1 = buf.getInt(); // uint32 checkint1
-      int checkInt2 = buf.getInt(); // uint32 checkint2
-      if (checkInt1 != checkInt2) {
-        throw new JSchException("check failed");
+  @Override
+  byte[] getPrivateKey() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  boolean parse(byte[] plain) throws JSchException {
+    if (vendor == VENDOR_PUTTY || vendor == VENDOR_PUTTY_V3) {
+      Buffer buf = new Buffer(plain);
+      buf.skip(plain.length);
+
+      try {
+        byte[][] tmp = buf.getBytes(1, "");
+        prv_array = tmp[0];
+      } catch (JSchException e) {
+        if (instLogger.getLogger().isEnabled(Logger.ERROR)) {
+          instLogger.getLogger().log(Logger.ERROR, "failed to parse key", e);
+        }
+        return false;
       }
-      String keyType = Util.byte2str(buf.getString()); // string keytype
-      pub_array = buf.getString(); // public key
-      // OpenSSH stores private key in first half of string and duplicate copy of public key in second half of string
-      byte[] tmp = buf.getString(); // secret key (private key + public key)
-      prv_array = Arrays.copyOf(tmp, getKeySize());
-      publicKeyComment = Util.byte2str(buf.getString());
+
       return true;
-    }
-    catch(Exception e){
-      //System.err.println(e);
+    } else if (vendor == VENDOR_OPENSSH_V1) {
+      try {
+        // OPENSSH Key v1 Format
+        final Buffer buf = new Buffer(plain);
+        int checkInt1 = buf.getInt(); // uint32 checkint1
+        int checkInt2 = buf.getInt(); // uint32 checkint2
+        if (checkInt1 != checkInt2) {
+          throw new JSchException("check failed");
+        }
+        String keyType = Util.byte2str(buf.getString()); // string keytype
+        pub_array = buf.getString(); // public key
+        // OpenSSH stores private key in first half of string and duplicate copy of public key in
+        // second half of string
+        byte[] tmp = buf.getString(); // secret key (private key + public key)
+        prv_array = Arrays.copyOf(tmp, getKeySize());
+        publicKeyComment = Util.byte2str(buf.getString());
+        return true;
+      } catch (Exception e) {
+        if (vendor == VENDOR_OPENSSH_V1)
+          throw new JSchException("Could not sucessfully decrypt openssh v1 key");
+        if (instLogger.getLogger().isEnabled(Logger.ERROR)) {
+          instLogger.getLogger().log(Logger.ERROR, "failed to parse key", e);
+        }
+        return false;
+      }
+    } else if (vendor == VENDOR_PKCS8) {
+      try {
+        Class<? extends KeyPairGenEdDSA> c =
+            Class.forName(JSch.getConfig("keypairgen_fromprivate.eddsa"))
+                .asSubclass(KeyPairGenEdDSA.class);
+        KeyPairGenEdDSA keypairgen = c.getDeclaredConstructor().newInstance();
+        keypairgen.init(getJceName(), plain);
+        pub_array = keypairgen.getPub();
+        prv_array = keypairgen.getPrv();
+        return true;
+      } catch (Exception | NoClassDefFoundError e) {
+        if (instLogger.getLogger().isEnabled(Logger.ERROR)) {
+          instLogger.getLogger().log(Logger.ERROR, "failed to parse key", e);
+        }
+        return false;
+      }
+    } else {
+      if (instLogger.getLogger().isEnabled(Logger.ERROR)) {
+        instLogger.getLogger().log(Logger.ERROR, "failed to parse key");
+      }
       return false;
     }
   }
 
-  public byte[] getPublicKeyBlob(){
-    byte[] foo=super.getPublicKeyBlob();
-    if(foo!=null) return foo;
+  @Override
+  public byte[] getPublicKeyBlob() {
+    byte[] foo = super.getPublicKeyBlob();
+    if (foo != null)
+      return foo;
 
-    if(pub_array==null) return null;
+    if (pub_array == null)
+      return null;
     byte[][] tmp = new byte[2][];
     tmp[0] = getKeyTypeName();
     tmp[1] = pub_array;
     return Buffer.fromBytes(tmp).buffer;
   }
 
-  byte[] getKeyTypeName(){ return Util.str2byte(getSshName()); }
+  @Override
+  byte[] getKeyTypeName() {
+    return Util.str2byte(getSshName());
+  }
 
-  public byte[] getSignature(byte[] data){
+  @Override
+  public byte[] getSignature(byte[] data) {
     return getSignature(data, getSshName());
   }
 
-  public byte[] getSignature(byte[] data, String alg){
-    try{
-      Class c=Class.forName(JSch.getConfig(alg));
-      SignatureEdDSA eddsa=
-        (SignatureEdDSA)(c.getDeclaredConstructor().newInstance());
+  @Override
+  public byte[] getSignature(byte[] data, String alg) {
+    try {
+      Class<? extends SignatureEdDSA> c =
+          Class.forName(JSch.getConfig(alg)).asSubclass(SignatureEdDSA.class);
+      SignatureEdDSA eddsa = c.getDeclaredConstructor().newInstance();
       eddsa.init();
       eddsa.setPrvKey(prv_array);
 
@@ -131,24 +181,28 @@ public abstract class KeyPairEdDSA extends KeyPair{
       tmp[0] = Util.str2byte(alg);
       tmp[1] = sig;
       return Buffer.fromBytes(tmp).buffer;
-    }
-    catch(Exception e){
+    } catch (Exception | NoClassDefFoundError e) {
+      if (instLogger.getLogger().isEnabled(Logger.ERROR)) {
+        instLogger.getLogger().log(Logger.ERROR, "failed to generate signature", e);
+      }
     }
     return null;
   }
 
-  public Signature getVerifier(){
+  @Override
+  public Signature getVerifier() {
     return getVerifier(getSshName());
   }
 
-  public Signature getVerifier(String alg){
-    try{
-      Class c=Class.forName(JSch.getConfig(alg));
-      SignatureEdDSA eddsa=
-        (SignatureEdDSA)(c.getDeclaredConstructor().newInstance());
+  @Override
+  public Signature getVerifier(String alg) {
+    try {
+      Class<? extends SignatureEdDSA> c =
+          Class.forName(JSch.getConfig(alg)).asSubclass(SignatureEdDSA.class);
+      SignatureEdDSA eddsa = c.getDeclaredConstructor().newInstance();
       eddsa.init();
 
-      if(pub_array == null && getPublicKeyBlob()!=null){
+      if (pub_array == null && getPublicKeyBlob() != null) {
         Buffer buf = new Buffer(getPublicKeyBlob());
         buf.getString();
         pub_array = buf.getString();
@@ -156,14 +210,17 @@ public abstract class KeyPairEdDSA extends KeyPair{
 
       eddsa.setPubKey(pub_array);
       return eddsa;
-    }
-    catch(Exception e){
+    } catch (Exception | NoClassDefFoundError e) {
+      if (instLogger.getLogger().isEnabled(Logger.ERROR)) {
+        instLogger.getLogger().log(Logger.ERROR, "failed to create verifier", e);
+      }
     }
     return null;
   }
 
+  @Override
   public byte[] forSSHAgent() throws JSchException {
-    if(isEncrypted()){
+    if (isEncrypted()) {
       throw new JSchException("key is encrypted.");
     }
     Buffer buf = new Buffer();
@@ -179,7 +236,8 @@ public abstract class KeyPairEdDSA extends KeyPair{
     return result;
   }
 
-  public void dispose(){
+  @Override
+  public void dispose() {
     super.dispose();
     Util.bzero(prv_array);
   }

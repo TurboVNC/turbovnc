@@ -58,8 +58,6 @@ public final class Helper {
       vlog.info("  - Multi-screen spanning");
     if (Utils.isWindows())
       vlog.info("  - Pageant support");
-    else
-      vlog.info("  - ssh-agent support");
     if (Utils.isX11() || Utils.isMac())
       vlog.info("  - Server-side keyboard mapping");
   }

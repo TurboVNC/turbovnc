@@ -1,4 +1,4 @@
-/* Copyright (C) 2015-2017, 2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2015-2017, 2022, 2025 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011 ymnk, JCraft, Inc.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -20,6 +20,7 @@
 #include <string.h>
 #include "LowLevelHook.h"
 #include "jawt_md.h"
+#include "com_jcraft_jsch_PageantConnector.h"
 #include "com_turbovnc_vncviewer_Viewport.h"
 #include "safestr.h"
 
@@ -47,15 +48,17 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
 
 #define _throw(msg) _throwe(msg, "java/lang/Exception");
 
-#define _throww32() {  \
+#define _throww32e(exceptionClass) {  \
   char message[256];  \
   if (!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(),  \
                      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), message,  \
                      256, NULL))  \
     strncpy_s(message, _countof(message), "Error in FormatMessage()",  \
               _TRUNCATE);  \
-  _throw(message);  \
+  _throwe(message, exceptionClass);  \
 }
+
+#define _throww32() _throww32e("java/lang/Exception");
 
 #define BAILIF0(f) {  \
   if (!(f) || env->ExceptionCheck()) {  \
@@ -126,7 +129,11 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_grabKeyboard
 }
 
 
-JNIEXPORT void JNICALL Java_com_jcraft_jsch_agentproxy_connector_PageantConnector_queryPageant
+#define AGENT_MAX_MSGLEN  262144
+#define AGENT_COPYDATA_ID  0x804e50baL
+
+
+JNIEXPORT void JNICALL Java_com_jcraft_jsch_PageantConnector_queryPageant
   (JNIEnv *env, jobject obj, jobject buffer)
 {
   HANDLE sharedFile = 0;
@@ -141,39 +148,44 @@ JNIEXPORT void JNICALL Java_com_jcraft_jsch_agentproxy_connector_PageantConnecto
 
   memset(&cds, 0, sizeof(cds));
 
-  HWND hwnd = FindWindow("Pageant", "Pageant");
-  if (!hwnd)
-    _throwe("Pageant is not runnning.",
-            "com/jcraft/jsch/agentproxy/AgentProxyException");
-
-  char mapName[30];
-  snprintf(mapName, 30, "PageantRequest%08x", GetCurrentThreadId());
-  sharedFile = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE,
-                                 0, 8192,  // AGENT_MAX_MSGLEN
-                                 mapName);
-  if (!sharedFile) _throww32();
-  sharedMemory = (char *)MapViewOfFile(sharedFile, SECTION_MAP_WRITE, 0, 0, 0);
-  if (!sharedMemory) _throww32();
-
   BAILIF0(bufferClass = env->GetObjectClass(buffer));
   BAILIF0(fid = env->GetFieldID(bufferClass, "buffer", "[B"));
   BAILIF0(jbuf = (jbyteArray)env->GetObjectField(buffer, fid));
   BAILIF0(mid = env->GetMethodID(bufferClass, "getLength", "()I"));
   len = env->CallIntMethod(buffer, mid);
 
+  if (len > AGENT_MAX_MSGLEN)
+    _throwe("Query too large.", "com/jcraft/jsch/AgentProxyException");
+
+  HWND hwnd = FindWindow("Pageant", "Pageant");
+  if (!hwnd)
+    _throwe("Pageant is not runnning.", "com/jcraft/jsch/AgentProxyException");
+
+  char mapName[30];
+  snprintf(mapName, 30, "PageantRequest%08x", GetCurrentThreadId());
+  sharedFile = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0,
+                                 AGENT_MAX_MSGLEN, mapName);
+  if (!sharedFile)
+    _throww32e("com/jcraft/jsch/AgentProxyException");
+  sharedMemory = (char *)MapViewOfFile(sharedFile, SECTION_MAP_WRITE, 0, 0, 0);
+  if (!sharedMemory)
+    _throww32e("com/jcraft/jsch/AgentProxyException");
+
   BAILIF0(buf = (char *)env->GetPrimitiveArrayCritical(jbuf, 0));
   memcpy(sharedMemory, buf, len);
   env->ReleasePrimitiveArrayCritical(jbuf, buf, 0);
 
-  cds.dwData = 0x804e50ba;  // AGENT_COPYDATA_ID
+  cds.dwData = AGENT_COPYDATA_ID;
   cds.cbData = (DWORD)(strlen(mapName) + 1);
   cds.lpData = _strdup(mapName);
   if (!SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(LPVOID)&cds))
-    _throww32();
+    _throww32e("com/jcraft/jsch/AgentProxyException");
 
   length = *(DWORD *)sharedMemory;
   length = (length >> 24) | ((length & 0x00FF0000) >> 8) |
            ((length & 0x0000FF00) << 8) | (length << 24);
+  if (length <= 0 || length > AGENT_MAX_MSGLEN - 4)
+    _throwe("Illegal length", "com/jcraft/jsch/AgentProxyException");
 
   BAILIF0(mid = env->GetMethodID(bufferClass, "rewind", "()V"));
   env->CallVoidMethod(buffer, mid);
@@ -186,7 +198,7 @@ JNIEXPORT void JNICALL Java_com_jcraft_jsch_agentproxy_connector_PageantConnecto
   env->ReleasePrimitiveArrayCritical(jbuf, buf, 0);
 
   bailout:
-  if (cds.lpData) free(cds.lpData);
+  free(cds.lpData);
   if (sharedMemory) UnmapViewOfFile(sharedMemory);
   if (sharedFile) CloseHandle(sharedFile);
 }

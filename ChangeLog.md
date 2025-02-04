@@ -56,8 +56,36 @@ fatal error that occurred in TightVNC-compatible VNC viewers (other than the
 TurboVNC Viewer) when attempting to select Compression Level 0 without JPEG
 while connected to a TurboVNC session.
 
-7. The TurboVNC Viewer's built-in SSH client now supports the Ed25519 signature
-scheme.  This improves compatibility with recent OpenSSH releases.
+7. The TurboVNC Viewer's built-in SSH client has been rebased on v0.2.23 of the
+JSch fork, which includes the following notable security, compatibility, and
+performance improvements:
+
+     - Curve25519 key exchange (KEX) methods are now supported.
+     - Diffie-Hellman Group 14 through 18 KEX methods are now supported.
+     - The Ed25519 signature scheme is now supported.
+     - Encrypt-then-MAC (EtM) Message Authentication Code (MAC) algorithms are
+now supported.
+     - Galois/Counter Mode (GCM) ciphers are now supported.
+     - The `hmac-sha2-512` MAC algorithm (Hash-based Message Authentication
+Code with the SHA-512 hash algorithm) is now supported.
+     - Version 3 of the PuTTY Private Key (PPK) format is now supported.
+     - RFC 8308 extension negotiation and the `server-sig-algs` extension are
+now supported.
+     - The OpenSSH strict key exchange extension is now supported (which
+addresses CVE-2023-48795.)
+     - Insecure signature schemes, KEX methods, and ciphers are now disabled by
+default, including:
+          - 3DES ciphers
+          - CBC (Cipher Block Chaining) ciphers
+          - Diffie-Hellman Group 1 KEX methods
+          - The DSS (Digital Signature Standard) signature scheme
+          - Signature schemes and KEX methods that use the SHA-1 hash algorithm
+
+        The `Ciphers`, `HostKeyAlgorithms`, `KexAlgorithms`, and
+`PubkeyAcceptedAlgorithms` OpenSSH configuration keywords or the `jsch.cipher`,
+`jsch.server_host_key`, `jsch.kex`, and `jsch.client_pubkey` Java system
+properties can be used to re-enable insecure algorithms when connecting to
+legacy systems.
 
 8. The TurboVNC Viewer's `SSHUser` parameter has been removed.  SSH usernames
 should now be specified by prefixing the VNC host or the gateway host with the

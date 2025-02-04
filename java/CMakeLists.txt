@@ -4,8 +4,7 @@ find_package(Java REQUIRED)
 if(NOT DEFINED CMAKE_JAVA_COMPILE_FLAGS AND DEFINED ENV{JAVAFLAGS})
 	set(DEFAULT_CMAKE_JAVA_COMPILE_FLAGS $ENV{JAVAFLAGS})
 else()
-	set(DEFAULT_CMAKE_JAVA_COMPILE_FLAGS
-		"-Xlint:all,-serial,-unchecked,-rawtypes")
+	set(DEFAULT_CMAKE_JAVA_COMPILE_FLAGS "-Xlint:all")
 endif()
 set(CMAKE_JAVA_COMPILE_FLAGS ${DEFAULT_CMAKE_JAVA_COMPILE_FLAGS} CACHE STRING
 	"Java compiler flags (Default: ${DEFAULT_CMAKE_JAVA_COMPILE_FLAGS})")
@@ -31,47 +30,99 @@ set(JAVA_CLASSES "")
 
 set(JSCH_CLASSNAMES
 	CipherNone
+	DH25519
+	DH25519MLKEM768
+	DH25519SNTRUP761
+	DH448
 	DHEC256
+	DHEC256MLKEM768
 	DHEC384
+	DHEC384MLKEM1024
 	DHEC521
+	DHECNKEM
 	DHG1
 	DHG14
+	DHG14224
+	DHG14256
+	DHG14N
+	DHG15
+	DHG15256
+	DHG15384
+	DHG15N
+	DHG16
+	DHG16384
+	DHG16N
+	DHG17
+	DHG18
 	DHGEX
+	DHGEX1
+	DHGEX224
 	DHGEX256
+	DHGEX384
+	DHGEX512
+	DHGN
+	DHXEC
+	DHXECKEM
 	UserAuthGSSAPIWithMIC
 	UserAuthKeyboardInteractive
 	UserAuthNone
 	UserAuthPassword
 	UserAuthPublicKey
+	XDH
+	jbcrypt/JBCrypt
 	jce/AES128CBC
 	jce/AES128CTR
+	jce/AES128GCM
 	jce/AES192CBC
 	jce/AES192CTR
 	jce/AES256CBC
 	jce/AES256CTR
+	jce/AES256GCM
+	jce/AESGCM
 	jce/ARCFOUR
 	jce/ARCFOUR128
 	jce/ARCFOUR256
 	jce/BlowfishCBC
+	jce/BlowfishCTR
 	jce/DH
 	jce/ECDH256
 	jce/ECDH384
 	jce/ECDH521
 	jce/ECDHN
 	jce/HMACMD5
+	jce/HMACMD5ETM
 	jce/HMACMD596
+	jce/HMACMD596ETM
 	jce/HMACSHA1
+	jce/HMACSHA1ETM
 	jce/HMACSHA196
+	jce/HMACSHA196ETM
+	jce/HMACSHA224SSHCOM
 	jce/HMACSHA256
+	jce/HMACSHA256ETM
+	jce/HMACSHA256SSHCOM
+	jce/HMACSHA2562SSHCOM
+	jce/HMACSHA384SSHCOM
 	jce/HMACSHA512
+	jce/HMACSHA512ETM
+	jce/HMACSHA512SSHCOM
 	jce/KeyPairGenDSA
 	jce/KeyPairGenECDSA
 	jce/KeyPairGenEdDSA
 	jce/KeyPairGenRSA
 	jce/MD5
 	jce/PBKDF
+	jce/PBKDF2
+	jce/PBKDF2HMACSHA1
+	jce/PBKDF2HMACSHA224
+	jce/PBKDF2HMACSHA256
+	jce/PBKDF2HMACSHA384
+	jce/PBKDF2HMACSHA512
+	jce/PBKDF2HMACSHA512224
+	jce/PBKDF2HMACSHA512256
 	jce/Random
 	jce/SHA1
+	jce/SHA224
 	jce/SHA256
 	jce/SHA384
 	jce/SHA512
@@ -81,19 +132,23 @@ set(JSCH_CLASSNAMES
 	jce/SignatureECDSA521
 	jce/SignatureECDSAN
 	jce/SignatureEd25519
+	jce/SignatureEd448
 	jce/SignatureEdDSA
 	jce/SignatureRSA
 	jce/SignatureRSAN
+	jce/SignatureRSASHA224SSHCOM
 	jce/SignatureRSASHA256
+	jce/SignatureRSASHA256SSHCOM
+	jce/SignatureRSASHA384SSHCOM
 	jce/SignatureRSASHA512
+	jce/SignatureRSASHA512SSHCOM
 	jce/TripleDESCBC
 	jce/TripleDESCTR
-	jcraft/Compression
-	jcraft/HMACMD5
-	jcraft/HMACMD596
-	jcraft/HMACSHA1
-	jcraft/HMACSHA196
-	jgss/GSSContextKrb5)
+	jce/Util
+	jce/XDH
+	jgss/GSSContextKrb5
+	juz/Compression
+	jzlib/Compression)
 
 foreach(class ${JSCH_CLASSNAMES})
 	set(JAVA_SOURCES ${JAVA_SOURCES} com/jcraft/jsch/${class}.java)
@@ -107,15 +162,12 @@ file(GLOB DEPEND_SOURCES
 	${SRCDIR}/com/turbovnc/rdr/*.java
 	${SRCDIR}/com/turbovnc/network/*.java
 	${SRCDIR}/com/jcraft/jsch/*.java
-	${SRCDIR}/com/jcraft/jsch/agentproxy/*.java
-	${SRCDIR}/com/jcraft/jsch/agentproxy/connector/*.java
-	${SRCDIR}/com/jcraft/jsch/agentproxy/usocket/*.java
+	${SRCDIR}/com/jcraft/jsch/jbcrypt/*.java
 	${SRCDIR}/com/jcraft/jsch/jce/*.java
-	${SRCDIR}/com/jcraft/jsch/jcraft/*.java
 	${SRCDIR}/com/jcraft/jsch/jgss/*.java
-	${SRCDIR}/com/jcraft/jzlib/*.java
-	${SRCDIR}/org/spf4j/base/*.java
-	${SRCDIR}/org/mindrot/jbcrypt/*.java)
+	${SRCDIR}/com/jcraft/jsch/juz/*.java
+	${SRCDIR}/com/jcraft/jsch/jzlib/*.java
+	${SRCDIR}/org/spf4j/base/*.java)
 
 string(REGEX REPLACE " " ";" CMAKE_JAVA_COMPILE_FLAGS
 	"${CMAKE_JAVA_COMPILE_FLAGS}")
@@ -161,16 +213,13 @@ add_custom_command(OUTPUT VncViewer.jar
 		com/turbovnc/rfb/*.class
 		com/turbovnc/rdr/*.class
 		com/turbovnc/network/*.class
-		com/jcraft/jzlib/*.class
-		com/jcraft/jsch/agentproxy/*.class
-		com/jcraft/jsch/agentproxy/connector/*.class
-		com/jcraft/jsch/agentproxy/usocket/*.class
-		com/jcraft/jsch/jgss/*.class
-		com/jcraft/jsch/jcraft/*.class
-		com/jcraft/jsch/jce/*.class
 		com/jcraft/jsch/*.class
+		com/jcraft/jsch/jbcrypt/*.class
+		com/jcraft/jsch/jce/*.class
+		com/jcraft/jsch/jgss/*.class
+		com/jcraft/jsch/juz/*.class
+		com/jcraft/jsch/jzlib/*.class
 		org/spf4j/base/*.class
-		org/mindrot/jbcrypt/*.class
 		${CLASSPATH}/toolbar.png
 		${CLASSPATH}/turbovnc.png
 		${CLASSPATH}/turbovnc-sm.png

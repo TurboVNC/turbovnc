@@ -34,10 +34,6 @@ import com.turbovnc.rfb.*;
 import com.turbovnc.rdr.*;
 import com.turbovnc.network.*;
 
-import com.jcraft.jsch.agentproxy.*;
-import com.jcraft.jsch.agentproxy.connector.*;
-import com.jcraft.jsch.agentproxy.usocket.*;
-import com.jcraft.jsch.Identity;
 import com.jcraft.jsch.*;
 
 public class Tunnel {
@@ -205,14 +201,14 @@ public class Tunnel {
     jsch.setKnownHosts(knownHosts.getAbsolutePath());
 
     if (Helper.isAvailable()) {
-      Connector connector = null;
+      AgentConnector connector = null;
       try {
         if (Utils.isWindows())
           connector = new PageantConnector();
         else
-          connector = new SSHAgentConnector(new JNIUSocketFactory());
+          connector = new SSHAgentConnector(new UnixDomainSocketFactory());
         if (connector != null) {
-          IdentityRepository repo = new RemoteIdentityRepository(connector);
+          IdentityRepository repo = new AgentIdentityRepository(connector);
           vlog.sshdebug("SSH private keys offered by agent:");
           Iterator<Identity> iter = repo.getIdentities().iterator();
           while (iter.hasNext()) {

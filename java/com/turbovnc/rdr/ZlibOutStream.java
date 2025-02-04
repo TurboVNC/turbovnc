@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2022, 2025 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -20,7 +20,7 @@
 
 package com.turbovnc.rdr;
 
-import com.jcraft.jzlib.*;
+import com.jcraft.jsch.jzlib.*;
 
 import com.turbovnc.rfb.LogWriter;
 
@@ -181,7 +181,7 @@ public class ZlibOutStream extends OutStream {
   private int newLevel;
   private int bufSize;
   private int offset;
-  private com.jcraft.jzlib.ZStream zs;
+  private com.jcraft.jsch.jzlib.ZStream zs;
   private int start;
 
   static LogWriter vlog = new LogWriter("ZlibOutStream");
