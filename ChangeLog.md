@@ -135,6 +135,11 @@ transmitted to the VNC server.
 14. The TurboVNC Viewer toolbar icons have been updated with more modern icons
 derived from UltraVNC v1.2.4.
 
+15. The TurboVNC Viewer's `CompatibleGUI` parameter is now configurable using
+a new check box ("TurboVNC server") under the "Encoding" tab of the TurboVNC
+Viewer Options dialog.  This facilitates using the standard 0-9 compression
+level scale with specific VNC hosts.
+
 
 3.1.4
 =====

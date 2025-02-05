@@ -43,7 +43,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   private Params params;
   private JTabbedPane tabPane;
   private JPanel buttonPane, encodingPanel, connPanel, globalPanel, secPanel;
-  private JCheckBox jpeg, interframe;
+  private JCheckBox jpeg, interframe, turboVNCServer;
   private JComboBox menuKey, scalingFactor, encMethodComboBox, span,
     desktopSize, grabKeyboard;
   private JSlider jpegQualityLevel, subsamplingLevel, compressionLevel;
@@ -64,9 +64,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   private JLabel encMethodLabel;
   private JLabel jpegQualityLabel, jpegQualityLabelLo, jpegQualityLabelHi;
   private JLabel subsamplingLabel, subsamplingLabelLo, subsamplingLabelHi;
-  private JLabel compressionLabel, compressionLabelLo, compressionLabelHi;
+  private JLabel compressionLabel;
   private String jpegQualityLabelString, subsamplingLabelString;
-  private String compressionLabelString;
   private Hashtable<Integer, String> subsamplingLabelTable;
   private String oldScalingFactor, oldDesktopSize;
   private boolean enableX509 = true;
@@ -193,8 +192,6 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           GridBagConstraints.LINE_START,
                           new Insets(2, 2, 2, 2));
 
-    compressionLabelString =
-      new String("Compression level (see docs): ");
     compressionLabel = new JLabel();
     compressionLevel =
       new JSlider(JSlider.HORIZONTAL, 0, 2, 1);
@@ -203,9 +200,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     compressionLevel.setSnapToTicks(true);
     compressionLevel.setPaintTicks(true);
     compressionLevel.setPaintLabels(false);
-    compressionLabelLo = new JLabel("fast");
-    compressionLabelHi = new JLabel("best");
-    compressionLabel.setText(compressionLabelString +
+    compressionLabel.setText("Compression level (see docs): " +
                              compressionLevel.getValue());
 
     Dialog.addGBComponent(compressionLabel, dummyPanel,
@@ -213,18 +208,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           GridBagConstraints.NONE,
                           GridBagConstraints.LINE_START,
                           new Insets(2, 2, 2, 2));
-    Dialog.addGBComponent(compressionLabelLo, dummyPanel,
-                          0, 8, 1, 1, 2, 2, 0, 0,
-                          GridBagConstraints.NONE,
-                          GridBagConstraints.LINE_START,
-                          new Insets(2, 12, 2, 2));
     Dialog.addGBComponent(compressionLevel, dummyPanel,
-                          1, 8, 1, 1, 2, 2, 0, 0,
-                          GridBagConstraints.NONE,
-                          GridBagConstraints.LINE_START,
-                          new Insets(2, 2, 2, 2));
-    Dialog.addGBComponent(compressionLabelHi, dummyPanel,
-                          2, 8, 1, 1, 2, 2, 1, 1,
+                          0, 8, 3, 1, 2, 2, 0, 0,
                           GridBagConstraints.NONE,
                           GridBagConstraints.LINE_START,
                           new Insets(2, 2, 2, 2));
@@ -238,10 +223,19 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           GridBagConstraints.LINE_START,
                           new Insets(2, 0, 2, 2));
 
+    turboVNCServer = new JCheckBox("TurboVNC server");
+    turboVNCServer.addItemListener(this);
+
+    Dialog.addGBComponent(turboVNCServer, dummyPanel,
+                          0, 10, 3, 1, 0, 2, 0, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(2, 0, 2, 2));
+
     Dialog.addGBComponent(dummyPanel, encodingPanel,
                           0, 0, 1, GridBagConstraints.REMAINDER, 0, 0, 1, 1,
-                          GridBagConstraints.HORIZONTAL,
-                          GridBagConstraints.PAGE_START,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.FIRST_LINE_START,
                           new Insets(4, 4, 4, 4));
 
     // Connection tab
@@ -906,10 +900,6 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
         subsamplingLabel.setEnabled(true);
         subsamplingLabelLo.setEnabled(true);
         subsamplingLabelHi.setEnabled(true);
-        if (compressionLevel.getMaximum() < 9) {
-          compressionLevel.setMinimum(1);
-          compressionLevel.setMaximum(2);
-        }
       } else {
         jpegQualityLevel.setEnabled(false);
         jpegQualityLabel.setEnabled(false);
@@ -919,17 +909,18 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
         subsamplingLabel.setEnabled(false);
         subsamplingLabelLo.setEnabled(false);
         subsamplingLabelHi.setEnabled(false);
-        if (compressionLevel.getMaximum() < 9) {
-          compressionLevel.setMinimum(0);
-          compressionLevel.setMaximum(1);
-        }
       }
+      if (turboVNCServer.isSelected())
+        setCompatibleGUI();
       setEncMethodComboBox();
     }
     if (s instanceof JCheckBox && (JCheckBox)s == interframe) {
+      if (turboVNCServer.isSelected())
+        setCompatibleGUI();
       setEncMethodComboBox();
-      compressionLabel.setText(compressionLabelString + getCompressionLevel());
     }
+    if (s instanceof JCheckBox && (JCheckBox)s == turboVNCServer)
+      setCompressionLevel(getCompressionLevel());
     if (s instanceof JCheckBox && (JCheckBox)s == secNone ||
         s instanceof JCheckBox && (JCheckBox)s == secVnc ||
         s instanceof JCheckBox && (JCheckBox)s == secPlain ||
@@ -1051,7 +1042,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
         jpegQualityLevel.getValue());
       setEncMethodComboBox();
     } else if (s instanceof JSlider && (JSlider)s == compressionLevel) {
-      compressionLabel.setText(compressionLabelString + getCompressionLevel());
+      setCompatibleGUI();
       setEncMethodComboBox();
     }
   }
@@ -1078,18 +1069,47 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     return false;
   }
 
-  public void setCompressionLevel(int level) {
-    boolean selectICE = false;
-    if (!isTurboCompressionLevel(level)) {
+  void setCompatibleGUI() {
+    String compressionLabelString;
+
+    if (!turboVNCServer.isSelected()) {
       compressionLevel.setMinimum(0);
       compressionLevel.setMaximum(9);
       compressionLabelString = new String("Compression level: ");
-      interframe.setEnabled(false);
+    } else {
+      if (jpeg.isSelected()) {
+        compressionLevel.setMinimum(1);
+        compressionLevel.setMaximum(2);
+      } else {
+        compressionLevel.setMinimum(0);
+        compressionLevel.setMaximum(1);
+      }
+      compressionLabelString = new String("Compression level (see docs): ");
     }
-    if (compressionLevel.getMaximum() < 9 &&
-        interframe.isEnabled()) {
-      if (level >= 5 && level <= 8) {
-        level -= 5;
+    String clString = "";
+    int cl = getCompressionLevel();
+    if (turboVNCServer.isSelected()) {
+      if (cl == 0 || cl == 5) clString = " [no zlib]";
+      else if (cl == 1 || cl == 6) clString = " [minimal]";
+      else if (cl == 2 || cl == 7) clString = " [medium]";
+    } else {
+      if (cl == 0) clString = " [none]";
+      else if (cl == 1) clString = " [minimal]";
+      else if (cl == 2) clString = " [medium]";
+      else if (cl == 6) clString = " [maximum useful]";
+    }
+    if (cl == 9) clString = " [extreme]";
+    compressionLabel.setText(compressionLabelString + cl + clString);
+    interframe.setEnabled(turboVNCServer.isSelected());
+  }
+
+  void setCompressionLevel(int level) {
+    boolean selectICE = false;
+    setCompatibleGUI();
+    if (turboVNCServer.isSelected() && interframe.isEnabled()) {
+      if (level >= 5 && level <= 9) {
+        if (level <= 8)
+          level -= 5;
         selectICE = true;
       }
     }
@@ -1130,13 +1150,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       encMethodComboBox.setSelectedItem(RFB.encodingName(encoding));
       encMethodLabel.setText("Encoding type:");
       encMethodLabel.setEnabled(false);
-    }
-    if (encoding != RFB.ENCODING_TIGHT || params.compatibleGUI.get()) {
-      compressionLevel.setMinimum(0);
-      compressionLevel.setMaximum(9);
-      compressionLabelString = new String("Compression level: ");
-      compressionLabel.setText(compressionLabelString + getCompressionLevel());
-      interframe.setEnabled(false);
+      turboVNCServer.setEnabled(false);
     }
   }
 
@@ -1202,6 +1216,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     jpeg.setSelected(params.jpeg.get());
     subsamplingLevel.setValue(params.subsampling.getOrdinal());
     jpegQualityLevel.setValue(params.quality.get());
+    turboVNCServer.setSelected(!params.compatibleGUI.get() &&
+      isTurboCompressionLevel(params.compressLevel.get()));
     setCompressionLevel(params.compressLevel.get());
 
     // Connection: Display
@@ -1305,6 +1321,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     params.subsampling.set(getSubsamplingLevel());
     params.quality.set(jpegQualityLevel.getValue());
     params.compressLevel.set(getCompressionLevel());
+    params.compatibleGUI.set(!turboVNCServer.isSelected());
 
     // Connection: Display
     params.scale.set(scalingFactor.getSelectedItem().toString());

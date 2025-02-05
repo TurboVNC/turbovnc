@@ -781,7 +781,7 @@ public final class Params {
   "usually true color (8 bits per component.)", -1);
 
   public BoolParameter compatibleGUI =
-  new BoolParameter("CompatibleGUI", this, false, false,
+  new BoolParameter("CompatibleGUI", this, true, false,
   "Expose all compression levels (0-9) in the TurboVNC Viewer Options " +
   "dialog (useful when connecting to non-TurboVNC servers.)  This parameter " +
   "is effectively set when using any encoding type other than Tight or when " +
