@@ -1,5 +1,5 @@
-3.2 Evolving
-============
+3.2 beta1
+=========
 
 ### Significant changes relative to 3.1.4:
 
