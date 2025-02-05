@@ -279,7 +279,7 @@ public final class Viewport extends JFrame implements Runnable {
     Dimension borderSize = new Dimension(vpInsets.left + vpInsets.right,
                                          vpInsets.top + vpInsets.bottom);
     if (cc.params.toolbar.get())
-      borderSize.height += 22;
+      borderSize.height += 26;
     return borderSize;
   }
 

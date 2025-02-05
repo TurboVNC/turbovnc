@@ -132,6 +132,9 @@ bar and dock in full-screen mode, irrespective of bump scrolling.
 RFB extension, which allows forward and back mouse button events to be
 transmitted to the VNC server.
 
+14. The TurboVNC Viewer toolbar icons have been updated with more modern icons
+derived from UltraVNC v1.2.4.
+
 
 3.1.4
 =====

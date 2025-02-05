@@ -636,8 +636,8 @@ public final class CConn extends CConnection implements UserPasswdGetter,
     vpRect.x = vpPos.x;
     vpRect.y = vpPos.y;
     if (params.toolbar.get() && !params.fullScreen.get()) {
-      vpRect.y += 22;
-      vpRect.height -= 22;
+      vpRect.y += 26;
+      vpRect.height -= 26;
     }
 
     GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();

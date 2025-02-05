@@ -1,5 +1,5 @@
-/* Copyright (C) 2012-2013, 2015, 2018, 2020, 2022, 2024 D. R. Commander.
- *                                                       All Rights Reserved.
+/* Copyright (C) 2012-2013, 2015, 2018, 2020, 2022, 2024-2025
+ *           D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2012 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -48,9 +48,9 @@ public final class Toolbar extends JToolBar implements ActionListener {
     super();
     cc = cc_;
     BufferedImage bi =
-      new BufferedImage(192, 16, BufferedImage.TYPE_INT_ARGB);
+      new BufferedImage(240, 20, BufferedImage.TYPE_INT_ARGB);
     Graphics2D g = bi.createGraphics();
-    g.drawImage(toolbarImage, 0, 0, 192, 16, null);
+    g.drawImage(toolbarImage, 0, 0, 240, 20, null);
     setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
     setAlignmentY(java.awt.Component.CENTER_ALIGNMENT);
     setFloatable(false);
@@ -63,7 +63,7 @@ public final class Toolbar extends JToolBar implements ActionListener {
       if (i >= 6 && i <= 7 && cc.params.restricted.get())
         continue;
       ImageIcon icon = new ImageIcon(
-        tk.createImage(bi.getSubimage(i * 16, 0, 16, 16).getSource()));
+        tk.createImage(bi.getSubimage(i * 20, 0, 20, 20).getSource()));
       AbstractButton button;
       switch (i) {
         case 8:
