@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 #
-# Copyright (C) 2009-2018, 2020-2022, 2024 D. R. Commander.
-#                                          All Rights Reserved.
+# Copyright (C) 2009-2018, 2020-2022, 2024-2025 D. R. Commander.
+#                                               All Rights Reserved.
 # Copyright (C) 2021 Steffen Kieß
 # Copyright (C) 2010 University Corporation for Atmospheric Research.
 #                    All Rights Reserved.
@@ -61,6 +61,7 @@ $autokill = 1;
 $bits = @BITS@;
 $noVNC = "";
 $serverArgs = "";
+$userDBus = 0;
 $useUDS = 0;
 $udsPath = "";
 
@@ -209,7 +210,8 @@ foreach $_registrydir (@registrydirs) {
               "-3dwm", 0, "-vgl", 0, "-debug", 0, "-x509cert", 1,
               "-x509key", 1, "-autokill", 0, "-quiet", 0, "-wm", 1,
               "-sessionlist", 0, "-sessionstart", 0, "-novnc", 1,
-              "-noautokill", 0, "-rfbport", 1, "-rfbunixpath", 1, "-uds", 0);
+              "-noautokill", 0, "-rfbport", 1, "-rfbunixpath", 1, "-uds", 0,
+              "-userdbus", 0);
 
 &Usage() if ($opt{'-help'} || $opt{'-h'} || $opt{'--help'});
 
@@ -266,6 +268,9 @@ if ($opt{'-xstartup'}) {
 }
 if ($opt{'-wm'}) {
   $wm = $opt{'-wm'};
+}
+if ($opt{'-userdbus'}) {
+  $userDBus = 1;
 }
 if ($opt{'-3dwm'} || $opt{'-vgl'}) {
   $useVGL = 1;
@@ -589,6 +594,10 @@ if (!$noxstartup) {
   warn "Starting applications specified in $xstartup\n";
   if ($wm) {
     $ENV{TVNC_WM} = $wm;
+  }
+  if ($userDBus) {
+    warn "(Using per-user D-Bus session bus instance)\n";
+    $ENV{TVNC_USERDBUS} = "1";
   }
   if ($useVGL) {
     warn "(Enabling VirtualGL)\n";
@@ -1242,6 +1251,7 @@ sub ReadConfiguration
        passwdFile
        securityTypes
        serverArgs
+       userDBus
        useUDS
        useVGL
        vncUserDir

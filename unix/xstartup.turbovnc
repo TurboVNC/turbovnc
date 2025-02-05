@@ -1,7 +1,7 @@
 #!/bin/sh
 
-#  Copyright (C) 2014-2018, 2021-2022, 2024 D. R. Commander.
-#                                           All Rights Reserved.
+#  Copyright (C) 2014-2018, 2021-2022, 2024-2025 D. R. Commander.
+#                                                All Rights Reserved.
 #  Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
 #  Copyright (C) 2002 Constantin Kaplinsky.  All Rights Reserved.
 #
@@ -44,14 +44,11 @@ GDK_BACKEND=x11;  export GDK_BACKEND
 # Ubuntu 18.04+), it is necessary to explicitly create a new session bus
 # instance by invoking dbus-launch.
 #
-# Using a separate D-Bus session bus instance for each TurboVNC session is
-# necessary in order to run multiple TurboVNC sessions (or a local session and
-# a TurboVNC session) simultaneously under the same user account, but this also
-# causes issues with Control Group (cgroup) v2 on some systems.  If
-# TVNC_USERDBUS is set to 1 in the environment (currently undocumented except
-# here), then we forego creating a unique D-Bus session bus instance for the
-# TurboVNC session and use the per-user D-Bus session bus instance provided by
-# systemd instead.  That improves cgroup v2 compatibility at the expense of
+# If TVNC_USERDBUS is set to 1 in the environment (which will be the case if
+# $userDBus = 1 in turbovncserver.conf or -userdbus is passed to vncserver),
+# then we forego creating a unique D-Bus session bus instance for the TurboVNC
+# session and use the per-user D-Bus session bus instance provided by systemd
+# instead.  That improves cgroup v2 compatibility at the expense of
 # multi-session capability.
 case "$DBUS_SESSION_BUS_ADDRESS" in
 unix:path=/run/user/*)
