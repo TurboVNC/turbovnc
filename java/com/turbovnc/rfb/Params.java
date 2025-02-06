@@ -432,7 +432,7 @@ public final class Params {
     for (Enumeration<?> i = props.propertyNames();  i.hasMoreElements();) {
       String name = (String)i.nextElement();
 
-      if (name.startsWith("turbovnc.")) {
+      if (name.startsWith("jsch.") || name.startsWith("turbovnc.")) {
         vlog.info("Setting Java system property " + name + "=" +
                   props.getProperty(name));
         System.setProperty(name, props.getProperty(name));
