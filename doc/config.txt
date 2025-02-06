@@ -236,16 +236,6 @@ Java system properties listed below can also be specified in
 	2.1.x and prior of the TurboVNC Viewer, requesting a single-screen layout
 	from the server even if it supports multi-screen layouts.
 
-| Java System Property | ''turbovnc.sshauth'' |
-| Summary | Preferred authentication methods for the built-in SSH client |
-| Default Value | ''publickey,keyboard-interactive,password'' |
-#OPT: hiCol=first
-
-	Description :: This property can be used to enable or disable particular SSH
-	authentication methods, as well as to specify their preferred order.  The
-	same thing can be accomplished using the ''PreferredAuthentications''
-	directive in the OpenSSH config file.
-
 | Java System Property | {pcode: turbovnc.sshbannerdlg = __0 \| 1__} |
 | Summary | Display the banner message from the SSH server in a dialog box |
 | Default Value | Disabled |
