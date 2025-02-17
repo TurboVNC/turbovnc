@@ -1,5 +1,5 @@
-3.0.4
-=====
+3.0.4 ESR
+=========
 
 ### Significant changes relative to 3.0.3:
 
