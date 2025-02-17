@@ -2559,7 +2559,7 @@ public final class CConn extends CConnection implements UserPasswdGetter,
 
 
   // EDT
-  synchronized void releasePressedKeys() {
+  void releasePressedKeys() {
     for (Map.Entry<Integer, Integer> entry : pressedKeys.entrySet()) {
       vlog.debug(String.format("Lost focus.  Releasing key symbol 0x%04x",
                  entry.getValue()));

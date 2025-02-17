@@ -125,6 +125,10 @@ connection timeout specified using the `ConnectTimeout` OpenSSH config file
 keyword was interpreted as milliseconds rather than seconds.  This caused the
 SSH connection to fail if the timeout was too low.
 
+26. Fixed a regression introduced by 3.0.3[7] that, under rare circumstances if
+automatic desktop resizing was enabled, caused the viewer to deadlock while
+resizing its window in response to a remote desktop size change.
+
 
 3.0.3
 =====
