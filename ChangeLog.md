@@ -1,3 +1,13 @@
+3.2
+===
+
+### Significant changes relative to 3.2 beta1:
+
+1. Fixed a regression introduced by 3.0.3[7] that, under rare circumstances if
+automatic desktop resizing was enabled, caused the viewer to deadlock while
+resizing its window in response to a remote desktop size change.
+
+
 3.2 beta1
 =========
 
