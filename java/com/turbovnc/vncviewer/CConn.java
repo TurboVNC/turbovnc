@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  * Copyright 2009-2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
- * Copyright (C) 2011-2023 D. R. Commander.  All Rights Reserved.
+ * Copyright (C) 2011-2023, 2025 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2015 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -1763,9 +1763,11 @@ public class CConn extends CConnection implements UserPasswdGetter,
 
     if (options.fullScreen.isSelected() != opts.fullScreen)
       toggleFullScreen();
-    else if (recreate)
-      recreateViewport();
-    else if (reconfigure)
+    else if (recreate) {
+      synchronized (this) {
+        recreateViewport();
+      }
+    } else if (reconfigure)
       reconfigureAndRepaintViewport(false);
     if (deleteRestore) {
       savedState = -1;
@@ -1793,7 +1795,9 @@ public class CConn extends CConnection implements UserPasswdGetter,
       return;
     showToolbar = !showToolbar;
     if (viewport != null) {
-      recreateViewport();
+      synchronized (this) {
+        recreateViewport();
+      }
       viewport.showToolbar(showToolbar);
     }
     menu.showToolbar.setSelected(showToolbar);
@@ -1803,8 +1807,11 @@ public class CConn extends CConnection implements UserPasswdGetter,
   public void toggleFullScreen() {
     opts.fullScreen = !opts.fullScreen;
     menu.fullScreen.setSelected(opts.fullScreen);
-    if (viewport != null)
-      recreateViewport(true);
+    if (viewport != null) {
+      synchronized (this) {
+        recreateViewport(true);
+      }
+    }
   }
 
   public boolean shouldGrab() {

@@ -79,6 +79,11 @@ the SSH connection timeout specified using the `ConnectTimeout` OpenSSH config
 file keyword was interpreted as milliseconds rather than seconds.  This caused
 the SSH connection to fail if the timeout was too low.
 
+16. Fixed an issue whereby the Java TurboVNC Viewer threw an
+IllegalComponentStateException if "Remote desktop size" was changed to "Auto"
+in the TurboVNC Viewer Options dialog while the viewer was actively receiving
+framebuffer updates from a VNC server.
+
 
 2.2.9 ESR
 =========
