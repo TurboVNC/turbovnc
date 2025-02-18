@@ -1851,9 +1851,11 @@ public final class CConn extends CConnection implements UserPasswdGetter,
     if (params.fullScreen.get() != oldParams.fullScreen.get()) {
       params.fullScreen.set(!params.fullScreen.get());
       toggleFullScreen();
-    } else if (recreate)
-      recreateViewport();
-    else if (reconfigure)
+    } else if (recreate) {
+      synchronized (this) {
+        recreateViewport();
+      }
+    } else if (reconfigure)
       reconfigureAndRepaintViewport(false);
     if (params.toolbar.get() != oldParams.toolbar.get()) {
       if (viewport != null)
@@ -1908,9 +1910,11 @@ public final class CConn extends CConnection implements UserPasswdGetter,
 
     savedState = -1;
     savedRect = new Rectangle(-1, -1, 0, 0);
-    if (!viewport.lionFSSupported() || !params.fullScreen.get())
-      recreateViewport();
-    else
+    if (!viewport.lionFSSupported() || !params.fullScreen.get()) {
+      synchronized (this) {
+        recreateViewport();
+      }
+    } else
       reconfigureAndRepaintViewport(false);
     savedState = -1;
     savedRect = new Rectangle(-1, -1, 0, 0);
@@ -1936,9 +1940,11 @@ public final class CConn extends CConnection implements UserPasswdGetter,
 
     savedState = -1;
     savedRect = new Rectangle(-1, -1, 0, 0);
-    if (!viewport.lionFSSupported() || !params.fullScreen.get())
-      recreateViewport();
-    else
+    if (!viewport.lionFSSupported() || !params.fullScreen.get()) {
+      synchronized (this) {
+        recreateViewport();
+      }
+    } else
       reconfigureAndRepaintViewport(false);
     savedState = -1;
     savedRect = new Rectangle(-1, -1, 0, 0);
@@ -1955,9 +1961,11 @@ public final class CConn extends CConnection implements UserPasswdGetter,
 
     savedState = -1;
     savedRect = new Rectangle(-1, -1, 0, 0);
-    if (!viewport.lionFSSupported() || !params.fullScreen.get())
-      recreateViewport();
-    else
+    if (!viewport.lionFSSupported() || !params.fullScreen.get()) {
+      synchronized (this) {
+        recreateViewport();
+      }
+    } else
       reconfigureAndRepaintViewport(false);
     savedState = -1;
     savedRect = new Rectangle(-1, -1, 0, 0);
@@ -1969,7 +1977,9 @@ public final class CConn extends CConnection implements UserPasswdGetter,
       return;
     params.toolbar.set(!params.toolbar.get());
     if (viewport != null) {
-      recreateViewport();
+      synchronized (this) {
+        recreateViewport();
+      }
       viewport.showToolbar(params.toolbar.get());
     }
     menu.showToolbar.setSelected(params.toolbar.get());
@@ -1979,8 +1989,11 @@ public final class CConn extends CConnection implements UserPasswdGetter,
   public void toggleFullScreen() {
     params.fullScreen.set(!params.fullScreen.get());
     menu.fullScreen.setSelected(params.fullScreen.get());
-    if (viewport != null)
-      recreateViewport(true);
+    if (viewport != null) {
+      synchronized (this) {
+        recreateViewport(true);
+      }
+    }
   }
 
   // EDT
@@ -1989,8 +2002,11 @@ public final class CConn extends CConnection implements UserPasswdGetter,
     menu.viewOnly.setSelected(params.viewOnly.get());
     if (viewport != null) {
       viewport.updateMacMenuViewOnly();
-      if (params.toolbar.get() && !params.fullScreen.get())
-        recreateViewport(true);
+      if (params.toolbar.get() && !params.fullScreen.get()) {
+        synchronized (this) {
+          recreateViewport(true);
+        }
+      }
     }
   }
 
