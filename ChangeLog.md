@@ -129,6 +129,11 @@ SSH connection to fail if the timeout was too low.
 automatic desktop resizing was enabled, caused the viewer to deadlock while
 resizing its window in response to a remote desktop size change.
 
+27. Fixed an issue whereby the TurboVNC Viewer threw an
+IllegalComponentStateException if "Remote desktop size" was changed to "Auto"
+in the TurboVNC Viewer Options dialog while the viewer was actively receiving
+framebuffer updates from a VNC server.
+
 
 3.0.3
 =====
