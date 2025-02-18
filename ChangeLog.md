@@ -64,10 +64,10 @@ CVE-2024-31083) from the xorg-server 1.20.x and 21.1.x code bases.
 
 13. The "Tight Encoding Without Zlib" RFB extension, which was used
 unofficially by the Lossless Tight encoding method since TurboVNC v0.5, has
-been officially registered with IANA as an RFB pseudo-encoding.  The TurboVNC
-Viewer now advertises support for the pseudo-encoding.  (The next major release
-of the TurboVNC Server will forego using the extension unless the VNC viewer
-advertises support for it.)
+been officially registered with IANA as an RFB pseudo-encoding.  The Java
+TurboVNC Viewer now advertises support for the pseudo-encoding.  (The TurboVNC
+3.2 Server will forego using the extension unless the VNC viewer advertises
+support for it.)
 
 14. Fixed an issue whereby the Java TurboVNC Viewer's built-in SSH client threw
 a NullPointerException if a cipher algorithm supported by the SSH server but
