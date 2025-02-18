@@ -84,9 +84,9 @@ Server from being used as an inetd service.
 17. The "Tight Encoding Without Zlib" RFB extension, which was used
 unofficially by the Lossless Tight encoding method since TurboVNC v0.5, has
 been officially registered with IANA as an RFB pseudo-encoding.  The TurboVNC
-Viewer now advertises support for the pseudo-encoding.  (The next major release
-of the TurboVNC Server will forego using the extension unless the VNC viewer
-advertises support for it.)
+Viewer now advertises support for the pseudo-encoding.  (The TurboVNC 3.2
+Server will forego using the extension unless the VNC viewer advertises support
+for it.)
 
 18. Fixed an issue in the TurboVNC Viewer's built-in SSH client whereby the
 `ssh-rsa` and `rsa-sha2-512` signature schemes could not be used unless they
