@@ -16,6 +16,10 @@ framebuffer updates from a VNC server.
 TurboVNC Viewer Options dialog did not take into account the values specified
 in **~/.vnc/default.turbovnc**.
 
+4. Fixed a regression introduced by 3.1.4[1] that caused the TurboVNC Viewer to
+ignore the SSH username if it was specified in the "VNC server" field of the
+New TurboVNC Connection dialog.
+
 
 3.1.4
 =====

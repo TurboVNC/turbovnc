@@ -1,5 +1,5 @@
-/* Copyright (C) 2012-2015, 2018, 2020, 2022, 2024 D. R. Commander.
- *                                                 All Rights Reserved.
+/* Copyright (C) 2012-2015, 2018, 2020, 2022, 2024-2025 D. R. Commander.
+ *                                                      All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -236,7 +236,11 @@ class ServerDialog extends Dialog implements ActionListener {
           Hostname.getColonPos(params.via.get()) >= 0) {
         params.server.set(serverStr);
       } else {
-        params.sshUser.set(Hostname.getSSHUser(serverStr));
+        String sshUser = Hostname.getSSHUser(serverStr);
+        if (sshUser != null) {
+          params.sshUser.set(sshUser);
+          params.sshUser.setCommandLine(true);
+        }
         params.server.set(Hostname.getHost(serverStr));
         params.port.set(Hostname.getPort(serverStr));
         params.udsPath = Hostname.getUDSPath(serverStr);
