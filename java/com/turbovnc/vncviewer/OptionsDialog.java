@@ -837,6 +837,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     } else if (s instanceof JButton && (JButton)s == resetButton) {
       Params oldParams = params;
       params = new Params();
+      params.loadDefaults();
       setOptions(desktopSize.isEnabled(), !shared.isEnabled(), false, false);
       params = oldParams;
     } else if (s instanceof JButton && (JButton)s == x509caButton) {

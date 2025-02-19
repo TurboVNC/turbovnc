@@ -12,6 +12,10 @@ IllegalComponentStateException if "Remote desktop size" was changed to "Auto"
 in the TurboVNC Viewer Options dialog while the viewer was actively receiving
 framebuffer updates from a VNC server.
 
+3. Fixed an issue whereby the "Reset all options to defaults" button in the
+TurboVNC Viewer Options dialog did not take into account the values specified
+in **~/.vnc/default.turbovnc**.
+
 
 3.2 beta1
 =========
