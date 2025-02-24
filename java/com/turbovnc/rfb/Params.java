@@ -493,8 +493,10 @@ public final class Params {
   }
 
   public void reconcile() {
-    if (scale.get() != 100 && desktopSize.getMode() == DesktopSize.AUTO) {
-      vlog.info("Desktop scaling enabled.  Disabling automatic desktop resizing.");
+    if ((scale.get() == ScaleParameter.AUTO ||
+         scale.get() == ScaleParameter.FIXEDRATIO) &&
+        desktopSize.getMode() == DesktopSize.AUTO) {
+      vlog.info("Automatic desktop scaling enabled.  Disabling automatic desktop resizing.");
       desktopSize.setMode(DesktopSize.SERVER);
     }
   }
@@ -847,7 +849,7 @@ public final class Params {
   "the entire image will fit in the viewer window without using " +
   "scrollbars.  If this parameter is set to \"FixedRatio\", then automatic " +
   "scaling is performed, but the original aspect ratio is preserved.  " +
-  "Enabling scaling disables automatic desktop resizing.", 100);
+  "Enabling automatic scaling disables automatic desktop resizing.", 100);
 
   public SpanParameter span =
   new SpanParameter("Span", this,

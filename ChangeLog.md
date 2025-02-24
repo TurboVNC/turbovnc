@@ -1,3 +1,14 @@
+3.3 Evolving
+============
+
+### Significant changes relative to 3.2.x:
+
+1. The TurboVNC Viewer's desktop scaling feature now works with automatic
+desktop resizing, which effectively allows the remote desktop to be zoomed in
+or out without changing the viewer window size.  This is useful with HiDPI
+monitors.
+
+
 3.2
 ===
 

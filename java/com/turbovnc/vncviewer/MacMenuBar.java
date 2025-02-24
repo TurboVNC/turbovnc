@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2015, 2018, 2020-2024 D. R. Commander.
+/* Copyright (C) 2012-2015, 2018, 2020-2025 D. R. Commander.
  *                                          All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
@@ -301,8 +301,7 @@ public final class MacMenuBar extends JMenuBar implements ActionListener {
   }
 
   void updateZoom() {
-    if (cc.params.desktopSize.getMode() == DesktopSize.AUTO ||
-        cc.params.scale.get() == ScaleParameter.AUTO ||
+    if (cc.params.scale.get() == ScaleParameter.AUTO ||
         cc.params.scale.get() == ScaleParameter.FIXEDRATIO) {
       zoomIn.setEnabled(false);
       zoomOut.setEnabled(false);

@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2015, 2018, 2022-2024 D. R. Commander.
+/* Copyright (C) 2012, 2015, 2018, 2022-2025 D. R. Commander.
  *                                           All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -79,5 +79,20 @@ public final class ScaleParameter extends IntParameter {
 
   public String getValues() {
     return "1-" + maxValue + ", Auto, or FixedRatio";
+  }
+
+  public int getReverseScaled(int dimension) {
+    if (value == 100 || value == AUTO || value == FIXEDRATIO)
+      return dimension;
+
+    int reverseScaledFloor =
+      (int)Math.floor((float)dimension * 100.0 / (float)value);
+    int reverseScaledCeil =
+      (int)Math.ceil((float)dimension * 100.0 / (float)value);
+
+    if ((int)Math.floor((float)reverseScaledCeil * (float)value / 100.0) >
+        dimension)
+      return reverseScaledFloor;
+    return reverseScaledCeil;
   }
 };

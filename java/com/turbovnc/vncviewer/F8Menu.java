@@ -247,8 +247,7 @@ public final class F8Menu extends JPopupMenu implements ActionListener {
   }
 
   void updateZoom() {
-    if (cc.params.desktopSize.getMode() == DesktopSize.AUTO ||
-        cc.params.scale.get() == ScaleParameter.AUTO ||
+    if (cc.params.scale.get() == ScaleParameter.AUTO ||
         cc.params.scale.get() == ScaleParameter.FIXEDRATIO) {
       zoomIn.setEnabled(false);
       zoomOut.setEnabled(false);

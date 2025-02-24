@@ -498,7 +498,7 @@ public final class CConn extends CConnection implements UserPasswdGetter,
         sendDesktopSize(params.desktopSize.getWidth(),
                         params.desktopSize.getHeight(), false);
       else if (params.desktopSize.getMode() == DesktopSize.AUTO) {
-        Dimension availableSize = viewport.getAvailableSize();
+        Dimension availableSize = viewport.sp.getSize();
         sendDesktopSize(availableSize.width, availableSize.height, false);
       }
 
@@ -656,6 +656,18 @@ public final class CConn extends CConnection implements UserPasswdGetter,
           screenRect.x -= vpRect.x;
           screenRect.y -= vpRect.y;
 
+          if (params.desktopSize.getMode() == DesktopSize.AUTO) {
+            screenRect.x = params.scale.getReverseScaled(screenRect.x);
+            screenRect.y = params.scale.getReverseScaled(screenRect.y);
+            screenRect.width = params.scale.getReverseScaled(screenRect.width);
+            if (screenRect.width + screenRect.x > width)
+              screenRect.width = width - screenRect.x;
+            screenRect.height =
+              params.scale.getReverseScaled(screenRect.height);
+            if (screenRect.height + screenRect.y > height)
+              screenRect.height = height - screenRect.y;
+          }
+
           Screen screen = new Screen(0, screenRect.x, screenRect.y,
                                      screenRect.width, screenRect.height, 0);
 
@@ -686,9 +698,13 @@ public final class CConn extends CConnection implements UserPasswdGetter,
     if (!cp.supportsSetDesktopSize)
       return;
 
-    if (params.desktopSize.getMode() == DesktopSize.AUTO)
+    if (params.desktopSize.getMode() == DesktopSize.AUTO) {
+      width = params.scale.getReverseScaled(width);
+      height = params.scale.getReverseScaled(height);
       layout = computeScreenLayout(width, height);
-    else {
+      if (width < 1 || height < 1 || layout.equals(cp.screenLayout))
+        return;
+    } else {
       if (params.desktopSize.getMode() != DesktopSize.MANUAL ||
           params.desktopSize.getLayout() == null) {
         vlog.error("ERROR: Unexpected desktop size configuration");
@@ -1076,6 +1092,10 @@ public final class CConn extends CConnection implements UserPasswdGetter,
     int w, h;
     w = desktop.width();
     h = desktop.height();
+    if (params.desktopSize.getMode() == DesktopSize.AUTO) {
+      w = params.scale.getReverseScaled(w);
+      h = params.scale.getReverseScaled(h);
+    }
 
     if ((w == cp.width) && (h == cp.height) &&
         (desktop.im.width() == cp.width) &&
@@ -1445,11 +1465,8 @@ public final class CConn extends CConnection implements UserPasswdGetter,
       viewport.dx = x - span.x;
       viewport.dy = y - span.y;
 
-      if (checkLayoutNow) {
-        ScreenSet layout = computeScreenLayout(span.width, span.height);
-        if (!layout.equals(cp.screenLayout))
-          sendDesktopSize(span.width, span.height, layout, false);
-      }
+      if (checkLayoutNow)
+        sendDesktopSize(span.width, span.height, false);
 
       return;
     }
@@ -1901,8 +1918,7 @@ public final class CConn extends CConnection implements UserPasswdGetter,
 
   // EDT
   public void zoomIn() {
-    if (params.desktopSize.getMode() == DesktopSize.AUTO ||
-        params.scale.get() == ScaleParameter.AUTO ||
+    if (params.scale.get() == ScaleParameter.AUTO ||
         params.scale.get() == ScaleParameter.FIXEDRATIO)
       return;
 
@@ -1915,6 +1931,13 @@ public final class CConn extends CConnection implements UserPasswdGetter,
       sf = ((sf / 50) + 1) * 50;
     if (sf > 400) sf = 400;
     params.scale.set(sf);
+
+    if (params.desktopSize.getMode() == DesktopSize.AUTO) {
+      Dimension availableSize = viewport.sp.getSize();
+      sendDesktopSize(availableSize.width, availableSize.height, true);
+      viewport.updateTitle();
+      return;
+    }
 
     savedState = -1;
     savedRect = new Rectangle(-1, -1, 0, 0);
@@ -1930,8 +1953,7 @@ public final class CConn extends CConnection implements UserPasswdGetter,
 
   // EDT
   public void zoomOut() {
-    if (params.desktopSize.getMode() == DesktopSize.AUTO ||
-        params.scale.get() == ScaleParameter.AUTO ||
+    if (params.scale.get() == ScaleParameter.AUTO ||
         params.scale.get() == ScaleParameter.FIXEDRATIO)
       return;
 
@@ -1945,6 +1967,13 @@ public final class CConn extends CConnection implements UserPasswdGetter,
     if (sf < 10) sf = 10;
     if (sf > 400) sf = 400;
     params.scale.set(sf);
+
+    if (params.desktopSize.getMode() == DesktopSize.AUTO) {
+      Dimension availableSize = viewport.sp.getSize();
+      sendDesktopSize(availableSize.width, availableSize.height, true);
+      viewport.updateTitle();
+      return;
+    }
 
     savedState = -1;
     savedRect = new Rectangle(-1, -1, 0, 0);
@@ -1960,12 +1989,18 @@ public final class CConn extends CConnection implements UserPasswdGetter,
 
   // EDT
   public void zoom100() {
-    if (params.desktopSize.getMode() == DesktopSize.AUTO ||
-        params.scale.get() == ScaleParameter.AUTO ||
+    if (params.scale.get() == ScaleParameter.AUTO ||
         params.scale.get() == ScaleParameter.FIXEDRATIO)
       return;
 
     params.scale.set(100);
+
+    if (params.desktopSize.getMode() == DesktopSize.AUTO) {
+      Dimension availableSize = viewport.sp.getSize();
+      sendDesktopSize(availableSize.width, availableSize.height, true);
+      viewport.updateTitle();
+      return;
+    }
 
     savedState = -1;
     savedRect = new Rectangle(-1, -1, 0, 0);

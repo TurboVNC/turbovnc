@@ -125,7 +125,7 @@ public final class Viewport extends JFrame implements Runnable {
           }
         } else if (cc.params.desktopSize.getMode() == DesktopSize.AUTO &&
                    !cc.firstUpdate && !cc.pendingServerResize) {
-          Dimension availableSize = cc.viewport.getAvailableSize();
+          Dimension availableSize = cc.viewport.sp.getSize();
           if (availableSize.width >= 1 && availableSize.height >= 1 &&
               (availableSize.width != cc.desktop.scaledWidth ||
                availableSize.height != cc.desktop.scaledHeight)) {
@@ -142,7 +142,7 @@ public final class Viewport extends JFrame implements Runnable {
               timer.stop();
             ActionListener actionListener = new ActionListener() {
               public void actionPerformed(ActionEvent e) {
-                Dimension availableSize = cc.viewport.getAvailableSize();
+                Dimension availableSize = cc.viewport.sp.getSize();
                 if (availableSize.width < 1 || availableSize.height < 1)
                   throw new ErrorException("Unexpected zero-size component");
                 cc.sendDesktopSize(availableSize.width, availableSize.height,
@@ -193,13 +193,9 @@ public final class Viewport extends JFrame implements Runnable {
       public void componentMoved(ComponentEvent e) {
         if (cc.params.desktopSize.getMode() == DesktopSize.AUTO &&
             !cc.firstUpdate && !cc.pendingServerResize && cc.checkLayout) {
-          Dimension availableSize = cc.viewport.getAvailableSize();
-          int w = availableSize.width, h = availableSize.height;
-          ScreenSet layout = cc.computeScreenLayout(w, h);
+          Dimension availableSize = cc.viewport.sp.getSize();
           cc.checkLayout = false;
-
-          if (w >= 1 && h >= 1 && !layout.equals(cc.cp.screenLayout))
-            cc.sendDesktopSize(w, h, layout, true);
+          cc.sendDesktopSize(availableSize.width, availableSize.height, true);
         }
       }
     });
@@ -254,22 +250,6 @@ public final class Viewport extends JFrame implements Runnable {
       im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, ctrlAltShiftMask));
       im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_END, ctrlAltShiftMask));
     }
-  }
-
-  public Dimension getAvailableSize() {
-    Dimension availableSize = getSize();
-    if (!cc.params.fullScreen.get()) {
-      Insets vpInsets = VncViewer.insets;
-      availableSize.width -= vpInsets.left + vpInsets.right;
-      availableSize.height -= vpInsets.top + vpInsets.bottom;
-    }
-    if (tb.isVisible())
-      availableSize.height -= tb.getHeight();
-    if (availableSize.width < 0)
-      availableSize.width = 0;
-    if (availableSize.height < 0)
-      availableSize.height = 0;
-    return availableSize;
   }
 
   public Dimension getBorderSize() {

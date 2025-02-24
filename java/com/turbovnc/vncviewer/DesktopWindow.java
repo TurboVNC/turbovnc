@@ -425,7 +425,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         scaledWidth = cc.cp.width;
         scaledHeight = cc.cp.height;
       } else {
-        Dimension availableSize = cc.viewport.getAvailableSize();
+        Dimension availableSize = cc.viewport.sp.getSize();
         if (availableSize.width == 0 || availableSize.height == 0) {
           availableSize.width = cc.cp.width;
           availableSize.height = cc.cp.height;
@@ -744,8 +744,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         case KeyEvent.VK_9:
         case KeyEvent.VK_NUMPAD9:
         case KeyEvent.VK_ADD:
-          if (cc.params.desktopSize.getMode() != DesktopSize.AUTO &&
-              cc.params.scale.get() != ScaleParameter.AUTO &&
+          if (cc.params.scale.get() != ScaleParameter.AUTO &&
               cc.params.scale.get() != ScaleParameter.FIXEDRATIO) {
             cc.zoomIn();
             return;
@@ -754,8 +753,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         case KeyEvent.VK_8:
         case KeyEvent.VK_NUMPAD8:
         case KeyEvent.VK_SUBTRACT:
-          if (cc.params.desktopSize.getMode() != DesktopSize.AUTO &&
-              cc.params.scale.get() != ScaleParameter.AUTO &&
+          if (cc.params.scale.get() != ScaleParameter.AUTO &&
               cc.params.scale.get() != ScaleParameter.FIXEDRATIO) {
             cc.zoomOut();
             return;
@@ -763,8 +761,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
           break;
         case KeyEvent.VK_0:
         case KeyEvent.VK_NUMPAD0:
-          if (cc.params.desktopSize.getMode() != DesktopSize.AUTO &&
-              cc.params.scale.get() != ScaleParameter.AUTO &&
+          if (cc.params.scale.get() != ScaleParameter.AUTO &&
               cc.params.scale.get() != ScaleParameter.FIXEDRATIO) {
             cc.zoom100();
             return;
@@ -815,8 +812,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         case KeyEvent.VK_9:
         case KeyEvent.VK_8:
         case KeyEvent.VK_0:
-          if (cc.params.desktopSize.getMode() != DesktopSize.AUTO &&
-              cc.params.scale.get() != ScaleParameter.AUTO &&
+          if (cc.params.scale.get() != ScaleParameter.AUTO &&
               cc.params.scale.get() != ScaleParameter.FIXEDRATIO)
             return;
       }

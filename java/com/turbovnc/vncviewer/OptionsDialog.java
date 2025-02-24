@@ -69,6 +69,18 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   private Hashtable<Integer, String> subsamplingLabelTable;
   private String oldScalingFactor, oldDesktopSize;
   private boolean enableX509 = true;
+  private static final String[] SCALING_FACTORS = {
+    "Auto", "Fixed Aspect Ratio", "50%", "75%", "95%", "100%", "105%", "125%",
+    "150%", "175%", "200%", "250%", "300%", "350%", "400%"
+  };
+  private static final String[] SCALING_FACTORS_ADR = {
+    "50%", "75%", "95%", "100%", "105%", "125%", "150%", "175%", "200%",
+    "250%", "300%", "350%", "400%"
+  };
+  private static final DefaultComboBoxModel<String> CB_MODEL =
+    new DefaultComboBoxModel<String>(SCALING_FACTORS);
+  private static final DefaultComboBoxModel<String> CB_MODEL_ADR =
+    new DefaultComboBoxModel<String>(SCALING_FACTORS_ADR);
 
   OptionsDialog(OptionsDialogCallback callback_, Params params_) {
     super(true);
@@ -247,11 +259,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     displayPanel.setBorder(BorderFactory.createTitledBorder("Display"));
 
     JLabel scalingFactorLabel = new JLabel("Scaling factor:");
-    Object[] scalingFactors = {
-      "Auto", "Fixed Aspect Ratio", "50%", "75%", "95%", "100%", "105%",
-      "125%", "150%", "175%", "200%", "250%", "300%", "350%", "400%"
-    };
-    scalingFactor = new JComboBox(scalingFactors);
+    scalingFactor = new JComboBox(CB_MODEL);
     scalingFactor.setEditable(true);
     scalingFactor.addItemListener(this);
 
@@ -970,11 +978,15 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
         oldDesktopSize = newsize;
         if (!newsize.equals(newDesktopSize))
           desktopSize.setSelectedItem(newsize);
+        String sf = scalingFactor.getSelectedItem().toString();
         if (size.getMode() == DesktopSize.AUTO) {
-          scalingFactor.setEnabled(false);
-          scalingFactor.setSelectedItem("100%");
+          if (sf.equalsIgnoreCase("Fixed Aspect Ratio") ||
+              sf.equalsIgnoreCase("Auto"))
+            sf = "100%";
+          scalingFactor.setModel(CB_MODEL_ADR);
         } else
-          scalingFactor.setEnabled(true);
+          scalingFactor.setModel(CB_MODEL);
+        scalingFactor.setSelectedItem(sf);
       }
     }
     if (s instanceof JCheckBox && (JCheckBox)s == tunnel) {
@@ -1282,9 +1294,9 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
 
     desktopSize.setEnabled(enableDesktopSize);
     if (params.desktopSize.getMode() == DesktopSize.AUTO)
-      scalingFactor.setEnabled(false);
+      scalingFactor.setModel(CB_MODEL_ADR);
     else
-      scalingFactor.setEnabled(true);
+      scalingFactor.setModel(CB_MODEL);
     if (disableShared) shared.setEnabled(false);
     updateSecurityPanel();
     if (disableSecurity) {
