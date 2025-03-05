@@ -16,6 +16,9 @@ framebuffer updates from a VNC server.
 TurboVNC Viewer Options dialog did not take into account the values specified
 in **~/.vnc/default.turbovnc**.
 
+4. The TurboVNC Viewer now works around an issue with recent versions of GNOME
+that caused erratic automatic desktop resizing behavior.
+
 
 3.2 beta1
 =========
