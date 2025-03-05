@@ -134,6 +134,9 @@ IllegalComponentStateException if "Remote desktop size" was changed to "Auto"
 in the TurboVNC Viewer Options dialog while the viewer was actively receiving
 framebuffer updates from a VNC server.
 
+28. The TurboVNC Viewer now works around an issue with recent versions of GNOME
+that caused erratic automatic desktop resizing behavior.
+
 
 3.0.3
 =====

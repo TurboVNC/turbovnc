@@ -268,10 +268,10 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
       //    subsequent calls to getInsets().
       // Thus, we have to compute the insets globally using a dummy JFrame.
       // Dear Swing, eff ewe.
-      final JFrame frame = new JFrame();
-      // Under certain Linux WM's, the insets aren't valid until
-      // componentResized() is called (see above.)
       if (Utils.isX11()) {
+        // Under certain Linux WMs, the insets aren't valid until
+        // componentResized() is called (see above.)
+        final JFrame frame = new JFrame();
         frame.addComponentListener(new ComponentAdapter() {
           public void componentResized(ComponentEvent e) {
             synchronized (frame) {
@@ -290,12 +290,20 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
             frame.wait();
         }
         frame.setVisible(false);
-      } else {
+        frame.dispose();
+      }
+      // With newer versions of GNOME (and only with newer versions of GNOME),
+      // the method above returns insets with all values set to 0, but the
+      // cross-platform method below works.
+      if (!Utils.isX11() ||
+          (insets != null && insets.top == 0 && insets.left == 0 &&
+           insets.bottom == 0 && insets.right == 0)) {
+        JFrame frame = new JFrame();
         frame.setVisible(true);
         insets = frame.getInsets();
         frame.setVisible(false);
+        frame.dispose();
       }
-      frame.dispose();
     } catch (Exception e) {
       vlog.error("Could not set insets:");
       vlog.error("  " + e.toString());
