@@ -20,6 +20,9 @@ in **~/.vnc/default.turbovnc**.
 ignore the SSH username if it was specified in the "VNC server" field of the
 New TurboVNC Connection dialog.
 
+5. The TurboVNC Viewer now works around an issue with recent versions of GNOME
+that caused erratic automatic desktop resizing behavior.
+
 
 3.1.4
 =====
