@@ -23,6 +23,13 @@ New TurboVNC Connection dialog.
 5. The TurboVNC Viewer now works around an issue with recent versions of GNOME
 that caused erratic automatic desktop resizing behavior.
 
+6. The default X startup script (`xstartup.turbovnc`) now looks for
+**gnome-classic.desktop** in both **/usr/share/xsessions** and
+**/usr/share/wayland-sessions** if `-wm 2d` is passed to `vncserver` or `$wm`
+is set to `2d` in **turbovncserver.conf**.  This works around an issue whereby
+the GNOME Classic window manager could not be used with the TurboVNC Server on
+Fedora 40 and later.
+
 
 3.1.4
 =====
