@@ -135,6 +135,13 @@ case "$TVNC_WM" in
       NOXSESSION=1
       TVNC_WM=`echo $TVNC_WM | $SED -r 's/:noxsession$//g'`
     fi
+    # On Fedora 40 and later, gnome-classic.desktop lives in
+    # /usr/share/wayland-sessions.
+    if [ "$XSESSIONSDIR" = "/usr/share/xsessions" -a \
+      ! -f $XSESSIONSDIR/gnome-classic.desktop -a \
+      -f /usr/share/wayland-sessions/gnome-classic.desktop ]; then
+      export XSESSIONSDIR=/usr/share/wayland-sessions
+    fi
     # RHEL 7+, Fedora: gnome-classic
     # Ubuntu 12: ubuntu-2d
     # Ubuntu 14: gnome-fallback
