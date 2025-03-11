@@ -118,6 +118,11 @@ fi
 
 SIZE=`du -s $TMPDIR | cut -f1`
 cat pkgscripts/deb-control | sed s/{__SIZE}/$SIZE/g > $TMPDIR/DEBIAN/control
+cat > $TMPDIR/DEBIAN/conffiles << EOF
+$SYSCONFDIR/sysconfig/tvncservers
+$SYSCONFDIR/turbovncserver.conf
+$SYSCONFDIR/turbovncserver-security.conf
+EOF
 
 $SUDO chown -Rh root:root $TMPDIR/*
 dpkg -b $TMPDIR $PKGNAME\_$VERSION\_$DEBARCH.deb
