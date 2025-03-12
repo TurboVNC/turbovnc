@@ -143,6 +143,36 @@ authentication (using ssh-agent or Pageant.)
 
 	#. The SSH session can now be exited, if desired.
 
+** Choosing a Window Manager
+
+By default, a window manager is launched in a TurboVNC session after the
+session is started.  You can specify the window manager by passing
+{pcode: -wm __window-manager__} to ''vncserver'' or setting
+{pcode: $wm="__window-manager__";} in {file: turbovncserver.conf}, where
+__''window-manager''__ corresponds to a session desktop file located in the X
+sessions directory ({file: /usr/share/xsessions} or
+{file: /usr/local/share/xsessions}) without the {file: .desktop} extension.
+(For example, pass ''-wm xfce'' to ''vncserver'' or set ''$wm="xfce";'' in
+{file: turbovncserver.conf} to launch the window manager specified in
+{file: xfce.desktop}.)  If unspecified, the window manager defaults to
+''gnome'' or ''ubuntu'' if {file: gnome.desktop} or {file: ubuntu.desktop}
+exists in the X sessions directory.  Specifying ''2d'' as the window manager
+launches GNOME Classic or Flashback if {file:gnome-classic.desktop} or
+{file:gnome-flashback-metacity.desktop} exists in the X sessions directory.
+
+The TurboVNC Server can run compositing window managers, such as GNOME 3+ or
+KDE 5+, using its [[#SoftwareOpenGL][built-in software OpenGL implementation]].
+However, for performance reasons, it is recommended that GPU acceleration (with
+[[#VGLWM][VirtualGL]]) be used with compositing window managers.  A
+non-compositing window manager such as MATE or Xfce is recommended if GPU
+acceleration will not be used.
+
+Refer to
+[[https://www.turbovnc.org/Documentation/Compatibility30][this report]*] for an
+up-to-date list of window managers that have been tested with this version of
+the TurboVNC Server, how to configure the TurboVNC Server to use those window
+managers, and a list of known compatibility issues.
+
 ** Manually Connecting to a VNC Server
 
 *** Procedure
@@ -342,12 +372,11 @@ settings, the connection will have redundant encryption.
 {img:vncauth-redundant.png}
 
 ** Running OpenGL Applications
+{anchor: SoftwareOpenGL}
 
 The TurboVNC Server includes a software GLX/OpenGL implementation that can be
 used for casual 3D rendering.  This implementation uses the swrast DRI driver
-provided by Mesa 8.x and later, and it supports only direct rendering.  Thus,
-it can only be used on systems that do not have vendor-specific GPU drivers
-installed or on systems that provide a libglvnd-enabled build of Mesa.  In
+provided by Mesa 8.x and later, and it supports only direct rendering.  In
 general, if the TurboVNC host has a GPU, then you should use
 [[#VGL][VirtualGL]] rather than relying on TurboVNC's software OpenGL
 implementation.
@@ -358,24 +387,6 @@ implementation, thus restoring the behavior of TurboVNC 2.1.x and earlier
 built-in GLX/OpenGL implementation is not functioning properly, then pass
 ''-verbose'' to ''vncserver'' to log informational messages that may reveal the
 source of the problem.
-
-** Window Manager Compatibility
-
-This version of the TurboVNC Server can run 3D (compositing) window managers
-(such as Unity or GNOME 3+ or KDE 5+) using its built-in software OpenGL
-implementation, and it also provides an option (''-vgl'') that allows for
-running 3D window managers using VirtualGL.  However, for performance reasons,
-it is generally recommended that you use a 2D window manager with the TurboVNC
-Server (even with VirtualGL, 3D window managers have a lot of overhead.)  As of
-this writing, Ubuntu, RHEL 7+, and Fedora provide an optional 2D window manager
-called "GNOME Fallback", "GNOME Flashback", or "GNOME Classic", which will
-automatically be used if it is installed and the ''TVNC_WM'' environment
-variable is set to ''2d''.  For other systems that lack a 2D window manager, it
-is recommended that you install MATE or Xfce.  Refer to
-[[http://www.turbovnc.org/Documentation/Compatibility30][this report]] for an
-up-to-date list of window managers that have been tested with this version of
-the TurboVNC Server, how to configure the TurboVNC Server to use those window
-managers, and a list of known compatibility issues.
 
 ** Further Reading
 
