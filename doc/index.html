@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2025-02-17T17:03:04">
+<meta name="date" content="2025-03-12T17:30:55">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.1.5</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -90,28 +90,28 @@
                 Session</a>
             </li>
             <li class="Itemize-3 hd">
-                <a href="#hd006003" class="hd">6.3 Manually Connecting to a VNC 
+                <a href="#hd006003" class="hd">6.3 Choosing a Window Manager</a>
+            </li>
+            <li class="Itemize-3 hd">
+                <a href="#hd006004" class="hd">6.4 Manually Connecting to a VNC 
                 Server</a>
             </li>
             <li class="Itemize-3 hd">
-                <a href="#hd006004" class="hd">6.4 Disconnecting and Killing a TurboVNC 
+                <a href="#hd006005" class="hd">6.5 Disconnecting and Killing a TurboVNC 
                 Session</a>
             </li>
             <li class="Itemize-3 hd">
-                <a href="#hd006005" class="hd">6.5 Using TurboVNC in a Web Browser</a>
+                <a href="#hd006006" class="hd">6.6 Using TurboVNC in a Web Browser</a>
             </li>
             <li class="Itemize-3 hd">
-                <a href="#hd006006" class="hd">6.6 Using SSH to Manually Secure a 
+                <a href="#hd006007" class="hd">6.7 Using SSH to Manually Secure a 
                 TurboVNC Connection</a>
             </li>
             <li class="Itemize-3 hd">
-                <a href="#hd006007" class="hd">6.7 Requiring SSH Tunneling</a>
+                <a href="#hd006008" class="hd">6.8 Requiring SSH Tunneling</a>
             </li>
             <li class="Itemize-3 hd">
-                <a href="#hd006008" class="hd">6.8 Running OpenGL Applications</a>
-            </li>
-            <li class="Itemize-3 hd">
-                <a href="#hd006009" class="hd">6.9 Window Manager Compatibility</a>
+                <a href="#hd006009" class="hd">6.9 Running OpenGL Applications</a>
             </li>
             <li class="Itemize-3 hd">
                 <a href="#hd0060010" class="hd">6.10 Further Reading</a>
@@ -172,6 +172,12 @@
         <ul class="hd">
             <li class="Itemize-3 hd">
                 <a href="#hd009001" class="hd">9.1 Using VirtualGL on a TurboVNC Host</a>
+                <ul class="hd">
+                    <li class="Itemize-5 hd">
+                        <a href="#hd009001002" class="hd">9.1.2 Running the Window Manager Using 
+                        VirtualGL</a>
+                    </li>
+                </ul>
             </li>
             <li class="Itemize-3 hd">
                 <a href="#hd009002" class="hd">9.2 Using VirtualGL on a Machine Other 
@@ -861,10 +867,53 @@ c:\Program&nbsp;Files\TurboVNC\vncviewer.bat
 
 
 
-<h2 id="hd006003">6.3&nbsp;Manually Connecting to a VNC Server</h2>
+<h2 id="hd006003">6.3&nbsp;Choosing a Window Manager</h2>
+
+<p>By default, a window manager is launched in a TurboVNC session after the 
+session is started.  You can specify the window manager by passing 
+<code>-wm <em>window-manager</em></code> to <code>vncserver</code> or 
+setting <code>$wm=&ldquo;<em>window-manager</em>&rdquo;;</code> in 
+<strong class="filename">turbovncserver.conf</strong>, where 
+<em><code>window-manager</code></em> corresponds to a session desktop 
+file located in the X sessions directory 
+(<strong class="filename">/usr/share/xsessions</strong> or 
+<strong class="filename">/usr/local/share/xsessions</strong>) without 
+the <strong class="filename">.desktop</strong> extension. (For example, 
+pass <code>-wm&nbsp;xfce</code> to <code>vncserver</code> or set 
+<code>$wm=&quot;xfce&quot;;</code> in 
+<strong class="filename">turbovncserver.conf</strong> to launch the 
+window manager specified in 
+<strong class="filename">xfce.desktop</strong>.)  If unspecified, the 
+window manager defaults to <code>gnome</code> or <code>ubuntu</code> if 
+<strong class="filename">gnome.desktop</strong> or 
+<strong class="filename">ubuntu.desktop</strong> exists in the X 
+sessions directory.  Specifying <code>2d</code> as the window manager 
+launches GNOME Classic or Flashback if 
+<strong class="filename">gnome-classic.desktop</strong> or 
+<strong class="filename">gnome-flashback-metacity.desktop</strong> 
+exists in the X sessions directory.</p>
+
+<p>The TurboVNC Server can run compositing window managers, such as GNOME 
+3+ or KDE 5+, using its <a href="#SoftwareOpenGL">built-in software 
+OpenGL implementation</a><a name="idx0027"></a>. However, for 
+performance reasons, it is recommended that GPU acceleration (with 
+<a href="#VGLWM">VirtualGL</a><a name="idx0028"></a>) be used with 
+compositing window managers.  A non-compositing window manager such as 
+MATE or Xfce is recommended if GPU acceleration will not be used.</p>
+
+<p>Refer to 
+<span class="remote"><a href="https://www.turbovnc.org/Documentation/Compatibility30" target="_blank" class="remote">this 
+report</a></span><a name="idx0029"></a> for an up-to-date list of window 
+managers that have been tested with this version of the TurboVNC Server, 
+how to configure the TurboVNC Server to use those window managers, and a 
+list of known compatibility issues.</p>
 
 
-<h3 id="hd006003001">Procedure</h3>
+
+<h2 id="hd006004">6.4&nbsp;Manually Connecting to a VNC Server</h2>
+
+
+<h3 id="hd006004001">Procedure</h3>
 
 <ol class="Ordered numeric">
     <li class="Ordered-1 Ordered">
@@ -929,14 +978,14 @@ c:\Program&nbsp;Files\TurboVNC\vncviewer.bat
         client machine.  This window contains a virtual desktop with which you 
         can interact to launch graphical applications on the VNC host.
         <div class="important"><p class="important">
-        If you are connecting to a non-VeNCrypt-compatible VNC server, then the authentication dialog will warn you that the connection is not encrypted: <br /><br /> <img src="vncauth-insecure.png" alt="vncauth-insecure" class="inline" id="imgid_6" name="imgid_6"/> <br /><br /> You should never use Unix Login authentication with an unencrypted connection.  Instead, tunnel the connection through SSH.  (See Section <a href="#Secure_TurboVNC_Usage" class="ref">6.6</a> below for more details.)
+        If you are connecting to a non-VeNCrypt-compatible VNC server, then the authentication dialog will warn you that the connection is not encrypted: <br /><br /> <img src="vncauth-insecure.png" alt="vncauth-insecure" class="inline" id="imgid_6" name="imgid_6"/> <br /><br /> You should never use Unix Login authentication with an unencrypted connection.  Instead, tunnel the connection through SSH.  (See Section <a href="#Secure_TurboVNC_Usage" class="ref">6.7</a> below for more details.)
         </p></div>
     </li>
 </ol>
 
 
 
-<h2 id="hd006004">6.4&nbsp;Disconnecting and Killing a TurboVNC Session</h2>
+<h2 id="hd006005">6.5&nbsp;Disconnecting and Killing a TurboVNC Session</h2>
 
 <p>Closing the TurboVNC Viewer disconnects from the TurboVNC session, but 
 the TurboVNC session will remain running on the TurboVNC host (as will 
@@ -947,7 +996,7 @@ can reconnect to the session at any time.</p>
 easiest way to kill it is to log out of the window manager running in 
 the session.  You can also use the 
 <a href="#TurboVNC_Session_Manager">TurboVNC Session 
-Manager</a><a name="idx0027"></a> to remotely kill TurboVNC sessions, or 
+Manager</a><a name="idx0030"></a> to remotely kill TurboVNC sessions, or 
 you can type the following command:</p>
 
 <pre class="verbatim">/opt/TurboVNC/bin/vncserver -kill :<em>n</em></pre>
@@ -968,13 +1017,13 @@ host.</p>
 
 
 
-<h2 id="hd006005">6.5&nbsp;Using TurboVNC in a Web Browser</h2>
+<h2 id="hd006006">6.6&nbsp;Using TurboVNC in a Web Browser</h2>
 
 <p><a name="noVNC"></a></p>
 
 <p>When a TurboVNC session is started, the <code>vncserver</code> script 
 can optionally start a simple web server that serves up 
-<span class="remote"><a href="https://novnc.com" target="_blank" class="remote">noVNC</a></span><a name="idx0028"></a>, 
+<span class="remote"><a href="https://novnc.com" target="_blank" class="remote">noVNC</a></span><a name="idx0031"></a>, 
 an HTML 5/JavaScript VNC viewer that works in any web browser (with 
 reduced performance and features relative to the TurboVNC Viewer.)  This 
 allows you to easily connect to a TurboVNC session from a machine that 
@@ -1011,12 +1060,12 @@ NOTE: noVNC only supports VNC Password authentication, so it is strongly recomme
 
 
 
-<h2 id="hd006006">6.6&nbsp;Using SSH to Manually Secure a TurboVNC Connection</h2>
+<h2 id="hd006007">6.7&nbsp;Using SSH to Manually Secure a TurboVNC Connection</h2>
 
 <p><a name="Secure_TurboVNC_Usage"></a></p>
 
 <p>If the <a href="#TurboVNC_Session_Manager">TurboVNC Session 
-Manager</a><a name="idx0029"></a> is not being used, then the connection 
+Manager</a><a name="idx0032"></a> is not being used, then the connection 
 between the TurboVNC Server and the TurboVNC Viewer will, by default, 
 use Anonymous TLS encryption.  (Refer to Chapter 
 <a href="#Security_Extensions" class="ref">8</a>.)  However, it may be 
@@ -1055,7 +1104,7 @@ server, which is why we used <code>localhost</code> in the above example.</p>
 
 
 
-<h2 id="hd006007">6.7&nbsp;Requiring SSH Tunneling</h2>
+<h2 id="hd006008">6.8&nbsp;Requiring SSH Tunneling</h2>
 
 <p>Passing an argument of <code>-localhost</code> to <code>vncserver</code> 
 will force the TurboVNC session to accept inbound connections only from 
@@ -1083,21 +1132,20 @@ redundant encryption.</p>
 
 <p>Note that only the OTP security type is needed when using the 
 <a href="#TurboVNC_Session_Manager">TurboVNC Session 
-Manager</a><a name="idx0030"></a> with its default settings.</p>
+Manager</a><a name="idx0033"></a> with its default settings.</p>
 
 
 
-<h2 id="hd006008">6.8&nbsp;Running OpenGL Applications</h2>
+<h2 id="hd006009">6.9&nbsp;Running OpenGL Applications</h2>
+
+<p><a name="SoftwareOpenGL"></a></p>
 
 <p>The TurboVNC Server includes a software GLX/OpenGL implementation that 
 can be used for casual 3D rendering.  This implementation uses the 
 swrast DRI driver provided by Mesa 8.x and later, and it supports only 
-direct rendering.  Thus, it can only be used on systems that do not have 
-vendor-specific GPU drivers installed or on systems that provide a 
-libglvnd-enabled build of Mesa.  In general, if the TurboVNC host has a 
-GPU, then you should use 
-<a href="#VGL">VirtualGL</a><a name="idx0031"></a> rather than relying 
-on TurboVNC&rsquo;s software OpenGL implementation.</p>
+direct rendering.  In general, if the TurboVNC host has a GPU, then you 
+should use <a href="#VGL">VirtualGL</a><a name="idx0034"></a> rather 
+than relying on TurboVNC&rsquo;s software OpenGL implementation.</p>
 
 <p>Passing <code>-extension&nbsp;GLX</code> to <code>vncserver</code> 
 disables the built-in GLX/OpenGL implementation, thus restoring the 
@@ -1106,35 +1154,6 @@ order to run OpenGL applications.)  If the built-in GLX/OpenGL
 implementation is not functioning properly, then pass 
 <code>-verbose</code> to <code>vncserver</code> to log informational 
 messages that may reveal the source of the problem.</p>
-
-
-
-<h2 id="hd006009">6.9&nbsp;Window Manager Compatibility</h2>
-
-<p>This version of the TurboVNC Server can run 3D (compositing) window 
-managers, such as Unity or GNOME 3+ or KDE 5+, using its built-in 
-software OpenGL implementation.  It also provides a command-line option 
-(<code>-vgl</code>) and a 
-<strong class="filename">turbovncserver.conf</strong> variable 
-(<code>$useVGL</code>) that allow for running 3D window managers using 
-VirtualGL.  However, for performance reasons, it is generally 
-recommended that you use a 2D (non-compositing) window manager with the 
-TurboVNC Server.  (Even with VirtualGL, 3D window managers have a lot of 
-overhead.)  As of this writing, Ubuntu, RHEL 7+, and Fedora provide an 
-optional 2D window manager called &ldquo;GNOME Fallback&rdquo;, 
-&ldquo;GNOME Flashback&rdquo;, or &ldquo;GNOME Classic&rdquo;, which 
-will be used if it is installed and the TurboVNC window manager is set 
-to <code>2d</code> (by passing <code>-wm&nbsp;2d</code> to 
-<code>vncserver</code> or setting 
-<code>$wm&nbsp;=&nbsp;&quot;2d&quot;;</code> in 
-<strong class="filename">turbovncserver.conf</strong>.)  For other 
-systems that lack a 2D window manager, it is recommended that you 
-install MATE or Xfce.  Refer to 
-<span class="remote"><a href="https://www.turbovnc.org/Documentation/Compatibility30" target="_blank" class="remote">this 
-report</a></span><a name="idx0032"></a> for an up-to-date list of window 
-managers that have been tested with this version of the TurboVNC Server, 
-how to configure the TurboVNC Server to use those window managers, and a 
-list of known compatibility issues.</p>
 
 
 
@@ -1239,7 +1258,7 @@ TurboVNC compresses images:</p>
         </li>
         <li class="Ordered-0">
             whether or not <a href="#InterframeComparison">interframe 
-            comparison</a><a name="idx0033"></a> should be used
+            comparison</a><a name="idx0035"></a> should be used
         </li></ol> See Section 
         <a href="#AdvancedCompression" class="ref">7.2</a> below for more 
         details.
@@ -1291,7 +1310,7 @@ options described above:</p>
     <td class="standard">30</td>
     <td class="standard">4x</td>
     <td class="standard">7</td>
-    <td class="standard">For subrectangles that have a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the <a href="#LR">Lossless Refresh feature</a><a name="idx0034"></a>.  In addition to reducing the JPEG quality to a &ldquo;minimum usable&rdquo; level, this encoding method also enables interframe comparison and Compression Level 2.  (CL 7 = CL 2 + interframe comparison.)  Compression Level 2 can reduce network usage for low-color application workloads that are not good candidates for JPEG compression.</td>
+    <td class="standard">For subrectangles that have a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the <a href="#LR">Lossless Refresh feature</a><a name="idx0036"></a>.  In addition to reducing the JPEG quality to a &ldquo;minimum usable&rdquo; level, this encoding method also enables interframe comparison and Compression Level 2.  (CL 7 = CL 2 + interframe comparison.)  Compression Level 2 can reduce network usage for low-color application workloads that are not good candidates for JPEG compression.</td>
   </tr>
   <tr class="standard">
     <td class="standard">&ldquo;Lossless Tight&rdquo;</td>
@@ -1589,7 +1608,7 @@ regions to just the subset of regions that were drawn using
 <code>X[Shm]PutImage()</code> and CopyRect.</p>
 
 <div class="important"><p class="important">
-NOTE: Ill-behaved applications that continuously render the same image will cause a variation of the &ldquo;blinking cursor dilemma&rdquo; and thus defeat ALR unless <a href="#InterframeComparison">interframe comparison</a><a name="idx0035"></a> is enabled.
+NOTE: Ill-behaved applications that continuously render the same image will cause a variation of the &ldquo;blinking cursor dilemma&rdquo; and thus defeat ALR unless <a href="#InterframeComparison">interframe comparison</a><a name="idx0037"></a> is enabled.
 </p></div>
 
 <p>You can override the default ALR behavior, thus making all screen 
@@ -1701,7 +1720,7 @@ uses the following terminology when referring to its security extensions:</p>
          from a job scheduler. OTP authentication is also useful for allowing 
          temporary access to a TurboVNC session for collaboration purposes.  The 
          <a href="#TurboVNC_Session_Manager">TurboVNC Session 
-         Manager</a><a name="idx0036"></a> uses OTP authentication by default, 
+         Manager</a><a name="idx0038"></a> uses OTP authentication by default, 
          which allows it to securely authenticate with a TurboVNC session 
          without prompting for additional credentials.
     </dd>
@@ -1719,7 +1738,7 @@ uses the following terminology when referring to its security extensions:</p>
          be used only with session encryption or if the session is restricted to 
          allow only loopback (SSH) connections and to disallow reverse 
          connections (see Section 
-         <a href="#Secure_TurboVNC_Usage" class="ref">6.6</a>.)
+         <a href="#Secure_TurboVNC_Usage" class="ref">6.7</a>.)
     </dd>
 </dl>
 
@@ -1746,7 +1765,7 @@ uses the following terminology when referring to its security extensions:</p>
          text. Thus, it is <em>strongly</em> recommended that this 
          authentication scheme be used only with VNC connections that are 
          encrypted using TLS (see below) or SSH (see Section 
-         <a href="#Secure_TurboVNC_Usage" class="ref">6.6</a>.)  Per the RFB 
+         <a href="#Secure_TurboVNC_Usage" class="ref">6.7</a>.)  Per the RFB 
          spec, this authentication scheme is referred to as &ldquo;Unix 
          Login&rdquo; when used with a TightVNC-compatible server and 
          &ldquo;Plain&rdquo; when used with a VeNCrypt-compatible server.
@@ -1909,7 +1928,7 @@ more of the security types or change their preferred order by editing
 the TurboVNC security configuration file.  See the <code>Xvnc</code> man 
 page for more details.  Note that only the OTP security type is needed 
 when using the <a href="#TurboVNC_Session_Manager">TurboVNC Session 
-Manager</a><a name="idx0037"></a> with its default settings.</p>
+Manager</a><a name="idx0039"></a> with its default settings.</p>
 
 <p>If the VNC server allows multiple security types, then the TurboVNC 
 Viewer&rsquo;s default security type will be determined by the 
@@ -2030,7 +2049,7 @@ VirtualGL&rsquo;s built-in VGL Transport.</p>
     <li class="Itemize-1 Itemize asterisk">
         Any machine with a web browser, and any mobile device, can be used as a 
         TurboVNC client (with reduced performance and features relative to the 
-        TurboVNC Viewer.)  Refer to Section <a href="#noVNC" class="ref">6.5</a>.
+        TurboVNC Viewer.)  Refer to Section <a href="#noVNC" class="ref">6.6</a>.
     </li>
 </ul>
 
@@ -2089,6 +2108,29 @@ this configuration.</p>
         <pre class="verbatim">/opt/VirtualGL/bin/vglrun <em>[vglrun options]</em> <em>3D-application-executable-or-script</em> <em>[arguments]</em></pre>
     </li>
 </ol>
+
+
+
+<h3 id="hd009001002">9.1.2&nbsp;Running the Window Manager Using VirtualGL</h3>
+
+<p><a name="VGLWM"></a></p>
+
+<p>If the TurboVNC host is also a VirtualGL server, then you can pass 
+<code>-vgl</code> to <code>vncserver</code> or set the 
+<code>$useVGL</code> variable in 
+<strong class="filename">turbovncserver.conf</strong> to enable 
+VirtualGL for all OpenGL applications launched in the TurboVNC session, 
+including the window manager.  This improves the performance of 
+compositing window managers and enables GPU acceleration for OpenGL 
+applications without the need to invoke <code>vglrun</code>.</p>
+
+<div class="important"><p class="important">
+To change VirtualGL&rsquo;s configuration for a specific 3D application, start the application with <code>vglrun</code>, per above, or set one of the <code>VGL_*</code> configuration environment variables prior to starting the application. (Refer to the VirtualGL User&rsquo;s Guide.)
+</p></div>
+
+<div class="important"><p class="important">
+To disable VirtualGL for a specific 3D application, unset the <code>LD_PRELOAD</code> environment variable prior to starting the application.
+</p></div>
 
 
 
@@ -2204,7 +2246,7 @@ flavors.  You can use the TurboVNC Viewer to connect to a non-TurboVNC
 server (or vice versa), although this will generally result in some 
 decrease in performance, and features such as the 
 <a href="#TurboVNC_Session_Manager">TurboVNC Session 
-Manager</a><a name="idx0038"></a> will not be available.</p>
+Manager</a><a name="idx0040"></a> will not be available.</p>
 
 <p>The following sections list additional things to bear in mind when 
 mixing TurboVNC with other VNC flavors.</p>
@@ -2924,7 +2966,7 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.sessmgr=0&nbsp;/opt/TurboVNC/bin/vncviewer
         The TurboVNC Session Manager will pass these command-line arguments to 
         the <code>vncserver</code> script when starting a new TurboVNC session 
         on the TurboVNC host.  This can be used, for instance, to enable 
-        <a href="#ALR">automatic lossless refresh</a><a name="idx0039"></a>.
+        <a href="#ALR">automatic lossless refresh</a><a name="idx0041"></a>.
     </dd>
 </dl>
 
