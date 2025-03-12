@@ -103,6 +103,24 @@ configuration.
 		/opt/VirtualGL/bin/vglrun __[vglrun options]__ __3D-application-executable-or-script__ __[arguments]__
 		---
 
+*** Running the Window Manager Using VirtualGL
+{anchor: VGLWM}
+
+If the TurboVNC host is also a VirtualGL server, then you can pass ''-vgl'' to
+''vncserver'' or set the ''$useVGL'' variable in {file: turbovncserver.conf} to
+enable VirtualGL for all OpenGL applications launched in the TurboVNC session,
+including the window manager.  This improves the performance of compositing
+window managers and enables GPU acceleration for OpenGL applications without
+the need to invoke ''vglrun''.
+
+	!!! To change VirtualGL's configuration for a specific 3D application, start
+	the application with ''vglrun'', per above, or set one of the ''VGL_*''
+	configuration environment variables prior to starting the application.
+	(Refer to the VirtualGL User's Guide.)
+
+	!!! To disable VirtualGL for a specific 3D application, unset the
+	''LD_PRELOAD'' environment variable prior to starting the application.
+
 ** Using VirtualGL on a Machine Other Than a TurboVNC Host
 
 #IMG: vgltransportservernetwork.png

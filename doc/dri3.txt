@@ -1,0 +1,46 @@
+* GPU-Accelerated OpenGL and Vulkan (Using the DRI3 X11 Extension)
+{anchor: DRI3}
+
+The TurboVNC Server supports built-in GPU acceleration when using open source
+(Mesa-based) GPU drivers.  This is implemented through the ''DRI3'' X11
+extension, which can be enabled by passing
+{pcode: -drinode __DRM-render-node__} to ''vncserver'' or adding the same
+command-line arguments to the value of the ''$serverArgs'' variable in
+{file: turbovncserver.conf} (or to the value of the TurboVNC Viewer's
+''ServerArgs'' parameter, if using the TurboVNC Session Manager.)
+__''DRM-render-node''__ is the DRM render node corresponding to a GPU on the
+TurboVNC host (for example, ''/dev/dri/renderD128''.)  Specifying a DRM render
+node of ''auto'' is the equivalent of specifying the first DRM render node
+under {file: /dev/dri}.
+
+*** Advantages of DRI3 (when compared to [[#VGL][VirtualGL]])
+#OPT: noList! plain!
+
+	* No additional software or setup required
+
+	* Supports GPU acceleration with Vulkan applications
+
+*** Disadvantages of DRI3 (when compared to [[#VGL][VirtualGL]])
+#OPT: noList! plain!
+
+	* Requires open source (Mesa-based) GPU drivers (does not work with nVidia's
+		proprietary Un*x drivers)
+
+	* Generally has worse performance and more CPU overhead with OpenGL
+		applications
+
+DRI3 is particularly useful with virtualization environments, such as VMware
+and Parallels Desktop, that redirect 3D rendering from the guest to the host.
+(The performance advantages of VirtualGL are less pronounced in such
+environments.)
+
+VirtualGL's performance is generally affected very little or not at all by the
+presence of the ''DRI3'' X11 extension, so using DRI3 for Vulkan applications
+and VirtualGL for OpenGL applications is a viable approach.
+
+	!!! By default, Mesa-based GPU drivers synchronize 3D rendering to the
+	vertical refresh rate (always 60 Hz in TurboVNC.)  Set the ''vblank_mode''
+	environment variable to ''1'' to disable vertical refresh rate
+	synchronization by default while allowing applications to override the
+	default.  Set the ''vblank_mode'' environment variable to ''0'' to
+	force-disable vertical refresh rate synchronization.

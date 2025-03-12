@@ -48,6 +48,9 @@
 #INCLUDE: vglusage.txt
 {nl}
 ----8<--------------
+#INCLUDE: dri3.txt
+{nl}
+----8<--------------
 #INCLUDE: compatibility.txt
 {nl}
 ----8<--------------
