@@ -26,6 +26,13 @@ is set to `2d` in **turbovncserver.conf**.  This works around an issue whereby
 the GNOME Classic window manager could not be used with the TurboVNC Server on
 Fedora 40 and later.
 
+6. The default X startup script (`xstartup.turbovnc`) now attempts to launch
+MATE or Xfce (in that order) if no window manager is specified and a GNOME
+session desktop file cannot be found.  This fixes a regression introduced by
+3.2 beta1[4] whereby the default X startup script no longer launched the
+default window manager on Ubuntu MATE or Xubuntu if no window manager was
+specified.
+
 
 3.2 beta1
 =========

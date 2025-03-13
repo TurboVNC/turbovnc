@@ -92,6 +92,7 @@ find_session()
   for SESSION in $SESSIONS; do
     if [ "$XSESSIONSDIR" != "" -a -f $XSESSIONSDIR/$SESSION.desktop ]; then
       DESKTOP_SESSION=$SESSION;  export DESKTOP_SESSION
+      break
     fi
   done
   if [ "$DESKTOP_SESSION" = "" ]; then
@@ -160,8 +161,9 @@ case "$TVNC_WM" in
         ;;
     esac
     if [ "$TVNC_WM" = "" ]; then
-      # No window manager was specified.  Use GNOME or Unity if it exists.
-      SESSIONS="gnome ubuntu"
+      # No window manager was specified.  Use GNOME, Unity, MATE, or Xfce (in
+      # that order) if a corresponding session desktop file exists.
+      SESSIONS="gnome ubuntu mate xfce"
       find_session
     else
       # For backward compatibility with TurboVNC 2.2.x, we allow a window

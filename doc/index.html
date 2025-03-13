@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2025-03-12T17:17:08">
+<meta name="date" content="2025-03-13T09:54:08">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -887,13 +887,30 @@ pass <code>-wm&nbsp;xfce</code> to <code>vncserver</code> or set
 <strong class="filename">turbovncserver.conf</strong> to launch the 
 window manager specified in 
 <strong class="filename">xfce.desktop</strong>.)  If unspecified, the 
-window manager defaults to <code>gnome</code> or <code>ubuntu</code> if 
-<strong class="filename">gnome.desktop</strong> or 
-<strong class="filename">ubuntu.desktop</strong> exists in the X 
-sessions directory.  Specifying <code>2d</code> as the window manager 
-launches GNOME Classic or Flashback if 
-<strong class="filename">gnome-classic.desktop</strong> or 
-<strong class="filename">gnome-flashback-metacity.desktop</strong> 
+window manager defaults to</p>
+
+<ul class="Itemize">
+    <li class="Itemize-1 Itemize asterisk">
+        <code>gnome</code> if <strong class="filename">gnome.desktop</strong> 
+        exists in the X sessions directory, or
+    </li>
+    <li class="Itemize-1 Itemize asterisk">
+        <code>ubuntu</code> if <strong class="filename">ubuntu.desktop</strong> 
+        exists in the X sessions directory, or
+    </li>
+    <li class="Itemize-1 Itemize asterisk">
+        <code>mate</code> if <strong class="filename">mate.desktop</strong> 
+        exists in the X sessions directory, or
+    </li>
+    <li class="Itemize-1 Itemize asterisk">
+        <code>xfce</code> if <strong class="filename">xfce.desktop</strong> 
+        exists in the X sessions directory.
+    </li>
+</ul>
+
+<p>Specifying <code>2d</code> as the window manager launches GNOME Classic 
+or Flashback if <strong class="filename">gnome-classic.desktop</strong> 
+or <strong class="filename">gnome-flashback-metacity.desktop</strong> 
 exists in the X sessions directory.</p>
 
 <p>The TurboVNC Server can run compositing window managers, such as GNOME 

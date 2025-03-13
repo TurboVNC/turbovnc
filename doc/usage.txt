@@ -152,10 +152,15 @@ sessions directory ({file: /usr/share/xsessions} or
 (For example, pass ''-wm xfce'' to ''vncserver'' or set ''$wm="xfce";'' in
 {file: turbovncserver.conf} to launch the window manager specified in
 {file: xfce.desktop}.)  If unspecified, the window manager defaults to
-''gnome'' or ''ubuntu'' if {file: gnome.desktop} or {file: ubuntu.desktop}
-exists in the X sessions directory.  Specifying ''2d'' as the window manager
-launches GNOME Classic or Flashback if {file:gnome-classic.desktop} or
-{file:gnome-flashback-metacity.desktop} exists in the X sessions directory.
+
+	* ''gnome'' if {file: gnome.desktop} exists in the X sessions directory, or
+	* ''ubuntu'' if {file: ubuntu.desktop} exists in the X sessions directory, or
+	* ''mate'' if {file: mate.desktop} exists in the X sessions directory, or
+	* ''xfce'' if {file: xfce.desktop} exists in the X sessions directory.
+
+Specifying ''2d'' as the window manager launches GNOME Classic or Flashback if
+{file:gnome-classic.desktop} or {file:gnome-flashback-metacity.desktop} exists
+in the X sessions directory.
 
 The TurboVNC Server can run compositing window managers, such as GNOME 3+ or
 KDE 5+, using its [[#SoftwareOpenGL][built-in software OpenGL implementation]].
