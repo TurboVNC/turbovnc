@@ -137,12 +137,11 @@ framebuffer updates from a VNC server.
 28. The TurboVNC Viewer now works around an issue with recent versions of GNOME
 that caused erratic automatic desktop resizing behavior.
 
-29. The default X startup script (`xstartup.turbovnc`) now looks for
-**gnome-classic.desktop** in both **/usr/share/xsessions** and
-**/usr/share/wayland-sessions** if `-wm 2d` is passed to `vncserver` or `$wm`
-is set to `2d` in **turbovncserver.conf**.  This works around an issue whereby
-the GNOME Classic window manager could not be used with the TurboVNC Server on
-Fedora 40 and later.
+29. The default X startup script (`xstartup.turbovnc`) now looks in both
+**/usr/share/xsessions** and **/usr/share/wayland-sessions** for a session
+desktop file corresponding to the specified window manager.  This works around
+an issue whereby the GNOME Classic window manager could not be used with the
+TurboVNC Server on Fedora 40 and later.
 
 
 3.0.3
