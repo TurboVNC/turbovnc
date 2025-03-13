@@ -97,6 +97,19 @@ find_session()
       DESKTOP_SESSION=$SESSION;  export DESKTOP_SESSION
     fi
   done
+  # On Fedora 40 and later, gnome-classic.desktop lives in
+  # /usr/share/wayland-sessions.  More generally, there is nothing
+  # Wayland-specific about the session desktop files in
+  # /usr/share/wayland-sessions, so we can safely use them as well.
+  if [ "$DESKTOP_SESSION" = "" -a \
+       "$XSESSIONSDIR" = "/usr/share/xsessions" ]; then
+    for SESSION in $SESSIONS; do
+      if [ -f /usr/share/wayland-sessions/$SESSION.desktop ]; then
+        DESKTOP_SESSION=$SESSION;  export DESKTOP_SESSION
+        XSESSIONSDIR=/usr/share/wayland-sessions
+      fi
+    done
+  fi
   if [ "$DESKTOP_SESSION" = "" ]; then
     if [ "$TVNC_WM" = "" ]; then
       echo "xstartup.turbovnc: The session desktop file for the default window manager was"
@@ -145,13 +158,6 @@ case "$TVNC_WM" in
     if [ "$TVNC_WM" = "2d:noxsession" ]; then
       NOXSESSION=1
       TVNC_WM=`echo $TVNC_WM | $SED -r 's/:noxsession$//g'`
-    fi
-    # On Fedora 40 and later, gnome-classic.desktop lives in
-    # /usr/share/wayland-sessions.
-    if [ "$XSESSIONSDIR" = "/usr/share/xsessions" -a \
-      ! -f $XSESSIONSDIR/gnome-classic.desktop -a \
-      -f /usr/share/wayland-sessions/gnome-classic.desktop ]; then
-      export XSESSIONSDIR=/usr/share/wayland-sessions
     fi
     # RHEL 7+, Fedora: gnome-classic
     # Ubuntu 12: ubuntu-2d
