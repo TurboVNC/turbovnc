@@ -170,7 +170,7 @@ managers.  A non-compositing window manager such as MATE or Xfce is recommended
 if GPU acceleration will not be used.
 
 Refer to
-[[https://www.turbovnc.org/Documentation/Compatibility30][this report]*] for an
+[[https://www.turbovnc.org/Documentation/Compatibility32][this report]*] for an
 up-to-date list of window managers that have been tested with this version of
 the TurboVNC Server, how to configure the TurboVNC Server to use those window
 managers, and a list of known compatibility issues.
