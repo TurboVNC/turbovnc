@@ -46,17 +46,24 @@ if [ "$MACOS_APP_CERT_NAME" != "" ]; then
 		# codesign assumes that directories with dots are frameworks, so we have to
 		# rename those directories in the JRE.  Fortunately, all they contain is
 		# license documents.
-		pushd "$APP/Contents/Plugins/jre/Contents/Home/legal/"
+		pushd "$APP/Contents/PlugIns/jre/Contents/Home/legal/"
 		for dir in *; do
 			mv "$dir" "`echo $dir | sed 's/\./_/g'`"
 		done
-		# We also need to temporarily make the license documents writeable.
+		# We also need to temporarily make the license documents writeable ...
 		find . -perm 444 -print | while read file; do
 			chmod 644 "$file"
 		done
+		# ... and retarget the symlinks.
+		find . -type l -print | while read link; do
+			ln -fs "`readlink $link | sed 's/java\./java_/g'`" $link
+		done
 		popd
 	fi
-	codesign --deep -s "$MACOS_APP_CERT_NAME" --timestamp "$APP"
+	codesign -s "$MACOS_APP_CERT_NAME" --timestamp \
+		"$APP/Contents/Resources/Native/"*
+	codesign --deep -f -s "$MACOS_APP_CERT_NAME" --options=runtime \
+		--entitlements $SRCDIR/release/entitlements.plist --timestamp "$APP"
 	if [ "$INCLUDEJRE" = "1" ]; then
 		# Re-apply read-only permissions to the license documents
 		pushd "$APP/Contents/Plugins/jre/Contents/Home/legal/"
@@ -65,7 +72,7 @@ if [ "$MACOS_APP_CERT_NAME" != "" ]; then
 		done
 		popd
 	fi
-	codesign --deep -vv "$APP"
+	codesign --verify --deep --strict -v "$APP"
 fi
 
 exit
