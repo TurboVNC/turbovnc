@@ -97,18 +97,20 @@ ln -fs /Library/Documentation/$PKGNAME/index.html "$PKGROOT/Applications/$PROJEC
 install -m 644 @CMAKE_BINARY_DIR@/pkgscripts/uninstall.applescript $TMPDIR
 osacompile -t APPL -o "$TMPDIR/Uninstall $PROJECT.app" $TMPDIR/uninstall.applescript
 if [ "$MACOS_APP_CERT_NAME" != "" ]; then
-	codesign -f -s "$MACOS_APP_CERT_NAME" --timestamp "$TMPDIR/Uninstall $PROJECT.app"
-	codesign -vv "$TMPDIR/Uninstall $PROJECT.app"
+	codesign -f -s "$MACOS_APP_CERT_NAME" --options runtime --timestamp \
+		"$TMPDIR/Uninstall $PROJECT.app"
+	codesign --verify --deep --strict -v "$TMPDIR/Uninstall $PROJECT.app"
 fi
 echo "do shell script \"@CMAKE_INSTALL_PREFIX@/bin/vncviewer -listen >/dev/null 2>&1 &\"" >$TMPDIR/listenmode.applescript
 osacompile -t APPL -o "$TMPDIR/$VIEWER (Listen Mode).app" $TMPDIR/listenmode.applescript
 if [ "$MACOS_APP_CERT_NAME" != "" ]; then
-	codesign -f -s "$MACOS_APP_CERT_NAME" --timestamp "$TMPDIR/$VIEWER (Listen Mode).app"
-	codesign -vv "$TMPDIR/$VIEWER (Listen Mode).app"
+	codesign -f -s "$MACOS_APP_CERT_NAME" --options runtime --timestamp \
+		"$TMPDIR/$VIEWER (Listen Mode).app"
+	codesign --verify --deep --strict -v "$TMPDIR/$VIEWER (Listen Mode).app"
 fi
-cp -RX "$VIEWER.app" "$PKGROOT/Applications/$PROJECT/$VIEWER.app"
-cp -RX "$TMPDIR/$VIEWER (Listen Mode).app" "$PKGROOT/Applications/$PROJECT/"
-cp -RX "$TMPDIR/Uninstall $PROJECT.app" "$PKGROOT/Applications/$PROJECT/"
+cp -Rp "$VIEWER.app" "$PKGROOT/Applications/$PROJECT/$VIEWER.app"
+cp -Rp "$TMPDIR/$VIEWER (Listen Mode).app" "$PKGROOT/Applications/$PROJECT/"
+cp -Rp "$TMPDIR/Uninstall $PROJECT.app" "$PKGROOT/Applications/$PROJECT/"
 echo "\"/Applications/$PROJECT/$VIEWER.app/Contents/MacOS/$LAUNCHER\" \${1+\"\$@\"}" >$PKGROOT$BINDIR/vncviewer
 chmod 755 $PKGROOT$BINDIR/vncviewer
 
@@ -133,7 +135,7 @@ hdiutil create -fs HFS+ -volname $PKGNAME-$VERSION \
 	-srcfolder "$TMPDIR/dmg" $TMPDIR/$PKGNAME-$VERSION-$CPU_TYPE.dmg
 if [ "$MACOS_APP_CERT_NAME" != "" ]; then
 	codesign -s "$MACOS_APP_CERT_NAME" --timestamp $TMPDIR/$PKGNAME-$VERSION-$CPU_TYPE.dmg
-	codesign -vv $TMPDIR/$PKGNAME-$VERSION-$CPU_TYPE.dmg
+	codesign --verify --deep --strict -v $TMPDIR/$PKGNAME-$VERSION-$CPU_TYPE.dmg
 fi
 cp $TMPDIR/$PKGNAME-$VERSION-$CPU_TYPE.dmg .
 
