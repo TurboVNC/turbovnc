@@ -1511,7 +1511,7 @@ public final class CConn extends CConnection implements UserPasswdGetter,
     }
   }
 
-  private void reconfigureAndRepaintViewport(boolean restore) {
+  private void reconfigureAndRepaintViewport() {
     reconfigureViewport(false);
     // The viewport's componentResized() method isn't guaranteed to be called
     // when reconfiguring the viewport, and it generally won't be called if
@@ -1864,7 +1864,7 @@ public final class CConn extends CConnection implements UserPasswdGetter,
         recreateViewport();
       }
     } else if (reconfigure)
-      reconfigureAndRepaintViewport(false);
+      reconfigureAndRepaintViewport();
     if (params.toolbar.get() != oldParams.toolbar.get()) {
       if (viewport != null)
         viewport.showToolbar(params.toolbar.get());
@@ -1923,7 +1923,7 @@ public final class CConn extends CConnection implements UserPasswdGetter,
         recreateViewport();
       }
     } else
-      reconfigureAndRepaintViewport(false);
+      reconfigureAndRepaintViewport();
     savedState = -1;
     savedRect = new Rectangle(-1, -1, 0, 0);
   }
@@ -1953,7 +1953,7 @@ public final class CConn extends CConnection implements UserPasswdGetter,
         recreateViewport();
       }
     } else
-      reconfigureAndRepaintViewport(false);
+      reconfigureAndRepaintViewport();
     savedState = -1;
     savedRect = new Rectangle(-1, -1, 0, 0);
   }
@@ -1974,7 +1974,7 @@ public final class CConn extends CConnection implements UserPasswdGetter,
         recreateViewport();
       }
     } else
-      reconfigureAndRepaintViewport(false);
+      reconfigureAndRepaintViewport();
     savedState = -1;
     savedRect = new Rectangle(-1, -1, 0, 0);
   }
