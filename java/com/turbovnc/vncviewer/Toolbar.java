@@ -34,9 +34,9 @@ public final class Toolbar extends JToolBar implements ActionListener {
   static final String[] BUTTONS = {
     "Connection options...", "Connection info...", "Full screen",
     "Request screen refresh", "Request lossless refresh",
-    "Save remote desktop image", "Send Ctrl-Alt-Del", "Send Ctrl-Esc",
-    "Send Ctrl key press/release", "Send Alt key press/release",
-    "New Connection...", "Disconnect"
+    "Save remote desktop image", "Zoom in", "Zoom 100%", "Zoom out",
+    "Send Ctrl-Alt-Del", "Send Ctrl-Esc", "Send Ctrl key press/release",
+    "Send Alt key press/release", "New Connection...", "Disconnect"
   };
 
   private final ClassLoader cl = getClass().getClassLoader();
@@ -48,27 +48,31 @@ public final class Toolbar extends JToolBar implements ActionListener {
     super();
     cc = cc_;
     BufferedImage bi =
-      new BufferedImage(240, 20, BufferedImage.TYPE_INT_ARGB);
+      new BufferedImage(300, 20, BufferedImage.TYPE_INT_ARGB);
     Graphics2D g = bi.createGraphics();
-    g.drawImage(toolbarImage, 0, 0, 240, 20, null);
+    g.drawImage(toolbarImage, 0, 0, 300, 20, null);
     setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
     setAlignmentY(java.awt.Component.CENTER_ALIGNMENT);
     setFloatable(false);
     setBorder(new EmptyBorder(1, 2, 1, 0));
-    for (int i = 0; i < 12; i++) {
-      if (i >= 6 && i <= 9 && cc.params.viewOnly.get())
+    for (int i = 0; i < 15; i++) {
+      if (i >= 6 && i <= 8 &&
+          (cc.params.scale.get() == ScaleParameter.AUTO ||
+           cc.params.scale.get() == ScaleParameter.FIXEDRATIO))
         continue;
-      if (i >= 10 && i <= 11 && cc.params.noNewConn.get())
+      if (i >= 9 && i <= 12 && cc.params.viewOnly.get())
         continue;
-      if (i >= 6 && i <= 7 && cc.params.restricted.get())
+      if (i >= 13 && i <= 14 && cc.params.noNewConn.get())
+        continue;
+      if (i >= 9 && i <= 10 && cc.params.restricted.get())
         continue;
       ImageIcon icon = new ImageIcon(
         tk.createImage(bi.getSubimage(i * 20, 0, 20, 20).getSource()));
       AbstractButton button;
       switch (i) {
-        case 8:
+        case 11:
           // fallthrough
-        case 9:
+        case 12:
           button = new JToggleButton(icon);
           button.setBorder(BorderFactory.createLoweredBevelBorder());
           break;
@@ -86,10 +90,14 @@ public final class Toolbar extends JToolBar implements ActionListener {
       button.setContentAreaFilled(false);
       add(button);
       add(Box.createHorizontalStrut(2));
+      int sep2index = 5;
+      if (cc.params.scale.get() != ScaleParameter.AUTO &&
+          cc.params.scale.get() != ScaleParameter.FIXEDRATIO)
+        sep2index = 8;
       if (i == 1 ||
-          (i == 5 && (!cc.params.viewOnly.get() ||
-                      !cc.params.noNewConn.get())) ||
-          (i == 9 && !cc.params.noNewConn.get())) {
+          (i == sep2index && (!cc.params.viewOnly.get() ||
+                              !cc.params.noNewConn.get())) ||
+          (i == 12 && !cc.params.noNewConn.get())) {
         // ref http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4346610
         add(new JSeparator(JSeparator.VERTICAL) {
           public Dimension getMaximumSize() {
@@ -117,6 +125,18 @@ public final class Toolbar extends JToolBar implements ActionListener {
     } else if (((AbstractButton)s).getName() == BUTTONS[5]) {
       cc.screenshot();
     } else if (((AbstractButton)s).getName() == BUTTONS[6] &&
+               cc.params.scale.get() != ScaleParameter.AUTO &&
+               cc.params.scale.get() != ScaleParameter.FIXEDRATIO) {
+      cc.zoomIn();
+    } else if (((AbstractButton)s).getName() == BUTTONS[7] &&
+               cc.params.scale.get() != ScaleParameter.AUTO &&
+               cc.params.scale.get() != ScaleParameter.FIXEDRATIO) {
+      cc.zoom100();
+    } else if (((AbstractButton)s).getName() == BUTTONS[8] &&
+               cc.params.scale.get() != ScaleParameter.AUTO &&
+               cc.params.scale.get() != ScaleParameter.FIXEDRATIO) {
+      cc.zoomOut();
+    } else if (((AbstractButton)s).getName() == BUTTONS[9] &&
                !cc.params.viewOnly.get()) {
       cc.writeKeyEvent(Keysyms.CONTROL_L, true);
       cc.writeKeyEvent(Keysyms.ALT_L, true);
@@ -124,29 +144,29 @@ public final class Toolbar extends JToolBar implements ActionListener {
       cc.writeKeyEvent(Keysyms.DELETE, false);
       cc.writeKeyEvent(Keysyms.ALT_L, false);
       cc.writeKeyEvent(Keysyms.CONTROL_L, false);
-    } else if (((AbstractButton)s).getName() == BUTTONS[7] &&
+    } else if (((AbstractButton)s).getName() == BUTTONS[10] &&
                !cc.params.viewOnly.get()) {
       cc.writeKeyEvent(Keysyms.CONTROL_L, true);
       cc.writeKeyEvent(Keysyms.ESCAPE, true);
       cc.writeKeyEvent(Keysyms.CONTROL_L, false);
       cc.writeKeyEvent(Keysyms.ESCAPE, false);
-    } else if (((AbstractButton)s).getName() == BUTTONS[8] &&
+    } else if (((AbstractButton)s).getName() == BUTTONS[11] &&
                !cc.params.viewOnly.get()) {
       if (((AbstractButton)s).isSelected()) {
         cc.writeKeyEvent(Keysyms.CONTROL_L, true);
       } else {
         cc.writeKeyEvent(Keysyms.CONTROL_L, false);
       }
-    } else if (((AbstractButton)s).getName() == BUTTONS[9] &&
+    } else if (((AbstractButton)s).getName() == BUTTONS[12] &&
                !cc.params.viewOnly.get()) {
       if (((AbstractButton)s).isSelected()) {
         cc.writeKeyEvent(Keysyms.ALT_L, true);
       } else {
         cc.writeKeyEvent(Keysyms.ALT_L, false);
       }
-    } else if (((AbstractButton)s).getName() == BUTTONS[10]) {
+    } else if (((AbstractButton)s).getName() == BUTTONS[13]) {
       VncViewer.newViewer(cc.viewer);
-    } else if (((AbstractButton)s).getName() == BUTTONS[11]) {
+    } else if (((AbstractButton)s).getName() == BUTTONS[14]) {
       cc.close();
     }
   }

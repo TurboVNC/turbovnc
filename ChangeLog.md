@@ -8,6 +8,10 @@ desktop resizing, which effectively allows the remote desktop to be zoomed in
 or out without changing the viewer window size.  This is useful with HiDPI
 monitors.
 
+2. Added toolbar icons to the TurboVNC Viewer that can be used to zoom in
+(increase the scaling factor), zoom out (decrease the scaling factor), or reset
+the scaling factor to 100% when automatic scaling is disabled.
+
 
 3.2
 ===
