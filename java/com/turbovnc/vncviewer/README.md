@@ -74,7 +74,7 @@ under the terms of the Creative Commons Attributon license:
 <https://www.shareicon.net/screenshot-586081>
 
 Lock/unlock icons in the TurboVNC Viewer authentication dialog are from
-[Open Iconic](https://useiconic.com/open), which is:
+[Open Iconic](https://github.com/iconic/open-iconic), which is:
 
     Copyright (c) 2014 Waybury
 
