@@ -98,7 +98,7 @@ license-compatible with TurboVNC.  (Later versions of UltraVNC were made
 available under the GNU GPL v3.)
 
 Lock/unlock icons in the TurboVNC Viewer authentication dialog are from
-[Open Iconic](https://useiconic.com/open), which is:
+[Open Iconic](https://github.com/iconic/open-iconic), which is:
 
     Copyright (c) 2014 Waybury
 
