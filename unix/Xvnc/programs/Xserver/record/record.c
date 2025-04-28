@@ -45,6 +45,7 @@ and Jim Haggerty of Metheus.
 #include "inputstr.h"
 #include "eventconvert.h"
 #include "scrnintstr.h"
+#include "opaque.h"
 
 #include <stdio.h>
 #include <assert.h>
@@ -1297,6 +1298,13 @@ RecordSanityCheckRegisterClients(RecordContextPtr pContext, ClientPtr client,
     xRecordRange *pRange;
     int i;
     XID recordingClient;
+
+    /* LimitClients is 2048 at max, way less that MAXINT */
+    if (stuff->nClients > LimitClients)
+        return BadValue;
+
+    if (stuff->nRanges > (MAXINT - 4 * stuff->nClients) / SIZEOF(xRecordRange))
+        return BadValue;
 
     if (((client->req_len << 2) - SIZEOF(xRecordRegisterClientsReq)) !=
         4 * stuff->nClients + SIZEOF(xRecordRange) * stuff->nRanges)
