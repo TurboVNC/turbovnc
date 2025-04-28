@@ -370,7 +370,17 @@ public class CConn extends CConnection implements UserPasswdGetter,
     super.setExtendedDesktopSize(reason, result, w, h, layout);
 
     if (reason == RFB.EDS_REASON_CLIENT && result != RFB.EDS_RESULT_SUCCESS) {
-      vlog.error("SetDesktopSize failed: " + result);
+      String resultString = null;
+      switch (result) {
+        case RFB.EDS_RESULT_PROHIBITED:
+          resultString = "client prohibited";  break;
+        case RFB.EDS_RESULT_NO_RESOURCES:
+          resultString = "out of resources";  break;
+        case RFB.EDS_RESULT_INVALID:
+          resultString = "invalid screen layout";  break;
+      }
+      vlog.error("SetDesktopSize failed: " +
+                 (resultString != null ? resultString : result));
       return;
     }
 
