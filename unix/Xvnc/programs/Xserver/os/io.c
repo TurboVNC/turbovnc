@@ -442,7 +442,7 @@ ReadRequestFromClient(ClientPtr client)
      */
 
     gotnow -= needed;
-    if (!gotnow)
+    if (!gotnow && !oci->ignoreBytes)
         AvailableInput = oc;
     if (move_header) {
         if (client->req_len < bytes_to_int32(sizeof(xBigReq) - sizeof(xReq))) {
