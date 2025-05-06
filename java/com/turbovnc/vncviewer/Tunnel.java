@@ -371,11 +371,14 @@ public class Tunnel {
   private static void createTunnelExt(int vncPort, int localPort,
                                       String pattern, Params params)
                                       throws Exception {
+    boolean tunnel = params.tunnel.get() ||
+                     (params.sessMgrActive && params.sessMgrAuto.get());
+
     if (pattern == null || pattern.length() < 1)
       pattern =
-        (params.tunnel.get() ? DEFAULT_TUNNEL_CMD :
-                               (params.jump.get() != null ? DEFAULT_JUMP_CMD :
-                                                            DEFAULT_VIA_CMD));
+        (tunnel ? DEFAULT_TUNNEL_CMD :
+                  (params.jump.get() != null ? DEFAULT_JUMP_CMD :
+                                               DEFAULT_VIA_CMD));
 
     String command = fillCmdPattern(pattern, vncPort, params.udsPath,
                                     localPort, params);

@@ -1,5 +1,5 @@
-/* Copyright (C) 2012, 2015, 2018, 2020-2022, 2024 D. R. Commander.
- *                                                 All Rights Reserved.
+/* Copyright (C) 2012, 2015, 2018, 2020-2022, 2024-2025 D. R. Commander.
+ *                                                      All Rights Reserved.
  * Copyright (C) 2012 Brian P. Hinz
  *
  * This is free software; you can redistribute it and/or modify
@@ -20,6 +20,7 @@
 
 package com.turbovnc.rfb;
 
+import javax.swing.*;
 import java.util.prefs.Preferences;
 import java.util.prefs.BackingStoreException;
 
@@ -51,11 +52,29 @@ public final class UserPreferences {
     }
   }
 
-  public static void clear() {
+  public static void clear(boolean list) {
     try {
+      if (!list) {
+        Object[] dlgOptions = {
+          UIManager.getString("OptionPane.yesButtonText"),
+          UIManager.getString("OptionPane.noButtonText")
+        };
+        JOptionPane pane = new JOptionPane("Are you sure you want to clear\n" +
+                                           "all saved per-host options?",
+                                           JOptionPane.WARNING_MESSAGE,
+                                           JOptionPane.YES_NO_OPTION, null,
+                                           dlgOptions, dlgOptions[1]);
+        JDialog dlg = pane.createDialog(null, "TurboVNC Viewer");
+        dlg.setAlwaysOnTop(true);
+        dlg.setVisible(true);
+        if (pane.getValue() == dlgOptions[1])
+          return;
+      }
       root.clear();
       String[] children = root.childrenNames();
       for (int i = 0; i < children.length; i++) {
+        if (list != children[i].equalsIgnoreCase("ServerDialog"))
+          continue;
         Preferences node = root.node(children[i]);
         node.removeNode();
       }
