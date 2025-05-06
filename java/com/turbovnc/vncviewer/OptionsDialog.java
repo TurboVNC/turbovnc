@@ -60,7 +60,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   private JButton x509caButton, x509crlButton;
   private JLabel x509caLabel, x509crlLabel;
   private JTextField x509ca, x509crl;
-  private JButton defClearButton, resetButton;
+  private JButton listClearButton, defClearButton, resetButton;
   private JLabel encMethodLabel;
   private JLabel jpegQualityLabel, jpegQualityLabelLo, jpegQualityLabelHi;
   private JLabel subsamplingLabel, subsamplingLabelLo, subsamplingLabelHi;
@@ -499,18 +499,25 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     // Global tab
     globalPanel = new JPanel(new GridBagLayout());
 
-    defClearButton = new JButton("Clear the list of saved connections");
+    listClearButton = new JButton("Clear the list of saved connections");
+    listClearButton.addActionListener(this);
+    defClearButton = new JButton("Clear all saved per-host options");
     defClearButton.addActionListener(this);
     resetButton = new JButton("Reset all options to defaults");
     resetButton.addActionListener(this);
 
-    Dialog.addGBComponent(defClearButton, globalPanel,
+    Dialog.addGBComponent(listClearButton, globalPanel,
                           0, 0, 2, 1, 2, 2, 1, 0,
                           GridBagConstraints.NONE,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(8, 5, 0, 5));
+    Dialog.addGBComponent(defClearButton, globalPanel,
+                          0, 1, 2, 1, 2, 2, 1, 0,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.FIRST_LINE_START,
+                          new Insets(8, 5, 0, 5));
     Dialog.addGBComponent(resetButton, globalPanel,
-                          0, 1, 2, GridBagConstraints.REMAINDER, 2, 2, 1, 1,
+                          0, 2, 2, GridBagConstraints.REMAINDER, 2, 2, 1, 1,
                           GridBagConstraints.NONE,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(8, 5, 0, 5));
@@ -832,8 +839,10 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       endDialog();
     } else if (s instanceof JButton && (JButton)s == cancelButton) {
       endDialog();
+    } else if (s instanceof JButton && (JButton)s == listClearButton) {
+      UserPreferences.clear(true);
     } else if (s instanceof JButton && (JButton)s == defClearButton) {
-      UserPreferences.clear();
+      UserPreferences.clear(false);
     } else if (s instanceof JButton && (JButton)s == resetButton) {
       Params oldParams = params;
       params = new Params();

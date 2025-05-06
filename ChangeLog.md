@@ -32,6 +32,10 @@ session desktop file cannot be found.  This fixes a regression introduced by
 default window manager on Ubuntu MATE or Xubuntu if no window manager was
 specified.
 
+7. The "Clear the list of saved connections" button in the "Global" tab of the
+TurboVNC Viewer Options dialog now clears only the connection history.  A
+separate button has been added for clearing saved per-host options.
+
 
 3.2 beta1
 =========
