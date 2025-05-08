@@ -3,7 +3,8 @@
 
 [Setup]
 #ifdef WIN64
-ArchitecturesInstallIn64BitMode=x64
+ArchitecturesInstallIn64BitMode=x64compatible
+ArchitecturesAllowed=x64compatible
 #endif
 AppName=@CMAKE_PROJECT_NAME@
 AppVerName=@CMAKE_PROJECT_NAME@ v@VERSION@ (@BUILD@)
@@ -75,3 +76,36 @@ Root: HKCR; Subkey: ".vnc"; ValueType: string; ValueName: ""; ValueData: "VncVie
 Root: HKCR; Subkey: "VncViewer.Config"; ValueType: string; ValueName: ""; ValueData: "VNCviewer Config File"; Flags: uninsdeletekey; Tasks: associatevnc
 Root: HKCR; Subkey: "VncViewer.Config\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\vncviewerw.bat,0"; Tasks: associatevnc
 Root: HKCR; Subkey: "VncViewer.Config\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\vncviewerw.bat"" -config ""%1"""; Tasks: associatevnc
+
+[Code]
+procedure UninstallPreviousVersion(UninstallerKey: String);
+var
+	resultCode: Integer;
+	uninstallerPath: String;
+begin
+	if not RegQueryStringValue(HKLM, UninstallerKey, 'UninstallString',
+		uninstallerPath) then
+		RegQueryStringValue(HKCU, UninstallerKey, 'UninstallString',
+			uninstallerPath);
+	if uninstallerPath <> '' then
+		Exec(RemoveQuotes(uninstallerPath),
+			'/SILENT /NORESTART /SUPPRESSMSGBOXES', '', SW_HIDE,
+			ewWaitUntilTerminated, resultCode);
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+	if (CurStep = ssInstall) then
+	begin
+		// 64-bit TurboVNC 3.1.x and prior running on Windows/x64
+		UninstallPreviousVersion(
+			'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\TurboVNC 64-bit_is1');
+		// 64-bit TurboVNC 3.1.x and prior running on Windows/Arm
+		UninstallPreviousVersion(
+			'SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\TurboVNC 64-bit_is1');
+		// 32-bit TurboVNC 3.1.x and prior, or
+		// 64-bit TurboVNC 3.2 beta1 or 3.2 running on Windows/Arm
+		UninstallPreviousVersion(
+			'SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\TurboVNC_is1');
+	end;
+end;

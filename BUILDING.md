@@ -320,7 +320,7 @@ configuration you built (such as __{build_directory}\Debug__ or
 __{build_directory}\Release__).
 
 Building a Windows installer requires
-[Inno Setup](http://www.jrsoftware.org/isinfo.php).
+[Inno Setup](http://www.jrsoftware.org/isinfo.php) v6.3 or later.
 __iscc.exe__ should be in your `PATH`.
 
 A custom JRE based on OpenJDK can be included in the Windows installer package
