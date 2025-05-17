@@ -1018,10 +1018,7 @@ public final class Params {
   (Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
    "When using the TurboVNC Session Manager, this parameter is effectively " +
    "disabled.  (The built-in SSH client is always used with the TurboVNC " +
-   "Session Manager.)\n " : "") +
-
-  "This parameter is effectively set if the Server parameter specifies a " +
-  "Unix domain socket connection to a remote host.", false);
+   "Session Manager.)" : ""), false);
 
   public StringParameter extSSHCommand =
   new StringParameter("ExtSSHCommand", this, false, true,

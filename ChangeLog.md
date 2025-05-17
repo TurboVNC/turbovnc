@@ -12,6 +12,9 @@ monitors.
 (increase the scaling factor), zoom out (decrease the scaling factor), or reset
 the scaling factor to 100% when automatic scaling is disabled.
 
+3. The TurboVNC Viewer's built-in SSH client can now be used to tunnel a
+connection to a VNC server that is listening on a Unix domain socket.
+
 
 3.2
 ===

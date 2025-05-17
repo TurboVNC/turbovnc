@@ -60,7 +60,10 @@ public class Tunnel {
       }
     }
 
-    if (params.udsPath != null &&
+    boolean extSSH = params.extSSH.get() ||
+                     (pattern != null && pattern.length() > 0);
+
+    if (extSSH && params.udsPath != null &&
         (pattern == null || pattern.indexOf("%L") < 0)) {
       // Connect to Unix domain socket using stdio-based forwarding
       params.stdioSocket = createTunnelExtUDS(pattern, params);
@@ -69,23 +72,27 @@ public class Tunnel {
       if (localPort == 0)
         throw new ErrorException("Could not obtain free TCP port");
 
-      if (params.extSSH.get() || (pattern != null && pattern.length() > 0))
+      if (extSSH)
         createTunnelExt(vncPort, localPort, pattern, params);
       else {
         String vncHost, gatewayStr;
         int sshPort = params.sshPort.isDefault() ? -1 : params.sshPort.get();
 
-        if (params.jump.get() != null && !params.tunnel.get()) {
+        boolean jump = (params.jump.get() != null ||
+                        (params.via.get() != null && params.udsPath != null));
+
+        if (jump && !params.tunnel.get()) {
           gatewayStr = Hostname.getHost(params.server.get());
           if (params.sshSession == null) {
             vncHost = gatewayStr;
             vlog.debug("Opening SSH connection to host " + vncHost);
+            String jumpHost = params.jump.get() != null ? params.jump.get() :
+                                                          params.via.get();
             params.sshSession =
               createTunnelJSch(Hostname.getSSHUser(params.server.get()),
-                               vncHost, sshPort,
-                               Hostname.getSSHUser(params.jump.get()),
-                               Hostname.getSSHHost(params.jump.get()),
-                               Hostname.getSSHPort(params.jump.get()), params);
+                               vncHost, sshPort, Hostname.getSSHUser(jumpHost),
+                               Hostname.getSSHHost(jumpHost),
+                               Hostname.getSSHPort(jumpHost), params);
           }
           vncHost = "localhost";
         } else {
@@ -123,9 +130,18 @@ public class Tunnel {
           vncHost = vncHost.replaceAll("[\\[\\]]", "");
           gatewayStr = gatewayHost;
         }
-        vlog.debug("Forwarding local port " + localPort + " to " + vncHost +
-                   "::" + vncPort + " (relative to " + gatewayStr + ")");
-        params.sshSession.setPortForwardingL(localPort, vncHost, vncPort);
+        if (params.udsPath != null) {
+          String udsPath =
+            expandUDSPathRemote(params.sshSession, params.udsPath);
+          vlog.debug("Forwarding local port " + localPort + " to " + vncHost +
+                     "::" + udsPath + " (relative to " + gatewayStr + ")");
+          params.sshSession.setSocketForwardingL("127.0.0.1", localPort,
+                                                 udsPath, null, 0);
+        } else {
+          vlog.debug("Forwarding local port " + localPort + " to " + vncHost +
+                     "::" + vncPort + " (relative to " + gatewayStr + ")");
+          params.sshSession.setPortForwardingL(localPort, vncHost, vncPort);
+        }
       }
       params.server.set("localhost::" + localPort);
     }
@@ -588,6 +604,82 @@ public class Tunnel {
           case 'u':
             result += System.getProperty("user.name");
             continue;
+          default:
+            throw new ErrorException("Invalid % sequence (%" +
+                                     udsPath.charAt(i) +
+                                     ") in Unix domain socket path");
+        }
+      }
+      result += udsPath.charAt(i);
+    }
+
+    return result;
+  }
+
+  // Expand a remote (server-side) Unix domain socket path similarly to
+  // escapeUDSPath()
+  private static String expandUDSPathRemote(Session session, String udsPath) {
+    String result, home = null, hostName = null, uid = null, username = null;
+
+    if (udsPath.indexOf("~") != 0 && udsPath.indexOf("%h") < 0 &&
+        udsPath.indexOf("%i") < 0 && udsPath.indexOf("%u") < 0)
+      return udsPath;
+
+    try {
+      ChannelExec channelExec = (ChannelExec)session.openChannel("exec");
+      String command =
+        "echo $HOME; uname -n || echo; id -u || echo; id -u -n || echo";
+      channelExec.setCommand(command);
+      InputStream stdout = channelExec.getInputStream();
+      channelExec.connect();
+      BufferedReader br = new BufferedReader(new InputStreamReader(stdout));
+      for (int line = 0; line < 4 && (result = br.readLine()) != null;
+           line++) {
+        if (result.length() > 0) {
+          switch (line) {
+            case 0:  home = result;  break;
+            case 1:  hostName = result;  break;
+            case 2:  uid = result;  break;
+            case 3:  username = result;  break;
+          }
+        }
+      }
+      channelExec.disconnect();
+    } catch (Exception e) {
+      vlog.debug("Could not expand Unix domain socket path:");
+      vlog.debug("  " + e.toString());
+    }
+
+    result = "";
+
+    for (int i = 0; i < udsPath.length(); i++) {
+      if (i == 0 && udsPath.charAt(i) == '~') {
+        if (home != null) {
+          result += home;
+          continue;
+        }
+      } else if (udsPath.charAt(i) == '%') {
+        switch (udsPath.charAt(++i)) {
+          case '%':
+            break;
+          case 'h':
+            if (hostName != null) {
+              result += hostName;
+              continue;
+            } else i--;
+            break;
+          case 'i':
+            if (uid != null) {
+              result += uid;
+              continue;
+            } else i--;
+            break;
+          case 'u':
+            if (username != null) {
+              result += username;
+              continue;
+            } else i--;
+            break;
           default:
             throw new ErrorException("Invalid % sequence (%" +
                                      udsPath.charAt(i) +
