@@ -139,13 +139,18 @@ public final class CConn extends CConnection implements UserPasswdGetter,
         if (port == 0) {
           try {
             // TurboVNC Session Manager
-            String session = SessionManager.createSession(params);
+            VncSession session = SessionManager.createSession(params);
             if (session == null) {
               close();
               return;
             }
             params.sessMgrActive = true;
-            params.port.set(Hostname.getPort(session));
+            if (session.udsPath != null) {
+              params.udsPath = session.udsPath;
+              if (host.equals("localhost"))
+                params.stdioSocket = Tunnel.connectUDSDirect(params.udsPath);
+            } else
+              params.port.set(Hostname.getPort(session.display));
           } catch (Exception e) {
             if (e instanceof com.jcraft.jsch.JSchException)
               throw new WarningException("Session Manager Error:\n" +
@@ -156,10 +161,12 @@ public final class CConn extends CConnection implements UserPasswdGetter,
           }
         }
         try {
-          Tunnel.createTunnel(params);
           if (params.stdioSocket == null) {
-            host = Hostname.getHost(params.server.get());
-            port = Hostname.getPort(params.server.get());
+            Tunnel.createTunnel(params);
+            if (params.stdioSocket == null) {
+              host = Hostname.getHost(params.server.get());
+              port = Hostname.getPort(params.server.get());
+            }
           }
         } catch (Exception e) {
           if (e instanceof com.jcraft.jsch.JSchException)
@@ -174,12 +181,12 @@ public final class CConn extends CConnection implements UserPasswdGetter,
       if (port == 0 && params.stdioSocket == null) {
         try {
           // TurboVNC Session Manager
-          String session = SessionManager.createSession(params);
+          VncSession session = SessionManager.createSession(params);
           if (session == null) {
             close();
             return;
           }
-          port = Hostname.getPort(session);
+          port = Hostname.getPort(session.display);
           params.sshSession.disconnect();
         } catch (Exception e) {
           if (e instanceof com.jcraft.jsch.JSchException)

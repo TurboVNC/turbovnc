@@ -921,17 +921,21 @@ sub Usage
 #
 # - The total number of TurboVNC sessions that are currently running on this
 #   host under the user account that invoked vncserver
-# - The number of parameters to be listed for each session (currently 3 but may
+# - The number of parameters to be listed for each session (currently 4 but may
 #   increase in the future)
 # - The X display number for Session 1
 # - The Xvnc process ID for Session 1
 # - The noVNC web server process ID for Session 1 (or 0 if a noVNC web server
 #   was not started with the session)
+# - The Unix domain socket path for Session 1 (or @NONE if the session does not
+#   listen on a Unix domain socket)
 #   ...
 # - The X display number for Session N
 # - The Xvnc process ID for Session N
 # - The noVNC web server process ID for Session N (or 0 if a noVNC web server
 #   was not started with the session)
+# - The Unix domain socket path for Session N (or @NONE if the session does not
+#   listen on a Unix domain socket)
 #
 # If -sessionstart is passed to vncserver, then vncserver starts a new TurboVNC
 # session and calls this subroutine with a second argument (the X display
@@ -942,8 +946,7 @@ sub Usage
 # Since the TurboVNC Session Manager relies upon these interfaces, they are
 # considered stable and (barring some unforeseen dire need) will not change in
 # a backward-incompatible manner.  The number of parameters will likely
-# increase in the future (for instance, to support Unix domain sockets with the
-# TurboVNC Session Manager), but the meaning of the existing parameters should
+# increase in the future, but the meaning of the existing parameters should
 # stay the same.
 #
 
@@ -957,7 +960,7 @@ sub List
   closedir(dir);
   if ($verbose) {
     print "\nTurboVNC sessions:\n\n";
-    print "X DISPLAY #\tPROCESS ID\tNOVNC PROCESS ID\n";
+    print "X DISPLAY #\tPROCESS ID\tNOVNC PID\tUDS PATH\n";
   }
   my @sessions = ();
   foreach my $file (@filelist) {
@@ -973,23 +976,33 @@ sub List
         $pid = 0;
       }
       push(@session, $pid);
+      if (-r "$vncUserDir/$host:$1.udspath") {
+        chomp($udsPath = `cat $vncUserDir/$host:$1.udspath`);
+        push(@session, $udsPath);
+      } else {
+        push(@session, "\@NONE");
+      }
       push(@sessions, \@session);
     }
   }
   if (!$verbose) {
-    print scalar(@sessions)."\t3";
+    print scalar(@sessions)."\t4";
   }
   if (scalar(@sessions)) {
     @sessions = sort { $a->[0] <=> $b->[0] } @sessions;
     foreach $session (@sessions) {
       if ($verbose) {
         print ":".$session->[0]."\t\t".$session->[1];
+        print "\t\t";
         if ($session->[2]) {
-          print "\t\t".$session->[2];
+          print $session->[2];
+        }
+        if ($session->[3] ne "\@NONE") {
+          print "\t\t".$session->[3];
         }
         print "\n";
       } else {
-        print "\t:".$session->[0]."\t".$session->[1]."\t".$session->[2];
+        print "\t:".$session->[0]."\t".$session->[1]."\t".$session->[2]."\t".$session->[3];
       }
     }
   }

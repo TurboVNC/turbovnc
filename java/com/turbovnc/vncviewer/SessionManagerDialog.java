@@ -1,4 +1,4 @@
-/* Copyright (C) 2018 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2018, 2025 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ import com.turbovnc.rfb.*;
 
 class SessionManagerDialog extends Dialog implements ActionListener {
 
-  SessionManagerDialog(String[] sessions_, String host_) {
+  SessionManagerDialog(VncSession[] sessions_, String host_) {
     super(true);
     sessions = sessions_;
     host = host_;
@@ -44,7 +44,7 @@ class SessionManagerDialog extends Dialog implements ActionListener {
 
       for (int i = 0;
            i < Math.min(sessions.length, SessionManager.MAX_SESSIONS); i++) {
-        JLabel displayLabel = new JLabel(host + sessions[i]);
+        JLabel displayLabel = new JLabel(host + sessions[i].display);
         connectButton[i] = new JButton("Connect");
         connectButton[i].addActionListener(this);
         newOTPButton[i] = new JButton("New OTP");
@@ -138,7 +138,7 @@ class SessionManagerDialog extends Dialog implements ActionListener {
   public void actionPerformed(ActionEvent e) {
     Object s = e.getSource();
     if (s instanceof JButton && (JButton)s == newSessionButton) {
-      connectSession = "NEW";
+      connectSession = new VncSession("NEW", null);
       endDialog();
     } else if (s instanceof JButton && (JButton)s == refreshButton) {
       endDialog();
@@ -176,11 +176,11 @@ class SessionManagerDialog extends Dialog implements ActionListener {
     }
   }
 
-  String getConnectSession() { return connectSession; }
+  VncSession getConnectSession() { return connectSession; }
 
-  String getKillSession() { return killSession; }
+  VncSession getKillSession() { return killSession; }
 
-  String getNewOTPSession() { return newOTPSession; }
+  VncSession getNewOTPSession() { return newOTPSession; }
 
   boolean getViewOnly() { return viewOnly; }
 
@@ -192,8 +192,9 @@ class SessionManagerDialog extends Dialog implements ActionListener {
   JCheckBox[] viewOnlyBox = new JCheckBox[SessionManager.MAX_SESSIONS];
   JButton newSessionButton, refreshButton, cancelButton;
 
-  String[] sessions;
-  String connectSession, killSession, newOTPSession, host;
+  VncSession[] sessions;
+  VncSession connectSession, killSession, newOTPSession;
+  String host;
   boolean viewOnly;
 
   static LogWriter vlog = new LogWriter("SessionManagerDialog");

@@ -15,6 +15,9 @@ the scaling factor to 100% when automatic scaling is disabled.
 3. The TurboVNC Viewer's built-in SSH client can now be used to tunnel a
 connection to a VNC server that is listening on a Unix domain socket.
 
+4. The TurboVNC Session Manager now works with TurboVNC sessions that are
+listening on Unix domain sockets.
+
 
 3.2
 ===

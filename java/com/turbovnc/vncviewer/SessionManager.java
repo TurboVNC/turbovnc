@@ -38,7 +38,7 @@ public final class SessionManager extends Tunnel {
 
   public static final int MAX_SESSIONS = 256;
 
-  public static String createSession(Params params) throws Exception {
+  public static VncSession createSession(Params params) throws Exception {
     String host = Hostname.getHost(params.server.get());
 
     vlog.debug("Opening SSH connection to host " + host);
@@ -68,7 +68,7 @@ public final class SessionManager extends Tunnel {
 
     boolean firstTime = true;
     while (true) {
-      String[] sessions = getSessions(params, host);
+      VncSession[] sessions = getSessions(params, host);
 
       if (Utils.getBooleanProperty("turbovnc.autotest", false)) {
         int autotestSession =
@@ -122,8 +122,8 @@ public final class SessionManager extends Tunnel {
     }
   }
 
-  private static String[] getSessions(Params params, String host)
-                                      throws Exception {
+  private static VncSession[] getSessions(Params params, String host)
+                                          throws Exception {
     ChannelExec channelExec =
       (ChannelExec)params.sshSession.openChannel("exec");
 
@@ -142,7 +142,7 @@ public final class SessionManager extends Tunnel {
 
     BufferedReader br = new BufferedReader(new InputStreamReader(stdout));
     String result, error = null;
-    String[] sessions = null;
+    VncSession[] sessions = null;
     while ((result = br.readLine()) != null) {
       if (!result.startsWith("[TURBOVNC] ")) continue;
       result = result.replace("[TURBOVNC] ", "");
@@ -153,10 +153,20 @@ public final class SessionManager extends Tunnel {
         int numFields = Integer.parseInt(splitResult[1]);
         if (numSessions > 0 && numFields > 0 &&
             splitResult.length == numSessions * numFields + 2) {
-          ArrayList<String> sessionList = new ArrayList<String>();
+          sessions = new VncSession[numSessions];
+          int sessionIndex = 0;
           for (int index = 2; index < splitResult.length; index += numFields)
-            sessionList.add(splitResult[index]);
-          sessions = sessionList.toArray(new String[numSessions]);
+            sessions[sessionIndex++] =
+              new VncSession(splitResult[index], null);
+          if (numFields > 3) {
+            sessionIndex = 0;
+            for (int index = 5; index < splitResult.length;
+                 index += numFields) {
+              if (!splitResult[index].equals("@NONE"))
+                sessions[sessionIndex].udsPath = splitResult[index];
+              sessionIndex++;
+            }
+          }
         }
       }
       break;
@@ -192,16 +202,16 @@ public final class SessionManager extends Tunnel {
     StringBuilder sb = null;
     if (sessions != null) {
       sb = new StringBuilder();
-      for (String s : sessions)
-        sb.append(s + " ");
+      for (VncSession s : sessions)
+        sb.append(s.display + " ");
     }
     vlog.debug("Available sessions: " + (sb != null ? sb.toString() : "None"));
 
     return sessions;
   }
 
-  private static String startSession(Params params, String host)
-                                     throws Exception {
+  private static VncSession startSession(Params params, String host)
+                                         throws Exception {
     vlog.debug("Starting new TurboVNC session on host " + host);
 
     ChannelExec channelExec =
@@ -231,7 +241,7 @@ public final class SessionManager extends Tunnel {
 
     BufferedReader br = new BufferedReader(new InputStreamReader(stdout));
     String result, error = null;
-    String[] sessions = null;
+    VncSession[] sessions = null;
     while ((result = br.readLine()) != null) {
       if (!result.startsWith("[TURBOVNC] ")) continue;
       result = result.replace("[TURBOVNC] ", "");
@@ -244,10 +254,20 @@ public final class SessionManager extends Tunnel {
         int numFields = Integer.parseInt(splitResult[1]);
         if (numSessions > 0 && numFields > 0 &&
             splitResult.length == numSessions * numFields + 2) {
-          ArrayList<String> sessionList = new ArrayList<String>();
+          sessions = new VncSession[numSessions];
+          int sessionIndex = 0;
           for (int index = 2; index < splitResult.length; index += numFields)
-            sessionList.add(splitResult[index]);
-          sessions = sessionList.toArray(new String[numSessions]);
+            sessions[sessionIndex++] =
+              new VncSession(splitResult[index], null);
+          if (numFields > 3) {
+            sessionIndex = 0;
+            for (int index = 5; index < splitResult.length;
+                 index += numFields) {
+              if (!splitResult[index].equals("@NONE"))
+                sessions[sessionIndex].udsPath = splitResult[index];
+              sessionIndex++;
+            }
+          }
         }
       }
       break;
@@ -290,10 +310,11 @@ public final class SessionManager extends Tunnel {
   }
 
   @SuppressWarnings("checkstyle:EmptyBlock")
-  private static String generateOTP(Params params, String host, String session,
-                                    boolean setPassword, boolean viewOnly)
-                                    throws Exception {
-    vlog.debug("Generating one-time password for session " + host + session);
+  private static String generateOTP(Params params, String host,
+                                    VncSession session, boolean setPassword,
+                                    boolean viewOnly) throws Exception {
+    vlog.debug("Generating one-time password for session " + host +
+               session.display);
 
     if (!Utils.getBooleanProperty("turbovnc.autotest", false))
       VncViewer.noExceptionDialog = true;
@@ -308,7 +329,7 @@ public final class SessionManager extends Tunnel {
       dir = System.getenv("TVNC_SERVERDIR");
 
     String command = (dir != null ? dir : "") + "/bin/vncpasswd -o -display " +
-                     session;
+                     session.display;
     if (viewOnly) command += " -v";
     channelExec.setCommand("bash -c \"set -o pipefail; " + command +
                            " 2>&1 | sed \'s/^/[TURBOVNC] /g\'\"");
@@ -365,9 +386,9 @@ public final class SessionManager extends Tunnel {
     return result;
   }
 
-  private static void killSession(Params params, String host, String session)
-                                  throws Exception {
-    vlog.debug("Killing TurboVNC session " + host + session);
+  private static void killSession(Params params, String host,
+                                  VncSession session) throws Exception {
+    vlog.debug("Killing TurboVNC session " + host + session.display);
 
     if (!Utils.getBooleanProperty("turbovnc.autotest", false))
       VncViewer.noExceptionDialog = true;
@@ -382,7 +403,7 @@ public final class SessionManager extends Tunnel {
       dir = System.getenv("TVNC_SERVERDIR");
 
     String command = (dir != null ? dir : "") + "/bin/vncserver -kill " +
-                     session;
+                     session.display;
     channelExec.setCommand("bash -c \"set -o pipefail; " + command +
                            " | sed \'s/^/[TURBOVNC] /g\'\"");
     InputStream stdout = channelExec.getInputStream();
