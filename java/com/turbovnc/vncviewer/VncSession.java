@@ -32,4 +32,5 @@ public final class VncSession {
 
   String display;
   String udsPath;
+  int sessionLimit;
 }

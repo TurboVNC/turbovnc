@@ -18,6 +18,13 @@ connection to a VNC server that is listening on a Unix domain socket.
 4. The TurboVNC Session Manager now works with TurboVNC sessions that are
 listening on Unix domain sockets.
 
+5. A new security configuration file directive (`session-limit`) can now be
+used to limit the number of simultaneous TurboVNC sessions allowed under each
+user account.  If the number of TurboVNC sessions currently running under a
+user's account is greater than or equal to the session limit, then the
+`vncserver` script and the TurboVNC Session Manager will refuse to start a new
+session.
+
 
 3.2
 ===

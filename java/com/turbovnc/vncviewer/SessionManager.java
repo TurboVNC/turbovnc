@@ -167,6 +167,16 @@ public final class SessionManager extends Tunnel {
               sessionIndex++;
             }
           }
+          if (numFields > 4) {
+            sessionIndex = 0;
+            for (int index = 6; index < splitResult.length;
+                 index += numFields) {
+              int temp = Integer.parseInt(splitResult[index]);
+              if (temp >= 0)
+                sessions[sessionIndex].sessionLimit = temp;
+              sessionIndex++;
+            }
+          }
         }
       }
       break;

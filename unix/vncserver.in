@@ -64,6 +64,7 @@ $serverArgs = "";
 $userDBus = 0;
 $useUDS = 0;
 $udsPath = "";
+$sessionLimit = 0;
 
 # Read configuration from the system-wide and user files if present.
 
@@ -225,6 +226,14 @@ if ($opt{'-list'}) {
 if ($opt{'-sessionlist'}) {
   &List(0);
   exit;
+}
+
+if ($sessionLimit > 0) {
+  my @sessions = &GetSessions();
+  if (scalar(@sessions) >= $sessionLimit) {
+    print "TurboVNC session limit exceeded for this user\n";
+    exit 1
+  }
 }
 
 if (defined($ENV{WAYLAND_DISPLAY})) {
@@ -921,7 +930,7 @@ sub Usage
 #
 # - The total number of TurboVNC sessions that are currently running on this
 #   host under the user account that invoked vncserver
-# - The number of parameters to be listed for each session (currently 4 but may
+# - The number of parameters to be listed for each session (currently 5 but may
 #   increase in the future)
 # - The X display number for Session 1
 # - The Xvnc process ID for Session 1
@@ -929,6 +938,7 @@ sub Usage
 #   was not started with the session)
 # - The Unix domain socket path for Session 1 (or @NONE if the session does not
 #   listen on a Unix domain socket)
+# - The per-user TurboVNC session limit
 #   ...
 # - The X display number for Session N
 # - The Xvnc process ID for Session N
@@ -936,6 +946,7 @@ sub Usage
 #   was not started with the session)
 # - The Unix domain socket path for Session N (or @NONE if the session does not
 #   listen on a Unix domain socket)
+# - The per-user TurboVNC session limit
 #
 # If -sessionstart is passed to vncserver, then vncserver starts a new TurboVNC
 # session and calls this subroutine with a second argument (the X display
@@ -950,18 +961,14 @@ sub Usage
 # stay the same.
 #
 
-sub List
+sub GetSessions
 {
-  local ($verbose) = $_[0];
-  local ($displayNumber) = $_[1];
+  local ($displayNumber) = $_[0];
 
   opendir(dir, $vncUserDir);
   my @filelist = readdir(dir);
   closedir(dir);
-  if ($verbose) {
-    print "\nTurboVNC sessions:\n\n";
-    print "X DISPLAY #\tPROCESS ID\tNOVNC PID\tUDS PATH\n";
-  }
+
   my @sessions = ();
   foreach my $file (@filelist) {
     if ($file =~ /$host:(\d+)$\.pid/ && !&CheckDisplayNumber($1, 1) &&
@@ -985,8 +992,21 @@ sub List
       push(@sessions, \@session);
     }
   }
+  return @sessions;
+}
+
+sub List
+{
+  local ($verbose) = $_[0];
+  local ($displayNumber) = $_[1];
+
+  if ($verbose) {
+    print "\nTurboVNC sessions:\n\n";
+    print "X DISPLAY #\tPROCESS ID\tNOVNC PID\tUDS PATH\n";
+  }
+  my @sessions = &GetSessions($displayNumber);
   if (!$verbose) {
-    print scalar(@sessions)."\t4";
+    print scalar(@sessions)."\t5";
   }
   if (scalar(@sessions)) {
     @sessions = sort { $a->[0] <=> $b->[0] } @sessions;
@@ -1002,7 +1022,7 @@ sub List
         }
         print "\n";
       } else {
-        print "\t:".$session->[0]."\t".$session->[1]."\t".$session->[2]."\t".$session->[3];
+        print "\t:".$session->[0]."\t".$session->[1]."\t".$session->[2]."\t".$session->[3]."\t".$sessionLimit;
       }
     }
   }
@@ -1324,6 +1344,11 @@ sub ReadAuthConfiguration($)
         if (substr(lc $tok, -3) eq 'vnc') {
           $enableVNC = 1;
         }
+      }
+    }
+    if (@tokens[0] eq 'session-limit') {
+      if (@tokens[1] =~ /^(\d+)$/) {
+        $sessionLimit = @tokens[1];
       }
     }
   }
