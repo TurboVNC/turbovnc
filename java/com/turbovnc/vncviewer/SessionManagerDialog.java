@@ -156,7 +156,7 @@ class SessionManagerDialog extends Dialog implements ActionListener {
           endDialog();
         } else if (s instanceof JButton && (JButton)s == killButton[i]) {
           String message = "Are you sure you want to kill session\n" +
-                           host + sessions[i] + " ?";
+                           host + sessions[i].display + " ?";
           String[] options = { "Yes", "No" };
           if (JOptionPane.showOptionDialog(getJDialog(), message,
                                            "Are you sure?",

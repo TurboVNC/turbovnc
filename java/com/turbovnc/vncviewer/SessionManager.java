@@ -91,7 +91,7 @@ public final class SessionManager extends Tunnel {
         boolean ret = dlg.showDialog();
         if (!ret) return null;
         else if (dlg.getConnectSession() != null) {
-          if (dlg.getConnectSession().equals("NEW"))
+          if (dlg.getConnectSession().display.equals("NEW"))
             return startSession(params, host);
           else {
             if (params.sessMgrAuto.get())
@@ -111,7 +111,7 @@ public final class SessionManager extends Tunnel {
           int option =
             JOptionPane.showConfirmDialog(dlg.getJDialog(), msg,
                                           "New OTP for " + host +
-                                            dlg.getNewOTPSession(),
+                                            dlg.getNewOTPSession().display,
                                           JOptionPane.OK_CANCEL_OPTION,
                                           JOptionPane.INFORMATION_MESSAGE);
           if (option == JOptionPane.OK_OPTION)
