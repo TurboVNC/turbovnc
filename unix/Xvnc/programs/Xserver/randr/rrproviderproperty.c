@@ -179,7 +179,8 @@ RRChangeProviderProperty(RRProviderPtr provider, Atom property, Atom type,
 
     if (mode == PropModeReplace || len > 0) {
         void *new_data = NULL, *old_data = NULL;
-
+        if (total_len > MAXINT / size_in_bytes)
+            return BadValue;
         total_size = total_len * size_in_bytes;
         new_value.data = (void *) malloc(total_size);
         if (!new_value.data && total_size) {
