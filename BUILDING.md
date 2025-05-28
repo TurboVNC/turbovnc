@@ -1,10 +1,29 @@
 Building TurboVNC
 =================
 
+## With nix
+You could use the provided nix flake as your build environment.
 
-Build Requirements
+1. Install the nix package manager
+```sh
+curl -fsSL https://install.determinate.systems/nix | sh -s -- install --determinate
+```
+
+2. Go into the provided environment
+```sh
+nix develop
+```
+
+3. Build this project
+```sh
+mkdir build && cd build
+cmake ..
+make -j
+```
+
+
+Without nix
 ------------------
-
 
 ### All Systems
 
