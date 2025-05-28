@@ -666,8 +666,12 @@ public final class CConn extends CConnection implements UserPasswdGetter,
           screenRect.x -= vpRect.x;
           screenRect.y -= vpRect.y;
 
-          Screen screen = new Screen(0, screenRect.x, screenRect.y,
-                                     screenRect.width, screenRect.height, 0);
+          double scale = viewport.getUiScale();
+          Screen screen = new Screen(
+              0, screenRect.x, screenRect.y,
+              (int)(screenRect.width*scale),
+              (int)(screenRect.height*scale), 0
+          );
 
           // We map client screens to server screens in the server's preferred
           // order (which, in the case of the TurboVNC Server, is always the

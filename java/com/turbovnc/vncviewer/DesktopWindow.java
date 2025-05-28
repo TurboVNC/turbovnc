@@ -416,21 +416,26 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   public void setScaledSize() {
     if (cc.params.scale.get() != ScaleParameter.AUTO &&
         cc.params.scale.get() != ScaleParameter.FIXEDRATIO) {
+      double uiScale = cc.viewport.getUiScale();
       scaledWidth = (int)Math.floor((float)cc.cp.width *
-                                    (float)cc.params.scale.get() / 100.0);
+                                    (float)cc.params.scale.get() / uiScale / 100.0);
       scaledHeight = (int)Math.floor((float)cc.cp.height *
-                                     (float)cc.params.scale.get() / 100.0);
+                                     (float)cc.params.scale.get() / uiScale / 100.0);
+      vlog.debug("Setting desktop scaled size: multiplying scale, scale="+cc.params.scale.get());
     } else {
       if (cc.viewport == null) {
         scaledWidth = cc.cp.width;
         scaledHeight = cc.cp.height;
+        vlog.debug("Setting desktop scaled size: viewport is null");
       } else {
         Dimension availableSize = cc.viewport.getAvailableSize();
         if (availableSize.width == 0 || availableSize.height == 0) {
+          vlog.debug("Setting desktop scaled size: availbe size is 0");
           availableSize.width = cc.cp.width;
           availableSize.height = cc.cp.height;
         }
         if (cc.params.scale.get() == ScaleParameter.FIXEDRATIO) {
+          vlog.debug("Setting desktop scaled size: fixed ratio");
           float widthRatio = (float)availableSize.width / (float)cc.cp.width;
           float heightRatio =
             (float)availableSize.height / (float)cc.cp.height;
@@ -438,6 +443,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
           scaledWidth = (int)Math.floor(cc.cp.width * ratio);
           scaledHeight = (int)Math.floor(cc.cp.height * ratio);
         } else {
+          vlog.debug("Setting desktop scaled size to availableSize");
           scaledWidth = availableSize.width;
           scaledHeight = availableSize.height;
         }

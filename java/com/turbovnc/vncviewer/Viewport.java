@@ -23,6 +23,7 @@ package com.turbovnc.vncviewer;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.*;
 import javax.swing.*;
 import java.lang.reflect.*;
 import java.io.*;
@@ -99,8 +100,10 @@ public final class Viewport extends JFrame implements Runnable {
 
     addComponentListener(new ComponentAdapter() {
       public void componentResized(ComponentEvent e) {
+        vlog.debug("Component resized");
         if (cc.params.scale.get() == ScaleParameter.AUTO ||
             cc.params.scale.get() == ScaleParameter.FIXEDRATIO) {
+          vlog.debug("Scale is auto or fixed ratio: "+cc.params.scale.get());
           if ((sp.getSize().width != cc.desktop.scaledWidth) ||
               (sp.getSize().height != cc.desktop.scaledHeight)) {
             cc.desktop.setScaledSize();
@@ -125,6 +128,7 @@ public final class Viewport extends JFrame implements Runnable {
           }
         } else if (cc.params.desktopSize.getMode() == DesktopSize.AUTO &&
                    !cc.firstUpdate && !cc.pendingServerResize) {
+          vlog.debug("Auto desktop size!");
           Dimension availableSize = cc.viewport.getAvailableSize();
           if (availableSize.width >= 1 && availableSize.height >= 1 &&
               (availableSize.width != cc.desktop.scaledWidth ||
@@ -147,6 +151,7 @@ public final class Viewport extends JFrame implements Runnable {
                   throw new ErrorException("Unexpected zero-size component");
                 cc.sendDesktopSize(availableSize.width, availableSize.height,
                                    true);
+                vlog.debug("Sent desktop size: "+availableSize);
               }
             };
             timer = new Timer(500, actionListener);
@@ -256,15 +261,50 @@ public final class Viewport extends JFrame implements Runnable {
     }
   }
 
+  public double getUiScale() {
+    GraphicsConfiguration gc = getGraphicsConfiguration();
+    if (gc == null) return 1; // fallback
+
+    AffineTransform tx = gc.getDefaultTransform();
+    double scaleX = tx.getScaleX();
+    // double scaleY = tx.getScaleY();  Should be same as x
+    return scaleX;
+  }
+
+  // This is the render size of the app.
+  // On macOS, this is not neccessarily the physical size.
+  //
+  // Note on HiDPI screens on macOS: there are 3 different resolutions on macOS (named by me):
+  // - logical: The UI size should be rendered as if it were on a screen with logical size
+  // - physical: The actual physical pixels the app is occupying
+  // - rendered: The size that macOS tells this app to render at.
+  //
+  // For example, if you have a 150x150 display and tells macOS that you want it to
+  // look like a 100x100 screen, then you effectively asked for 1.5x scale. However,
+  // macOS applications doesn't support fraction scaling, only integer ones. Therefore,
+  // macOS would tell the app to render at 200x200, with a 2x scale. Then, macOS downsamples
+  // this to 150x150.
+  // For the application, the logical resolution is 100x100 and rendered resolution is 200x100.
+  private Dimension getRenderedSize() {
+    double scale = getUiScale();
+
+    Dimension logicalSize = getSize();
+    Dimension physicalSize = new Dimension((int)(logicalSize.width * scale), (int)(logicalSize.height * scale));
+    vlog.debug("logical size = "+logicalSize+" physical size = "+physicalSize);
+    return physicalSize;
+  }
+
   public Dimension getAvailableSize() {
-    Dimension availableSize = getSize();
+    Dimension availableSize = getRenderedSize();
+    double scale = getUiScale();
+
     if (!cc.params.fullScreen.get()) {
       Insets vpInsets = VncViewer.insets;
-      availableSize.width -= vpInsets.left + vpInsets.right;
-      availableSize.height -= vpInsets.top + vpInsets.bottom;
+      availableSize.width -= (vpInsets.left + vpInsets.right) * scale;
+      availableSize.height -= (vpInsets.top + vpInsets.bottom) * scale;
     }
     if (tb.isVisible())
-      availableSize.height -= tb.getHeight();
+      availableSize.height -= tb.getHeight() * scale;
     if (availableSize.width < 0)
       availableSize.width = 0;
     if (availableSize.height < 0)
