@@ -2,7 +2,7 @@
 .\" ** The above line should force tbl to be a preprocessor **
 .\" Man page for Xvnc
 .\"
-.\" Copyright (C) 2010, 2012, 2014-2024 D. R. Commander
+.\" Copyright (C) 2010, 2012, 2014-2025 D. R. Commander
 .\" Copyright (C) 2021 Steffen Kieß
 .\" Copyright (C) 2010 University Corporation for Atmospheric Research
 .\" Copyright (C) 2005-2008 Sun Microsystems, Inc.
@@ -14,7 +14,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TurboVNC distribution.
 .\"
-.TH Xvnc 1 "August 2024" "" "TurboVNC"
+.TH Xvnc 1 "June 2025" "" "TurboVNC"
 .SH NAME
 Xvnc \- the TurboVNC X server
 .SH SYNOPSIS
@@ -375,7 +375,7 @@ Disable multithreaded Tight encoding
 Specify the number of threads to use with multithreaded Tight encoding.  The
 default is to use one thread per CPU core, up to a maximum of 4 (because using
 more than 4 encoding threads breaks compatibility with viewers other than the
-TurboVNC Viewer.)  The server will not allow the thread count to exceed 8, nor
+TurboVNC Viewer.)  The server will not allow the thread count to exceed 4, nor
 to exceed the number of CPU cores.
 
 .TP
