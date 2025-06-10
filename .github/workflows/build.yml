@@ -2,10 +2,6 @@ name: Build
 
 on:
   push:
-    branches:
-      - '**'
-    tags-ignore:
-      - '**'
   pull_request:
   workflow_dispatch:
 
@@ -15,6 +11,7 @@ env:
 
 jobs:
   linux:
+    if: ${{!contains(github.ref, 'refs/tags/')}}
     runs-on: ubuntu-latest
     steps:
       - name: Set global environment variables
@@ -56,6 +53,7 @@ jobs:
           sudo chown -R runner:runner $HOME/src/vnc.nightly
           mv $HOME/src/vnc.nightly/latest/log-${{github.job}}.txt $HOME/src/vnc.nightly/latest/files/
   linux-non-default-options:
+    if: ${{!contains(github.ref, 'refs/tags/')}}
     runs-on: ubuntu-latest
     steps:
       - name: Set global environment variables
@@ -83,6 +81,7 @@ jobs:
           make -j$NUMCPUS --load-average=$NUMCPUS
           popd
   macos:
+    if: ${{!contains(github.ref, 'refs/tags/')}}
     runs-on: macos-13
     steps:
       - name: Set global environment variables
@@ -122,3 +121,81 @@ jobs:
         run: |
           $HOME/src/buildscripts/buildvnc -d $GITHUB_WORKSPACE -v
           mv $HOME/src/vnc.nightly/latest/log-${{github.job}}.txt $HOME/src/vnc.nightly/latest/files/
+  windows:
+    runs-on: windows-2025
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set global environment variables
+        shell: bash
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            RAWBRANCH=$(git branch -r --contains $GITHUB_REF)
+            echo "BRANCH=${RAWBRANCH##*/}" >$GITHUB_ENV
+          else
+            echo "BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}" >$GITHUB_ENV
+          fi
+          echo "LJT_URL=https://s3.amazonaws.com/libjpeg-turbo-pr/3.0.x/windows" >>$GITHUB_ENV
+      - name: Cache installers
+        uses: actions/cache@v4
+        with:
+          path: c:/installers
+          key: installers-${{github.job}}-${{env.BRANCH}}
+      - name: Cache OpenJDK
+        uses: actions/cache@v4
+        with:
+          path: ~/.openjdk
+          key: openjdk-${{github.job}}-${{env.BRANCH}}
+      - name: Set up build
+        shell: bash
+        run: |
+          set -x
+          choco install -y InnoSetup
+          mkdir -p c:/installers
+          if [ ! -f c:/installers/libjpeg-turbo-$LJT_VERSION-vc64.exe ]; then
+            curl -fSL -o c:/installers/libjpeg-turbo-$LJT_VERSION-vc64.exe $LJT_URL/libjpeg-turbo-$LJT_VERSION-vc64.exe
+          fi
+          c:/installers/libjpeg-turbo-$LJT_VERSION-vc64.exe //S
+          if [ ! -f c:/installers/libjpeg-turbo-$LJT_VERSION-vc.exe ]; then
+            curl -fSL -o c:/installers/libjpeg-turbo-$LJT_VERSION-vc.exe $LJT_URL/libjpeg-turbo-$LJT_VERSION-vc.exe
+          fi
+          c:/installers/libjpeg-turbo-$LJT_VERSION-vc.exe //S
+          git clone --depth=1 https://github.com/nathan818fr/vcvars-bash.git c:/vcvars-bash
+          git clone --depth=1 https://github.com/TurboVNC/buildscripts.git -b $BRANCH c:/buildscripts
+          mkdir /opt
+      - name: Configure GPG signing
+        if: ${{github.event_name != 'pull_request'}}
+        shell: bash
+        run: |
+          printf "${{secrets.GPG_KEY}}" | base64 --decode | gpg --batch --import -
+          echo "GPG_KEY_NAME=\"${{secrets.GPG_KEY_NAME}}\"" >c:/buildscripts/gpgsign
+          echo "GPG_KEY_ID=${{secrets.GPG_KEY_ID}}" >>c:/buildscripts/gpgsign
+          echo "GPG_KEY_PASS=${{secrets.GPG_KEY_PASS}}" >>c:/buildscripts/gpgsign
+      - name: Build
+        shell: bash
+        run: |
+          export VSINSTALLDIR='C:\Program Files\Microsoft Visual Studio\2022\Enterprise\'
+          eval "$(c:/vcvars-bash/vcvarsall.sh amd64)"
+          export PATH="$PATH:/c/Program Files (x86)/Inno Setup 6/:/c/msys64/usr/bin/"
+          echo INCLUDE=$INCLUDE
+          echo LIB=$LIB
+          echo PATH=$PATH
+          c:/buildscripts/buildvnc -d $GITHUB_WORKSPACE -b /c/vnc.nightly -v
+      - name: Upload unsigned artifact
+        if: ${{github.event_name == 'push' && contains(github.ref, 'refs/tags/')}}
+        id: upload-unsigned-artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: c:/vnc.nightly/files/TurboVNC-*.exe
+      - name: Sign artifact
+        if: ${{github.event_name == 'push' && contains(github.ref, 'refs/tags/')}}
+        uses: signpath/github-action-submit-signing-request@v1.1
+        with:
+          api-token: ${{secrets.SIGNPATH_API_TOKEN}}
+          organization-id: 616cafe1-280b-4605-ab3b-da1345d91f61
+          project-slug: turbovnc
+          signing-policy-slug: release-signing
+          github-artifact-id: ${{steps.upload-unsigned-artifact.outputs.artifact-id}}
+          wait-for-completion: true
