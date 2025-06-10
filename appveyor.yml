@@ -1,8 +1,8 @@
 image: Visual Studio 2022
 
 environment:
-  LJT_VERSION: 3.1.0
-  LJT_64BIT_SDK: "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/%LJT_VERSION%/libjpeg-turbo-%LJT_VERSION%-vc64.exe"
+  LJT_VERSION: 3.1.1
+  LJT_64BIT_SDK: "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/%LJT_VERSION%/libjpeg-turbo-%LJT_VERSION%-vc-x64.exe"
 
 install:
   - cmd: >-
@@ -12,9 +12,9 @@ install:
 
       choco install -y InnoSetup
 
-      curl -fSL -o c:\installers\libjpeg-turbo-vc64.exe "%LJT_64BIT_SDK%"
+      curl -fSL -o c:\installers\libjpeg-turbo-vc-x64.exe "%LJT_64BIT_SDK%"
 
-      c:\installers\libjpeg-turbo-vc64.exe /S
+      c:\installers\libjpeg-turbo-vc-x64.exe /S
 
       call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
 
