@@ -1,9 +1,9 @@
 image: Visual Studio 2017
 
 environment:
-  LJT_VERSION: 3.1.0
-  LJT_64BIT_SDK: "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/%LJT_VERSION%/libjpeg-turbo-%LJT_VERSION%-vc64.exe"
-  LJT_32BIT_SDK: "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/%LJT_VERSION%/libjpeg-turbo-%LJT_VERSION%-vc.exe"
+  LJT_VERSION: 3.1.1
+  LJT_64BIT_SDK: "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/%LJT_VERSION%/libjpeg-turbo-%LJT_VERSION%-vc-x64.exe"
+  LJT_32BIT_SDK: "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/%LJT_VERSION%/libjpeg-turbo-%LJT_VERSION%-vc-x86.exe"
 
 install:
   - cmd: >-
@@ -13,13 +13,13 @@ install:
 
       choco install -y InnoSetup
 
-      curl -fSL -o c:\installers\libjpeg-turbo-vc64.exe "%LJT_64BIT_SDK%"
+      curl -fSL -o c:\installers\libjpeg-turbo-vc-x64.exe "%LJT_64BIT_SDK%"
 
-      c:\installers\libjpeg-turbo-vc64.exe /S
+      c:\installers\libjpeg-turbo-vc-x64.exe /S
 
-      curl -fSL -o c:\installers\libjpeg-turbo-vc.exe "%LJT_32BIT_SDK%"
+      curl -fSL -o c:\installers\libjpeg-turbo-vc-x86.exe "%LJT_32BIT_SDK%"
 
-      c:\installers\libjpeg-turbo-vc.exe /S
+      c:\installers\libjpeg-turbo-vc-x86.exe /S
 
       set INCLUDE=c:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include;c:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared;c:\Program Files (x86)\Windows Kits\10\include\10.0.18362.0\ucrt;c:\Program Files (x86)\Windows Kits\10\include\10.0.18362.0\um
 
