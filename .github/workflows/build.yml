@@ -205,6 +205,7 @@ jobs:
           echo LIB=$LIB
           echo PATH=$PATH
           c:/buildscripts/buildvnc -d $GITHUB_WORKSPACE -b /c/vnc.nightly -v
+          mv /c/vnc.nightly/log-${{github.job}}.txt /c/vnc.nightly/files/
       - name: Configure AWS
         if: ${{github.event_name != 'pull_request' && !contains(github.ref, 'refs/tags/')}}
         uses: aws-actions/configure-aws-credentials@v4
