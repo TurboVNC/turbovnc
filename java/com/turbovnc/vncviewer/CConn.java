@@ -590,26 +590,16 @@ public final class CConn extends CConnection implements UserPasswdGetter,
     String env = System.getenv("TVNC_SINGLESCREEN");
     if (Utils.getBooleanProperty("turbovnc.singlescreen", false) ||
         (env != null && env.equals("1"))) {
-      layout = cp.screenLayout;
+      layout = new ScreenSet();
 
-      if (layout.numScreens() == 0)
-        layout.addScreen(new Screen());
-      else if (layout.numScreens() != 1) {
-        int i = 0;
-
-        for (Iterator<Screen> iter = layout.screens.iterator(); iter.hasNext();
-             i++) {
-          Screen screen = iter.next();
-          if (i > 0)
-            iter.remove();
-        }
-      }
-
-      Screen screen0 = layout.screens.iterator().next();
+      Screen screen0 = new Screen();
       screen0.dimensions.tl.x = 0;
       screen0.dimensions.tl.y = 0;
       screen0.dimensions.br.x = width;
       screen0.dimensions.br.y = height;
+
+      layout.addScreen(screen0);
+      layout.assignIDs(cp.screenLayout);
 
       return layout;
     }
