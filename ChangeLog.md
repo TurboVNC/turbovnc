@@ -29,6 +29,10 @@ desktop file corresponding to the specified window manager.  This works around
 an issue whereby the GNOME Classic window manager could not be used with the
 TurboVNC Server on Fedora 40 and later.
 
+7. Fixed an issue in the TurboVNC Viewer whereby the "Default Window
+Size/Position" feature did not work properly in full-screen mode if
+`TVNC_SINGLESCREEN`/`turbovnc.singlescreen` was enabled.
+
 
 3.1.4
 =====
