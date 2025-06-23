@@ -1,3 +1,13 @@
+3.2.1
+=====
+
+### Significant changes relative to 3.2:
+
+1. Fixed an issue in the TurboVNC Viewer whereby the "Default Window
+Size/Position" feature did not work properly in full-screen mode if
+`TVNC_SINGLESCREEN`/`turbovnc.singlescreen` was enabled.
+
+
 3.2
 ===
 
