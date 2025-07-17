@@ -2,7 +2,7 @@
  * rfbserver.c - deal with server-side of the RFB protocol.
  */
 
-/* Copyright (C) 2009-2022, 2024 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2009-2022, 2024-2025 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2021, 2024 AnatoScope SA.  All Rights Reserved.
  * Copyright (C) 2015 Pierre Ossman for Cendio AB.  All Rights Reserved.
  * Copyright (C) 2011 Joel Martin
@@ -79,7 +79,7 @@ Bool rfbALRAll = FALSE;
 int rfbALRQualityLevel = -1;
 int rfbALRSubsampLevel = TVNC_1X;
 int rfbCombineRect = 100;
-int rfbICEBlockSize = 256;
+int rfbInterframeBlockSize = 256;
 Bool rfbInterframeDebug = FALSE;
 Bool rfbGIIDebug = FALSE;
 int rfbMaxWidth = MAXSHORT, rfbMaxHeight = MAXSHORT;
@@ -478,8 +478,8 @@ static rfbClientPtr rfbNewClient(int sock)
     rfbInterframeDebug = TRUE;
 
   if ((env = getenv("TVNC_ICEBLOCKSIZE")) != NULL) {
-    int iceBlockSize = atoi(env);
-    if (iceBlockSize >= 0) rfbICEBlockSize = iceBlockSize;
+    int interframeBlockSize = atoi(env);
+    if (interframeBlockSize >= 0) rfbInterframeBlockSize = interframeBlockSize;
   }
 
   if ((env = getenv("TVNC_COMBINERECT")) != NULL) {
@@ -2280,8 +2280,10 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
       char *src = &rfbFB.pfbMemory[y * pitch + x * ps];
       char *dst = &cl->compareFB[y * pitch + x * ps];
       int row, col;
-      int hBlockSize = rfbICEBlockSize == 0 ? w : rfbICEBlockSize;
-      int vBlockSize = rfbICEBlockSize == 0 ? h : rfbICEBlockSize;
+      int hBlockSize = rfbInterframeBlockSize == 0 ?
+                       w : rfbInterframeBlockSize;
+      int vBlockSize = rfbInterframeBlockSize == 0 ?
+                       h : rfbInterframeBlockSize;
 
       for (row = 0; row < h; row += vBlockSize) {
         for (col = 0; col < w; col += hBlockSize) {
@@ -2345,8 +2347,8 @@ Bool rfbSendFramebufferUpdate(rfbClientPtr cl)
        well) will ignore any empty FBUs and stop sending FBURs when it
        receives one.  If CU is not active, then this causes the viewer to
        stop receiving updates until something else, such as a mouse cursor
-       change, triggers a new FBUR.  Thus, if the ICE culls all of the
-       pixels in this update, we send a 1-pixel FBU rather than an empty
+       change, triggers a new FBUR.  Thus, if interframe comparison culls all
+       of the pixels in this update, we send a 1-pixel FBU rather than an empty
        one. */
     if (REGION_NUM_RECTS(updateRegion) == 0) {
       BoxRec box;

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2025-03-12T17:40:22">
+<meta name="date" content="2025-07-19T13:16:49">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.0.4</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2661,7 +2661,7 @@ about how Hextile and ZRLE work.</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard">Set the block size for the interframe comparison engine (ICE) to <em><code>{s}</code></em> x <em><code>{s}</code></em> pixels.  Setting <em><code>{s}</code></em> to 0 causes the ICE to compare full rectangles, as TurboVNC 1.2.x did.</td>
+    <td class="standard">Set the block size for interframe comparison to <em><code>{s}</code></em> x <em><code>{s}</code></em> pixels.  Setting <em><code>{s}</code></em> to 0 causes the TurboVNC Server to compare full rectangles, as TurboVNC 1.2.x did.</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
@@ -2685,14 +2685,14 @@ about how Hextile and ZRLE work.</p>
         ability to efficiently split rectangles into subrectangles, thus 
         increasing host CPU usage (and sometimes increasing network usage as 
         well, which runs counter to the purpose of interframe comparison.)  
-        Setting the block size to 0 causes the ICE to compare full framebuffer 
-        update rectangles, as TurboVNC 1.2.x did. <br /><br /> The default block 
-        size of 256x256 was chosen based on extensive low-level experiments 
-        using the same set of RFB session captures that were used when designing 
-        the TurboVNC encoder.  For most of those datasets, 256x256 blocks 
-        produced the lowest network and CPU usage, but actual mileage may vary. 
-        There were rare cases in which using 64x64 blocks or full-rectangle 
-        comparison produced better network and CPU usage.
+        Setting the block size to 0 causes the TurboVNC Server to compare full 
+        framebuffer update rectangles, as TurboVNC 1.2.x did. <br /><br /> The 
+        default block size of 256x256 was chosen based on extensive low-level 
+        experiments using the same set of RFB session captures that were used 
+        when designing the TurboVNC encoder.  For most of those datasets, 
+        256x256 blocks produced the lowest network and CPU usage, but actual 
+        mileage may vary. There were rare cases in which using 64x64 blocks or 
+        full-rectangle comparison produced better network and CPU usage.
     </dd>
 </dl>
 
@@ -2704,7 +2704,7 @@ about how Hextile and ZRLE work.</p>
   </tr>
   <tr class="standard">
     <td class="high standard">Summary</td>
-    <td class="standard">Disable/Enable the ICE debugger</td>
+    <td class="standard">Disable/Enable the interframe comparison debugger</td>
   </tr>
   <tr class="standard">
     <td class="high standard">Default Value</td>
@@ -2719,10 +2719,10 @@ about how Hextile and ZRLE work.</p>
     <dd class="Description-1 Description">
         If interframe comparison is enabled (see Section 
         <a href="#InterframeComparison" class="ref">7.1</a>), then setting this 
-        environment variable to 1 will cause the interframe comparison engine 
-        (ICE) to change the color of duplicate screen regions without culling 
-        them from the update stream. This allows you to easily see which 
-        applications are generating duplicate updates.
+        environment variable to 1 will cause the TurboVNC Server to change the 
+        color of duplicate screen regions without culling them from the update 
+        stream.  This allows you to easily see which applications are generating 
+        duplicate updates.
     </dd>
 </dl>
 
