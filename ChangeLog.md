@@ -2426,12 +2426,11 @@ TurboVNC Viewer GUI.  Also, a new command-line option/parameter
 (`CompatibleGUI`) can now be used to force the GUI to expose all 10 compression
 levels (useful when connecting to non-TurboVNC servers.)
 
-10. The Interframe Comparison Engine (ICE) now compares large framebuffer
-update rectangles on a block-by-block basis, which prevents the entire
-rectangle from being sent if only a small portion of it has changed.  The
-default block size is 256x256 but can be changed using the `TVNC_ICEBLOCKSIZE`
-environment variable (for instance, `TVNC_ICEBLOCKSIZE=128` would use 128x128
-blocks.)
+10. The interframe comparison feature now compares large framebuffer update
+rectangles on a block-by-block basis, which prevents the entire rectangle from
+being sent if only a small portion of it has changed.  The default block size
+is 256x256 but can be changed using the `TVNC_ICEBLOCKSIZE` environment
+variable (for instance, `TVNC_ICEBLOCKSIZE=128` would use 128x128 blocks.)
 
 11. By default, the embedded HTTP server in the TurboVNC Server will now serve
 up a JNLP (Java Web Start) file for the session instead of an applet.  You can
@@ -3062,12 +3061,12 @@ encoding received from the server rather than the requested encoding.  This is
 useful when connecting to RealVNC and other servers that do not support Tight
 encoding.
 
-21. Implemented an interframe comparison engine (ICE) in the TurboVNC Server,
-which prevents duplicate framebuffer updates from being sent as a result of an
-application drawing the same thing over and over again.  The ICE will normally
-be enabled when Compression Level 5 or above is requested by a VNC viewer, but
-you can also enable/disable it manually by passing command-line arguments to
-Xvnc.
+21. Implemented an interframe comparison feature in the TurboVNC Server, which
+prevents duplicate framebuffer updates from being sent as a result of an
+application drawing the same thing over and over again.  Interframe comparison
+will normally be enabled when Compression Level 5 or above is requested by a
+VNC viewer, but you can also enable/disable it manually by passing command-line
+arguments to Xvnc.
 
 22. Added experimental (and currently undocumented) support for the `-via` and
 `-tunnel` command-line options to the Windows TurboVNC Viewer.  These work the
