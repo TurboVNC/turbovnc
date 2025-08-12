@@ -7,6 +7,13 @@
 Size/Position" feature did not work properly in full-screen mode if
 `TVNC_SINGLESCREEN`/`turbovnc.singlescreen` was enabled.
 
+2. When using server-side key mapping, the Windows TurboVNC Viewer now works
+around an issue whereby the operating system does not send a key release event
+to applications if one of the Shift keys is released while the other Shift key
+remains pressed.  2.2.4[1] worked around this issue when using client-side key
+mapping, but due to an oversight, the server-side key mapping feature
+introduced in 3.1 beta1[4] did not include the same workaround.
+
 
 3.2
 ===
