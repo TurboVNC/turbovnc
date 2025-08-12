@@ -2329,6 +2329,16 @@ public final class CConn extends CConnection implements UserPasswdGetter,
       }
 
       if (rfbKeyCode != 0) {
+        // Work around a Windows bug whereby the O/S does not send a WM_KEYUP
+        // message if both Shift keys are pressed and only one is released.  If
+        // we receive a key release event for one Shift key and the other is in
+        // the pressed keys hash, we release both of them.
+        if (Utils.isWindows()) {
+          if (rfbKeyCode == 0x36 && pressedRFBKeys.containsKey(0x2a))
+            writeKeyRelease(0x2a, "key release, RFB keycode 0x2a");
+          if (rfbKeyCode == 0x2a && pressedRFBKeys.containsKey(0x36))
+            writeKeyRelease(0x36, "key release, RFB keycode 0x36");
+        }
         writeKeyRelease(rfbKeyCode, debugStr);
         return;
       }
