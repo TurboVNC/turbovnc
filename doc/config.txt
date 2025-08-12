@@ -73,9 +73,9 @@ rectangles |
 	both the server and the viewer.
 
 | Environment Variable | {pcode: TVNC_ICEBLOCKSIZE = __{s}__} |
-| Summary | Set the block size for the interframe comparison engine (ICE) to \
-__''{s}''__ x __''{s}''__ pixels.  Setting __''{s}''__ to 0 causes the ICE to \
-compare full rectangles, as TurboVNC 1.2.x did. |
+| Summary | Set the block size for interframe comparison to \
+__''{s}''__ x __''{s}''__ pixels.  Setting __''{s}''__ to 0 causes the \
+TurboVNC Server to compare full rectangles, as TurboVNC 1.2.x did. |
 | Default Value | ''256'' |
 #OPT: hiCol=first
 
@@ -89,8 +89,8 @@ compare full rectangles, as TurboVNC 1.2.x did. |
 	interfere with the Tight encoder's ability to efficiently split rectangles
 	into subrectangles, thus increasing host CPU usage (and sometimes increasing
 	network usage as well, which defeats the purpose of interframe comparison.)
-	Setting the block size to 0 causes the ICE to compare full framebuffer update
-	rectangles, as TurboVNC 1.2.x did.
+	Setting the block size to 0 causes the TurboVNC Server to compare full
+	framebuffer update rectangles, as TurboVNC 1.2.x did.
 	{nl}{nl}
 	The default block size of 256x256 was chosen based on extensive low-level
 	experiments using the same set of RFB session captures that were used when
@@ -100,16 +100,16 @@ compare full rectangles, as TurboVNC 1.2.x did. |
 	produced better network and CPU usage.
 
 | Environment Variable | {pcode: TVNC_ICEDEBUG = __0 \| 1__} |
-| Summary | Disable/Enable the ICE debugger |
+| Summary | Disable/Enable the interframe comparison debugger |
 | Default Value | Disabled |
 #OPT: hiCol=first
 
 	Description :: If interframe comparison is enabled (see
 	{ref prefix="Section ": InterframeComparison}), then setting this environment
-	variable to ''1'' will cause the interframe comparison engine (ICE) to change
-	the color of duplicate screen regions without culling them from the
-	framebuffer update stream.  This allows you to easily see which applications
-	are generating duplicate updates.
+	variable to ''1'' will cause the TurboVNC Server to change the color of
+	duplicate screen regions without culling them from the framebuffer update
+	stream.  This allows you to easily see which applications are generating
+	duplicate updates.
 
 | Environment Variable | {pcode: TVNC_MT = __0 \| 1__} |
 | Summary | Disable/Enable multithreaded image encoding |

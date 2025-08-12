@@ -901,14 +901,14 @@ public final class Params {
   "commensurate increase in CPU usage.)\n " +
 
   "In v1.2 or later of the TurboVNC Server, compression levels 5-7 map to " +
-  "compression levels 0-2, but they also enable the interframe comparison " +
-  "engine in the server.  Interframe comparison maintains a copy of the " +
-  "remote framebuffer for each connected viewer and compares each " +
-  "framebuffer update with the copy to ensure that redundant updates are " +
-  "not sent to the viewer.  This prevents unnecessary network traffic if an " +
-  "ill-behaved application draws the same thing over and over again, but " +
-  "interframe comparison also causes the TurboVNC Server to use more CPU " +
-  "time and much more memory.", 1, 0, 9);
+  "compression levels 0-2, but they also enable interframe comparison in " +
+  "the server.  Interframe comparison maintains a copy of the remote " +
+  "framebuffer for each connected viewer and compares each framebuffer " +
+  "update with the copy to ensure that redundant updates are not sent to " +
+  "the viewer.  This prevents unnecessary network traffic if an ill-behaved " +
+  "application draws the same thing over and over again, but interframe " +
+  "comparison also causes the TurboVNC Server to use more CPU time and much " +
+  "more memory.", 1, 0, 9);
 
   public EncodingParameter encoding =
   new EncodingParameter("Encoding", this,

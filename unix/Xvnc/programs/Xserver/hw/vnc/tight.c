@@ -4,8 +4,8 @@
  * Routines to implement Tight Encoding
  */
 
-/* Copyright (C) 2010-2012, 2014, 2017, 2022, 2024 D. R. Commander.
- *                                                 All Rights Reserved.
+/* Copyright (C) 2010-2012, 2014, 2017, 2022, 2024-2025 D. R. Commander.
+ *                                                      All Rights Reserved.
  * Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  * Copyright (C) 2004 Landmark Graphics Corporation.  All Rights Reserved.
  * Copyright (C) 2000, 2001 Const Kaplinsky.  All Rights Reserved.
@@ -246,10 +246,10 @@ int rfbTightCompressLevel(rfbClientPtr cl)
 {
   int tightCompressLevel = cl->tightCompressLevel;
 
-  /* If the interframe comparison engine is set to automatic, then
-     interframe comparison will be enabled for compression levels 5 and
-     above.  Thus, we map 5-8 internally to 0-4 so that we can get
-     interframe-enabled equivalents of all of the documented TurboVNC modes.
+  /* If interframe comparison is set to automatic, then interframe comparison
+     will be enabled for compression levels 5 and above.  Thus, we map 5-8
+     internally to 0-4 so that we can get interframe-enabled equivalents of all
+     of the documented TurboVNC modes.
      */
   if (tightCompressLevel >= 5 && tightCompressLevel <= 8)
     tightCompressLevel -= 5;
