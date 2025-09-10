@@ -58,6 +58,8 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "inputstr.h"
 #include "events.h"
 
+extern RESTYPE RT_XKBCLIENT;
+
 typedef struct _XkbInterest {
     DeviceIntPtr dev;
     ClientPtr client;
