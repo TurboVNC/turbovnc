@@ -147,11 +147,12 @@ session is started.  You can specify the window manager by passing
 {pcode: -wm __window-manager__} to ''vncserver'' or setting
 {pcode: $wm="__window-manager__";} in {file: turbovncserver.conf}, where
 __''window-manager''__ corresponds to a session desktop file located in the X
-sessions directory ({file: /usr/share/xsessions} or
-{file: /usr/local/share/xsessions}) without the {file: .desktop} extension.
-(For example, pass ''-wm xfce'' to ''vncserver'' or set ''$wm="xfce";'' in
-{file: turbovncserver.conf} to launch the window manager specified in
-{file: xfce.desktop}.)  If unspecified, the window manager defaults to
+sessions directory ({file: /usr/share/xsessions},
+{file: /usr/share/wayland-sessions}, or {file: /usr/local/share/xsessions})
+without the {file: .desktop} extension.  (For example, pass ''-wm xfce'' to
+''vncserver'' or set ''$wm="xfce";'' in {file: turbovncserver.conf} to launch
+the window manager specified in {file: xfce.desktop}.)  If unspecified, the
+window manager defaults to
 
 	* ''gnome'' if {file: gnome.desktop} exists in the X sessions directory, or
 	* ''ubuntu'' if {file: ubuntu.desktop} exists in the X sessions directory, or

@@ -13,7 +13,7 @@
 .\" License as specified in the file LICENCE.TXT that comes with the
 .\" TurboVNC distribution.
 .\"
-.TH vncserver 1 "July 2024" "" "TurboVNC"
+.TH vncserver 1 "October 2025" "" "TurboVNC"
 .SH NAME
 vncserver \- a wrapper to launch the TurboVNC Server
 .SH SYNOPSIS
@@ -142,11 +142,12 @@ another command to launch the window manager.
 This sets the value of the \fBTVNC_WM\fR environment variable to
 \fIwindow-manager\fR.  If the \fBTVNC_WM\fR environment variable is set, then
 the default X startup script will launch the specified window manager if a
-corresponding session desktop file exists under \fB/usr/share/xsessions\fR
-(\fB/usr/local/share/xsessions\fR on *BSD systems) and fail otherwise.  If the
-window manager is not specified, then the default X startup script will launch
-the "gnome", "ubuntu", "mate", or "xfce" window manager (in that order) if a
-corresponding session desktop file exists.  Otherwise, it will fail.
+corresponding session desktop file exists under \fB/usr/share/xsessions\fR or
+\fB/usr/share/wayland-sessions\fR (\fB/usr/local/share/xsessions\fR on *BSD
+systems) and fail otherwise.  If the window manager is not specified, then the
+default X startup script will launch the "gnome", "ubuntu", "mate", or "xfce"
+window manager (in that order) if a corresponding session desktop file exists.
+Otherwise, it will fail.
 .TP
 \fB\-x509cert\fR \fIcert\fR
 Specify the X.509 signed certificate file (in PEM format) to use with X.509

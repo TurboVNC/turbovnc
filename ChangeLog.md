@@ -14,6 +14,13 @@ remains pressed.  2.2.4[1] worked around this issue when using client-side key
 mapping, but due to an oversight, the server-side key mapping feature
 introduced in 3.1 beta1[4] did not include the same workaround.
 
+3. The default X startup script (`xstartup.turbovnc`) now assigns the same
+priority to session desktop files located in **/usr/share/wayland-sessions**
+and **/usr/share/xsessions**.  This prevents an issue on Fedora 40 and later
+whereby, if GNOME and Xfce or MATE were installed but the (now optional)
+`gnome-session-xsession` package was not installed, TurboVNC used Xfce or MATE
+as the default window manager rather than GNOME.
+
 
 3.2
 ===
