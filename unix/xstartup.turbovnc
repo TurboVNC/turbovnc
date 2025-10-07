@@ -93,22 +93,18 @@ find_session()
     if [ "$XSESSIONSDIR" != "" -a -f $XSESSIONSDIR/$SESSION.desktop ]; then
       DESKTOP_SESSION=$SESSION;  export DESKTOP_SESSION
       break
+    # On Fedora 40+, gnome-classic.desktop lives in
+    # /usr/share/wayland-sessions.  On RHEL 10+, gnome.desktop lives there too.
+    # More generally, there is nothing Wayland-specific about the session
+    # desktop files in /usr/share/wayland-sessions, so we can safely use them
+    # as well.
+    elif [ "$XSESSIONSDIR" = "/usr/share/xsessions" -a \
+           -f /usr/share/wayland-sessions/$SESSION.desktop ]; then
+      DESKTOP_SESSION=$SESSION;  export DESKTOP_SESSION
+      XSESSIONSDIR=/usr/share/wayland-sessions
+      break
     fi
   done
-  # On Fedora 40 and later, gnome-classic.desktop lives in
-  # /usr/share/wayland-sessions.  More generally, there is nothing
-  # Wayland-specific about the session desktop files in
-  # /usr/share/wayland-sessions, so we can safely use them as well.
-  if [ "$DESKTOP_SESSION" = "" -a \
-       "$XSESSIONSDIR" = "/usr/share/xsessions" ]; then
-    for SESSION in $SESSIONS; do
-      if [ -f /usr/share/wayland-sessions/$SESSION.desktop ]; then
-        DESKTOP_SESSION=$SESSION;  export DESKTOP_SESSION
-        XSESSIONSDIR=/usr/share/wayland-sessions
-        break
-      fi
-    done
-  fi
   if [ "$DESKTOP_SESSION" = "" ]; then
     if [ "$TVNC_WM" = "" ]; then
       echo "xstartup.turbovnc: The session desktop file for the default window manager was"
@@ -119,6 +115,10 @@ find_session()
     fi
     for SESSION in $SESSIONS; do
       echo "xstartup.turbovnc:   $XSESSIONSDIR/$SESSION.desktop"
+      if [ "$XSESSIONSDIR" = "/usr/share/xsessions" -a \
+           -d /usr/share/wayland-sessions ]; then
+        echo "xstartup.turbovnc:   /usr/share/wayland-sessions/$SESSION.desktop"
+      fi
     done
     exit 1
   fi
