@@ -1,7 +1,7 @@
-3.3 Evolving
-============
+3.3 beta1
+=========
 
-### Significant changes relative to 3.2.x:
+### Significant changes relative to 3.2.1:
 
 1. The TurboVNC Viewer's desktop scaling feature now works with automatic
 desktop resizing, which effectively allows the remote desktop to be zoomed in
