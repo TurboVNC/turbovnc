@@ -1,5 +1,5 @@
-/* Copyright (C) 2012-2015, 2018, 2020, 2022, 2024 D. R. Commander.
- *                                                 All Rights Reserved.
+/* Copyright (C) 2012-2015, 2018, 2020, 2022, 2024-2025 D. R. Commander.
+ *                                                      All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -85,6 +85,12 @@ class ServerDialog extends Dialog implements ActionListener {
     if (params.server.get() != null)
       server.setSelectedItem(params.server.get());
 
+    ImageIcon trashIcon =
+      new ImageIcon(VncViewer.class.getResource("trash.png"));
+    trashButton = new JButton(trashIcon);
+    if (!Utils.isMac())
+      trashButton.setPreferredSize(new Dimension(28, 28));
+
     topPanel = new JPanel(new GridBagLayout());
 
     Dialog.addGBComponent(new JLabel(VncViewer.LOGO_ICON), topPanel,
@@ -101,17 +107,22 @@ class ServerDialog extends Dialog implements ActionListener {
                           2, 0, 1, 1, 0, 0, 1, 1,
                           GridBagConstraints.HORIZONTAL,
                           GridBagConstraints.CENTER,
-                          new Insets(10, 0, 5, 20));
+                          new Insets(10, 0, 5, 5));
+    Dialog.addGBComponent(trashButton, topPanel,
+                          3, 0, 1, 1, 0, 0, 0, 1,
+                          GridBagConstraints.NONE,
+                          GridBagConstraints.LINE_START,
+                          new Insets(5, 0, 0, 10));
     Dialog.addGBComponent(sessionLabel, topPanel,
                           1, 1, 2, 1, 0, 0, 1, 1,
                           GridBagConstraints.HORIZONTAL,
                           GridBagConstraints.CENTER,
-                          new Insets(0, 0, 0, 20));
+                          new Insets(0, 0, 0, 0));
     Dialog.addGBComponent(sessionLabel2, topPanel,
                           1, 2, 2, 1, 0, 0, 1, 1,
                           GridBagConstraints.HORIZONTAL,
                           GridBagConstraints.CENTER,
-                          new Insets(0, 0, 0, 20));
+                          new Insets(0, 0, 0, 0));
 
     optionsButton = new JButton("Options...");
     aboutButton = new JButton("About...");
@@ -142,6 +153,7 @@ class ServerDialog extends Dialog implements ActionListener {
                           new Insets(0, 2, 0, 5));
 
     server.addActionListener(this);
+    trashButton.addActionListener(this);
     optionsButton.addActionListener(this);
     aboutButton.addActionListener(this);
     okButton.addActionListener(this);
@@ -221,6 +233,21 @@ class ServerDialog extends Dialog implements ActionListener {
       if (e.getActionCommand().equals("comboBoxEdited") ||
           e.getActionCommand().equals("comboBoxChanged"))
         updateButtons();
+    } else if (s instanceof JButton && (JButton)s == trashButton) {
+      String serverStr = (String)editor.getItem();
+      if (serverStr != null && serverStr.length() > 0) {
+        UserPreferences.deleteHostOptions(Hostname.getHost(serverStr));
+        UserPreferences.updateHistory(serverStr, true);
+        server.removeAllItems();
+        String valueStr = UserPreferences.get("ServerDialog", "history");
+        if (valueStr != null) {
+          String values[] = valueStr.split(",");
+          for (String value : values)
+            server.addItem(value);
+        }
+        server.setSelectedIndex(0);
+        updateButtons();
+      }
     }
   }
 
@@ -232,31 +259,7 @@ class ServerDialog extends Dialog implements ActionListener {
         throw new WarningException("No server name specified");
 
       params.server.set(serverStr);
-
-      // Update the history list
-      String valueStr = UserPreferences.get("ServerDialog", "history");
-      String t = (valueStr == null) ? "" : valueStr;
-      StringTokenizer st = new StringTokenizer(t, ",");
-      StringBuffer sb = new StringBuffer().append(serverStr);
-      while (st.hasMoreTokens()) {
-        String str = st.nextToken();
-        if (!str.equals(serverStr) && !str.equals("")) {
-          sb.append(',');
-          sb.append(str);
-        }
-      }
-      String history = sb.toString();
-      if (history.length() > Preferences.MAX_VALUE_LENGTH) {
-        int lastComma =
-          history.lastIndexOf(',', Preferences.MAX_VALUE_LENGTH);
-        if (lastComma <= 0)
-          history = "";
-        else
-          history = history.substring(0, lastComma);
-      }
-      UserPreferences.set("ServerDialog", "history", history);
-      UserPreferences.save("ServerDialog");
-
+      UserPreferences.updateHistory(serverStr, false);
     } catch (Exception e) {
       cc.viewer.reportException(e, false);
       return false;
@@ -271,7 +274,7 @@ class ServerDialog extends Dialog implements ActionListener {
   JComboBox server;
   ComboBoxEditor editor;
   JPanel topPanel, buttonPanel;
-  JButton aboutButton, optionsButton, okButton, cancelButton;
+  JButton aboutButton, optionsButton, okButton, cancelButton, trashButton;
   OptionsDialog options;
 
   static LogWriter vlog = new LogWriter("ServerDialog");

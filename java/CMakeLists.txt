@@ -183,7 +183,7 @@ configure_file(${CLASSPATH}/timestamp.in ${CLASSPATH}/timestamp)
 if(NOT "${SRCDIR}" STREQUAL "${BINDIR}")
 
 foreach(icon toolbar.png turbovnc.png turbovnc-sm.png turbovnc-128.png
-	insecure.png secure.png)
+	insecure.png secure.png trash.png)
 	add_custom_command(OUTPUT ${BINDIR}/${CLASSPATH}/${icon}
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			${SRCDIR}/${CLASSPATH}/${icon} ${BINDIR}/${CLASSPATH}/${icon}
@@ -205,6 +205,7 @@ add_custom_command(OUTPUT VncViewer.jar
 		${BINDIR}/${CLASSPATH}/turbovnc-128.png
 		${BINDIR}/${CLASSPATH}/insecure.png
 		${BINDIR}/${CLASSPATH}/secure.png
+		${BINDIR}/${CLASSPATH}/trash.png
 	COMMAND ${JAVA_ARCHIVE}
 	ARGS cfm VncViewer.jar
 		${SRCDIR}/${CLASSPATH}/MANIFEST.MF
@@ -225,7 +226,8 @@ add_custom_command(OUTPUT VncViewer.jar
 		${CLASSPATH}/turbovnc-sm.png
 		${CLASSPATH}/turbovnc-128.png
 		${CLASSPATH}/insecure.png
-		${CLASSPATH}/secure.png)
+		${CLASSPATH}/secure.png
+		${CLASSPATH}/trash.png)
 
 add_custom_target(java ALL DEPENDS VncViewer.jar)
 

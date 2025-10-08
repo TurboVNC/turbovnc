@@ -69,7 +69,8 @@ platforms and Windows GDI on Windows platforms.
 Acknowledgements
 ----------------
 
-Zoom icons in the TurboVNC Viewer toolbar are from
+Zoom icons in the TurboVNC Viewer toolbar, and trash icon in the New TurboVNC
+Connection dialog, are from
 [Tabler Icons](https://github.com/tabler/tabler-icons), which is:
 
     Copyright (c) 2020-2024 Paweł Kuna

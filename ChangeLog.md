@@ -25,6 +25,10 @@ user's account is greater than or equal to the session limit, then the
 `vncserver` script and the TurboVNC Session Manager will refuse to start a new
 session.
 
+6. The New TurboVNC Connection dialog in the TurboVNC Viewer now has a button
+that can be used to remove an individual connection from the connection history
+and optionally delete the per-host options associated with that connection.
+
 
 3.2.1
 =====

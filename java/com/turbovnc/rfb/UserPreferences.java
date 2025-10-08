@@ -21,6 +21,7 @@
 package com.turbovnc.rfb;
 
 import javax.swing.*;
+import java.util.*;
 import java.util.prefs.Preferences;
 import java.util.prefs.BackingStoreException;
 
@@ -52,37 +53,101 @@ public final class UserPreferences {
     }
   }
 
-  public static void clear(boolean list) {
+  private static void deleteNode(String nName, boolean caseSensitive) {
     try {
-      if (!list) {
-        Object[] dlgOptions = {
-          UIManager.getString("OptionPane.yesButtonText"),
-          UIManager.getString("OptionPane.noButtonText")
-        };
-        JOptionPane pane = new JOptionPane("Are you sure you want to clear\n" +
-                                           "all saved per-host options?",
-                                           JOptionPane.WARNING_MESSAGE,
-                                           JOptionPane.YES_NO_OPTION, null,
-                                           dlgOptions, dlgOptions[1]);
-        JDialog dlg = pane.createDialog(null, "TurboVNC Viewer");
-        dlg.setAlwaysOnTop(true);
-        dlg.setVisible(true);
-        if (pane.getValue() == dlgOptions[1])
-          return;
+      String[] children = root.childrenNames();
+      for (int i = 0; i < children.length; i++) {
+        if (nName != null &&
+            (caseSensitive ? children[i].equals(nName) :
+                             children[i].equalsIgnoreCase(nName))) {
+          Preferences node = root.node(children[i]);
+          node.removeNode();
+        }
       }
+      root.sync();
+    } catch (BackingStoreException e) {
+      vlog.error("Could not delete preferences:");
+      vlog.error("  " + e.getMessage());
+    }
+  }
+
+  public static void deleteHostOptions(String host) {
+    Object[] dlgOptions = {
+      UIManager.getString("OptionPane.yesButtonText"),
+      UIManager.getString("OptionPane.noButtonText")
+    };
+    JOptionPane pane = new JOptionPane("Do you want to delete the saved\n" +
+                                       "options for host " + host + "?",
+                                       JOptionPane.WARNING_MESSAGE,
+                                       JOptionPane.YES_NO_OPTION, null,
+                                       dlgOptions, dlgOptions[1]);
+    JDialog dlg = pane.createDialog(null, "TurboVNC Viewer");
+    dlg.setAlwaysOnTop(true);
+    dlg.setVisible(true);
+    if (pane.getValue() == dlgOptions[1])
+      return;
+    deleteNode(host, true);
+  }
+
+  public static void deleteAllOptions() {
+    try {
+      Object[] dlgOptions = {
+        UIManager.getString("OptionPane.yesButtonText"),
+        UIManager.getString("OptionPane.noButtonText")
+      };
+      JOptionPane pane = new JOptionPane("Are you sure you want to delete\n" +
+                                         "the saved options for all hosts?",
+                                         JOptionPane.WARNING_MESSAGE,
+                                         JOptionPane.YES_NO_OPTION, null,
+                                         dlgOptions, dlgOptions[1]);
+      JDialog dlg = pane.createDialog(null, "TurboVNC Viewer");
+      dlg.setAlwaysOnTop(true);
+      dlg.setVisible(true);
+      if (pane.getValue() == dlgOptions[1])
+        return;
       root.clear();
       String[] children = root.childrenNames();
       for (int i = 0; i < children.length; i++) {
-        if (list != children[i].equalsIgnoreCase("ServerDialog"))
-          continue;
         Preferences node = root.node(children[i]);
         node.removeNode();
       }
       root.sync();
     } catch (BackingStoreException e) {
-      vlog.error("Could not clear preferences:");
+      vlog.error("Could not delete preferences:");
       vlog.error("  " + e.getMessage());
     }
+  }
+
+  public static void updateHistory(String serverStr, boolean clear) {
+    // Update the history list
+    String valueStr = get("ServerDialog", "history");
+    String t = (valueStr == null) ? "" : valueStr;
+    StringTokenizer st = new StringTokenizer(t, ",");
+    StringBuffer sb = new StringBuffer();
+    if (!clear)
+      sb.append(serverStr);
+    while (st.hasMoreTokens()) {
+      String str = st.nextToken();
+      if (!str.equals(serverStr) && !str.equals("")) {
+        if (sb.length() > 0)
+          sb.append(',');
+        sb.append(str);
+      }
+    }
+    String history = sb.toString();
+    if (history.length() > Preferences.MAX_VALUE_LENGTH) {
+      int lastComma = history.lastIndexOf(',', Preferences.MAX_VALUE_LENGTH);
+      if (lastComma <= 0)
+        history = "";
+      else
+        history = history.substring(0, lastComma);
+    }
+    set("ServerDialog", "history", history);
+    save("ServerDialog");
+  }
+
+  public static void clearHistory() {
+    deleteNode("ServerDialog", false);
   }
 
   public static void load(String nName, Params params) {

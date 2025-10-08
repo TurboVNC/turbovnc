@@ -60,7 +60,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   private JButton x509caButton, x509crlButton;
   private JLabel x509caLabel, x509crlLabel;
   private JTextField x509ca, x509crl;
-  private JButton listClearButton, defClearButton, resetButton;
+  private JButton clearHistoryButton, deleteOptionsButton, resetButton;
   private JLabel encMethodLabel;
   private JLabel jpegQualityLabel, jpegQualityLabelLo, jpegQualityLabelHi;
   private JLabel subsamplingLabel, subsamplingLabelLo, subsamplingLabelHi;
@@ -507,19 +507,19 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     // Global tab
     globalPanel = new JPanel(new GridBagLayout());
 
-    listClearButton = new JButton("Clear the list of saved connections");
-    listClearButton.addActionListener(this);
-    defClearButton = new JButton("Clear all saved per-host options");
-    defClearButton.addActionListener(this);
+    clearHistoryButton = new JButton("Clear the connection history");
+    clearHistoryButton.addActionListener(this);
+    deleteOptionsButton = new JButton("Delete saved options for all hosts");
+    deleteOptionsButton.addActionListener(this);
     resetButton = new JButton("Reset all options to defaults");
     resetButton.addActionListener(this);
 
-    Dialog.addGBComponent(listClearButton, globalPanel,
+    Dialog.addGBComponent(clearHistoryButton, globalPanel,
                           0, 0, 2, 1, 2, 2, 1, 0,
                           GridBagConstraints.NONE,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(8, 5, 0, 5));
-    Dialog.addGBComponent(defClearButton, globalPanel,
+    Dialog.addGBComponent(deleteOptionsButton, globalPanel,
                           0, 1, 2, 1, 2, 2, 1, 0,
                           GridBagConstraints.NONE,
                           GridBagConstraints.FIRST_LINE_START,
@@ -847,10 +847,10 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       endDialog();
     } else if (s instanceof JButton && (JButton)s == cancelButton) {
       endDialog();
-    } else if (s instanceof JButton && (JButton)s == listClearButton) {
-      UserPreferences.clear(true);
-    } else if (s instanceof JButton && (JButton)s == defClearButton) {
-      UserPreferences.clear(false);
+    } else if (s instanceof JButton && (JButton)s == clearHistoryButton) {
+      UserPreferences.clearHistory();
+    } else if (s instanceof JButton && (JButton)s == deleteOptionsButton) {
+      UserPreferences.deleteAllOptions();
     } else if (s instanceof JButton && (JButton)s == resetButton) {
       Params oldParams = params;
       params = new Params();
