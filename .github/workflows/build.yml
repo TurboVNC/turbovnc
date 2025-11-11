@@ -95,7 +95,7 @@ jobs:
           popd
   macos:
     if: ${{!contains(github.ref, 'refs/tags/')}}
-    runs-on: macos-13
+    runs-on: macos-15
     steps:
       - name: Set global environment variables
         run: |
@@ -106,7 +106,6 @@ jobs:
       - name: Set up build
         run: |
           brew install md5sha1sum
-          sudo xcode-select -s /Applications/Xcode_14.2.app
           mkdir -p $HOME/src/vnc.nightly
           git clone --depth=1 https://github.com/turbovnc/buildscripts.git -b $BRANCH $HOME/src/buildscripts
           mkdir $HOME/libjpeg-turbo-dmg
