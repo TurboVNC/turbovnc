@@ -1,0 +1,12 @@
+{
+  "name": "Official TurboVNC Ubuntu Desktop",
+  "build": { "dockerfile": "Dockerfile" },
+  "forwardPorts": [6080],
+  "portsAttributes": {
+    "6080": {
+      "label": "noVNC TurboVNC Desktop",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "postCreateCommand": "echo 'Compiled from official TurboVNC repo! Access via port 6080.'"
+}
