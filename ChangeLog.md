@@ -40,6 +40,14 @@ remains pressed.  2.2.4[1] worked around this issue when using client-side key
 mapping, but due to an oversight, the server-side key mapping feature
 introduced in 3.1 beta1[4] did not include the same workaround.
 
+9. The `vncserver` script now checks whether the Xvnc process associated with a
+TurboVNC session is running before including the session in the session list.
+This prevents an issue whereby, if the Xvnc process was killed without using
+the `vncserver` script (such as by rebooting the host without shutting down the
+session) and a local session or another X proxy reused the orphaned session's
+display number, then the TurboVNC Session Manager listed the orphaned session
+but could not connect to it.
+
 
 3.1.4
 =====

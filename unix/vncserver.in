@@ -967,6 +967,9 @@ sub List
       my @session = ();
       push(@session, $1);
       chomp($pid = `cat $vncUserDir/$file`);
+      if (!kill 0, $pid) {
+        next;
+      }
       push(@session, $pid);
       if (-r "$vncUserDir/$host:$1-noVNC.pid") {
         chomp($pid = `cat $vncUserDir/$host:$1-noVNC.pid`);
