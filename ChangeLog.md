@@ -8,6 +8,14 @@ threw a fatal error ("Cannot load from object array because 'this.sessions' is
 null") if the TurboVNC Session Manager dialog was used to kill the last
 TurboVNC session running under the user's account on the host.
 
+2. The `vncserver` script now checks whether the Xvnc process associated with a
+TurboVNC session is running before including the session in the session list.
+This prevents an issue whereby, if the Xvnc process was killed without using
+the `vncserver` script (such as by rebooting the host without shutting down the
+session) and a local session or another X proxy reused the orphaned session's
+display number, then the TurboVNC Session Manager listed the orphaned session
+but could not connect to it.
+
 
 3.3 beta1
 =========
