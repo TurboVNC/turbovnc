@@ -1,3 +1,14 @@
+3.3 beta2
+=========
+
+### Significant changes relative to 3.3 beta1:
+
+1. Fixed a regression introduced by 3.3 beta1[5] whereby the TurboVNC Viewer
+threw a fatal error ("Cannot load from object array because 'this.sessions' is
+null") if the TurboVNC Session Manager dialog was used to kill the last
+TurboVNC session running under the user's account on the host.
+
+
 3.3 beta1
 =========
 

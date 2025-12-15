@@ -97,7 +97,7 @@ class SessionManagerDialog extends Dialog implements ActionListener {
                           GridBagConstraints.HORIZONTAL,
                           GridBagConstraints.CENTER,
                           new Insets(0, 2, 0, 5));
-    if (sessions[0].sessionLimit > 0 &&
+    if (sessions != null && sessions[0].sessionLimit > 0 &&
         sessions.length >= sessions[0].sessionLimit)
       newSessionButton.setEnabled(false);
 
