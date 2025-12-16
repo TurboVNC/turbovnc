@@ -16,6 +16,10 @@ session) and a local session or another X proxy reused the orphaned session's
 display number, then the TurboVNC Session Manager listed the orphaned session
 but could not connect to it.
 
+3. Fixed an issue in the TurboVNC Server whereby the zlib stream of a
+server-to-client UTF-8 clipboard transfer was sometimes truncated if
+Compression Level 0 was used, causing the VNC viewer to abort.
+
 
 3.3 beta1
 =========
