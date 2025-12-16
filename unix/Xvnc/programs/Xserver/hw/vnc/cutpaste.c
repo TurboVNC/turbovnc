@@ -2,8 +2,8 @@
  * cutpaste.c - routines to deal with cut & paste buffers / selection.
  */
 
-/* Copyright (C) 2014, 2017-2019, 2022, 2024 D. R. Commander.
- *                                           All Rights Reserved.
+/* Copyright (C) 2014, 2017-2019, 2022, 2024-2025 D. R. Commander.
+ *                                                All Rights Reserved.
  * Copyright 2016-2017, 2019-2021 Pierre Ossman for Cendio AB
  * Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -942,7 +942,7 @@ static void SendClipboardProvide(rfbClientPtr cl, CARD32 flags,
   rfbServerCutTextMsg sct;
   Bool zlibInit = FALSE;
   z_stream zs;
-  CARD32 totalLength = 0;
+  size_t totalCompressBound = 0;
   char *compressedBuf = NULL;
 
   if (!cl->enableExtClipboard || !(cl->clipFlags & rfbExtClipProvide))
@@ -952,7 +952,8 @@ static void SendClipboardProvide(rfbClientPtr cl, CARD32 flags,
   for (i = 0; i < 16; i++) {
     if (!(flags & (1 << i)))
       continue;
-    totalLength += sizeof(CARD32) + lengths[count];
+    totalCompressBound += compressBound(sizeof(CARD32)) +
+                          compressBound(lengths[count]);
     count++;
   }
 
@@ -962,10 +963,10 @@ static void SendClipboardProvide(rfbClientPtr cl, CARD32 flags,
     goto bailout;
   }
 
-  compressedBuf = (char *)rfbAlloc(compressBound(totalLength));
+  compressedBuf = (char *)rfbAlloc(totalCompressBound);
 
   zs.next_out = (unsigned char *)compressedBuf;
-  zs.avail_out = compressBound(totalLength);
+  zs.avail_out = totalCompressBound;
 
   count = 0;
   for (i = 0; i < 16; i++) {
@@ -999,10 +1000,10 @@ static void SendClipboardProvide(rfbClientPtr cl, CARD32 flags,
   memset(&sct, 0, sz_rfbServerCutTextMsg);
   sct.type = rfbServerCutText;
   sct.length =
-    Swap32IfLE((CARD32)(-(4 + compressBound(totalLength) - zs.avail_out)));
+    Swap32IfLE((CARD32)(-(4 + totalCompressBound - zs.avail_out)));
   WRITE_OR_CLOSE(&sct, sz_rfbServerCutTextMsg, goto bailout);
   WRITE32_OR_CLOSE(flags | rfbExtClipProvide, goto bailout);
-  WRITE_OR_CLOSE(compressedBuf, compressBound(totalLength) - zs.avail_out,
+  WRITE_OR_CLOSE(compressedBuf, totalCompressBound - zs.avail_out,
                  goto bailout);
 
   free(compressedBuf);
