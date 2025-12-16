@@ -138,7 +138,51 @@ public final class Params {
     return null;
   }
 
-  public void list(int width, boolean advanced) {
+  private static String wrapText(String str, int width, int offset) {
+    String[] words = str.split(" ");
+    int len = 0;
+    StringBuilder sb = new StringBuilder();
+
+    for (int i = 0; i < offset; i++)
+      sb.append(" ");
+    for (String word : words) {
+      if (len + word.length() + 1 <= width - offset) {
+        sb.append(word);
+        len += word.length() + 1;
+      } else {
+        if (sb.charAt(sb.length() - 1) == ' ')
+          sb.deleteCharAt(sb.length() - 1);
+        sb.append("\n");
+        for (int i = 0; i < offset; i++)
+          sb.append(" ");
+        if (word.length() <= 0) {
+          len = 0;
+          continue;
+        }
+        sb.append(word);
+        len = word.length() + 1;
+      }
+      if (word.length() > 0 && word.charAt(word.length() - 1) == '\n') {
+        sb.append("\n");
+        for (int i = 0; i < offset; i++)
+          sb.append(" ");
+        len = 0;
+      } else if (word.length() > 0 && word.charAt(word.length() - 1) == '\r') {
+        sb.deleteCharAt(sb.length() - 1);
+        sb.append("\n");
+        for (int i = 0; i < offset; i++)
+          sb.append(" ");
+        len = 0;
+      } else
+        sb.append(" ");
+    }
+    if (sb.charAt(sb.length() - 1) == ' ')
+      sb.deleteCharAt(sb.length() - 1);
+
+    return sb.toString();
+  }
+
+  public void list(boolean advanced) {
     VoidParameter current = head;
 
     while (current != null) {
@@ -162,44 +206,18 @@ public final class Params {
         continue;
       }
 
-      System.out.print("--> " + current.getName() + "\n    ");
-      if (current.getValues() != null)
-        System.out.print("Values: " + current.getValues() + " ");
-      if (current.getDefaultStr() != null)
-        System.out.print("(default = " + current.getDefaultStr() + ")\n");
-      System.out.print("\n   ");
+      System.out.print("--> " + current.getName() + "\n");
+      String valuesStr = (current.getValues() != null ?
+                          "Values: " + current.getValues() + " " : "") +
+                         (current.getDefaultStr() != null ?
+                          "(default = " + current.getDefaultStr() + ")" : "");
+      if (valuesStr.length() > 0)
+        System.out.println(wrapText(valuesStr, 80, 4));
+      System.out.print("\n");
+      System.out.println(wrapText(desc, 80, 4));
+      System.out.print("\n");
 
-      int column = 4;
-      while (true) {
-        int s = desc.indexOf(' ');
-        while (desc.charAt(s + 1) == ' ') s++;
-        int wordLen;
-        if (s > -1) wordLen = s;
-        else wordLen = desc.length();
-
-        if (column + wordLen + 1 > width) {
-          System.out.print("\n   ");
-          column = 4;
-        }
-        if (wordLen >= 1 && desc.charAt(wordLen - 1) == '\r') {
-          System.out.format("%" + wordLen + "s",
-                            desc.substring(0, wordLen - 1));
-          column += wordLen;
-        } else {
-          System.out.format(" %" + wordLen + "s", desc.substring(0, wordLen));
-          column += wordLen + 1;
-        }
-        if (wordLen >= 1 && (desc.charAt(wordLen - 1) == '\n' ||
-                             desc.charAt(wordLen - 1) == '\r')) {
-          System.out.print("\n   ");
-          column = 4;
-        }
-
-        if (s == -1) break;
-        desc = desc.substring(wordLen + 1);
-      }
       current = current.next();
-      System.out.print("\n\n");
     }
   }
 

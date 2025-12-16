@@ -504,7 +504,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
 
         if (argv[i].equals("-??")) {
           System.out.print("\nThe advanced parameters are:\n\n");
-          params.list(80, true);
+          params.list(true);
           System.exit(1);
         }
 
@@ -627,7 +627,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
     System.out.println("Copyright (C) " + copyrightYear + " " + copyright);
     System.out.println(url);
     System.out.print(usage);
-    params.list(80, false);
+    params.list(false);
     System.exit(1);
   }
 
