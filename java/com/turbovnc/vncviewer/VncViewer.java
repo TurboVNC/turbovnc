@@ -47,13 +47,21 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
   static String pkgDate = null;
   static String pkgTime = null;
 
-  private static final ImageIcon FRAME_ICON =
-    new ImageIcon(VncViewer.class.getResource("turbovnc-sm.png"));
-  public static final Image FRAME_IMAGE = FRAME_ICON.getImage();
-  public static final ImageIcon LOGO_ICON =
-    new ImageIcon(VncViewer.class.getResource("turbovnc.png"));
-  public static final ImageIcon LOGO_ICON128 =
+  private static final ImageIcon ICON16 =
+    new ImageIcon(VncViewer.class.getResource("turbovnc-16.png"));
+  public static final Image IMAGE16 = ICON16.getImage();
+  public static final ImageIcon ICON48 =
+    new ImageIcon(VncViewer.class.getResource("turbovnc-48.png"));
+  public static final Image IMAGE48 = ICON48.getImage();
+  public static final ImageIcon ICON128 =
     new ImageIcon(VncViewer.class.getResource("turbovnc-128.png"));
+  public static final Image IMAGE128 = ICON128.getImage();
+  public static final List<Image> IMAGES = new ArrayList<Image>();
+  static {
+    IMAGES.add(IMAGE128);
+    IMAGES.add(IMAGE48);
+    IMAGES.add(IMAGE16);
+  }
 
   void setVersion() {
     if (version == null || build == null || copyrightYear == null ||
@@ -223,7 +231,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
           Method setDockIconImage = Utils.JAVA_VERSION >= 9 ?
             appClass.getMethod("setIconImage", paramTypes) :
             appClass.getMethod("setDockIconImage", paramTypes);
-          setDockIconImage.invoke(obj, LOGO_ICON128.getImage());
+          setDockIconImage.invoke(obj, IMAGE128);
         } catch (Exception e) {
           vlog.debug("Could not set dock icon:");
           vlog.debug("  " + e.toString());
@@ -245,7 +253,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
       JDialog dlg = new JDialog();
       Object owner = dlg.getOwner();
       if (owner instanceof Frame && owner != null)
-        ((Frame)owner).setIconImage(FRAME_IMAGE);
+        ((Frame)owner).setIconImages(IMAGES);
       dlg.dispose();
 
     } catch (Exception e) {
@@ -742,7 +750,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
       "Copyright (C) " + VncViewer.copyrightYear + " " + VncViewer.copyright +
         "\n" +
       VncViewer.url,
-      "About TurboVNC Viewer", JOptionPane.INFORMATION_MESSAGE, LOGO_ICON128);
+      "About TurboVNC Viewer", JOptionPane.INFORMATION_MESSAGE, ICON128);
   }
 
   void showOptions() {

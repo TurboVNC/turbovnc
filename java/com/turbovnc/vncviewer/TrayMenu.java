@@ -1,5 +1,5 @@
-/* Copyright (C) 2014, 2018, 2020, 2022, 2024 D. R. Commander.
- *                                            All Rights Reserved.
+/* Copyright (C) 2014, 2018, 2020, 2022, 2024-2025 D. R. Commander.
+ *                                                 All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -48,7 +48,7 @@ public final class TrayMenu extends PopupMenu implements ActionListener {
     if (Utils.isMac()) {
       setDockMenu(this);
     } else {
-      trayIcon = new TrayIcon(VncViewer.FRAME_IMAGE);
+      trayIcon = new TrayIcon(VncViewer.IMAGE16);
       trayIcon.setPopupMenu(this);
       tray = SystemTray.getSystemTray();
       try {

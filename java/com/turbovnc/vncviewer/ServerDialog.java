@@ -93,7 +93,7 @@ class ServerDialog extends Dialog implements ActionListener {
 
     topPanel = new JPanel(new GridBagLayout());
 
-    Dialog.addGBComponent(new JLabel(VncViewer.LOGO_ICON), topPanel,
+    Dialog.addGBComponent(new JLabel(VncViewer.ICON48), topPanel,
                           0, 0, 1, 3, 0, 0, 0, 1,
                           GridBagConstraints.HORIZONTAL,
                           GridBagConstraints.LINE_START,

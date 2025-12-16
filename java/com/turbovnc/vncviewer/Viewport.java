@@ -41,7 +41,7 @@ public final class Viewport extends JFrame implements Runnable {
     updateTitle();
     setFocusable(false);
     setFocusTraversalKeysEnabled(false);
-    setIconImage(VncViewer.FRAME_IMAGE);
+    setIconImages(VncViewer.IMAGES);
     UIManager.getDefaults().put("ScrollPane.ancestorInputMap",
       new UIDefaults.LazyInputMap(new Object[]{}));
     if (cc.params.confirmClose.get())

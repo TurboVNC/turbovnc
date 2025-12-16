@@ -1,4 +1,5 @@
-/* Copyright (C) 2012-2014, 2016, 2018 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012-2014, 2016, 2018, 2025 D. R. Commander.
+ *                                           All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -69,7 +70,7 @@ class Dialog {
     // created with a null owner to ensure that they appear in the task
     // switcher on Linux.  However, this necessitates using
     // JDialog.setIconImage() to set the icon image.
-    dlg.setIconImage(VncViewer.FRAME_IMAGE);
+    dlg.setIconImages(VncViewer.IMAGES);
 
     populateDialog(dlg);
     if (title != null)
