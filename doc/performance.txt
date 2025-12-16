@@ -217,7 +217,7 @@ has the following effect:
 
 {:}
 
-|| Compression Level || Zlib compression level (indexed color subrectangles) \
+|| Compression level || Zlib compression level (indexed color subrectangles) \
 	|| Zlib compression level (raw subrectangles) || Palette threshold \
 	|| Interframe comparison || Notes ||
 | 0 | None | None | Subrectangle size / 4 | No | \
