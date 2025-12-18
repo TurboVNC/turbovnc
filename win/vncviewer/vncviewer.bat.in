@@ -30,10 +30,6 @@ set _TMP2=%_TMP:? =%
 if EXIST "%_TMP2%\jawt.dll" set JAWT_PATH=%_TMP2%
 if DEFINED JAWT_PATH goto jawt_path_defined
 
-rem Maybe we're using Java 6?
-if EXIST "c:\Program Files\Java\jre6\bin\jawt.dll" set JAWT_PATH=c:\Program Files\Java\jre6\bin
-if DEFINED JAWT_PATH goto jawt_path_defined
-
 echo WARNING: Could not find jawt.dll.  Some features may not work properly.
 goto start
 
