@@ -1,4 +1,5 @@
-/* Copyright (C) 2013-2014, 2018, 2020 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2013-2014, 2018, 2020, 2025 D. R. Commander.
+ *                                           All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -280,8 +281,7 @@ class ProfileDialog extends Dialog {
     dlg.getRootPane().registerKeyboardAction(actionListener, ks,
       JComponent.WHEN_IN_FOCUSED_WINDOW);
     ks = KeyStroke.getKeyStroke(KeyEvent.VK_P,
-      KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_DOWN_MASK |
-      KeyEvent.SHIFT_DOWN_MASK);
+                                cc.params.hotkeyModifiers.get());
     dlg.getRootPane().registerKeyboardAction(actionListener, ks,
       JComponent.WHEN_IN_FOCUSED_WINDOW);
     // macOS always treats the RAlt key as an AltGr key.  For reasons that
@@ -289,10 +289,10 @@ class ProfileDialog extends Dialog {
     // the modifier mask will always contain KeyEvent.ALT_GRAPH_DOWN_MASK
     // and KeyEvent.ALT_DOWN_MASK whenever LAlt is pressed, so we need to
     // register a separate keyboard action to handle that situation.
-    if (Utils.isMac()) {
+    if (Utils.isMac() &&
+        (cc.params.hotkeyModifiers.get() & KeyEvent.ALT_DOWN_MASK) != 0) {
       ks = KeyStroke.getKeyStroke(KeyEvent.VK_P,
-        KeyEvent.CTRL_DOWN_MASK | KeyEvent.ALT_GRAPH_DOWN_MASK |
-        KeyEvent.SHIFT_DOWN_MASK | KeyEvent.ALT_DOWN_MASK);
+        cc.params.hotkeyModifiers.get() | KeyEvent.ALT_GRAPH_DOWN_MASK);
       dlg.getRootPane().registerKeyboardAction(actionListener, ks,
         JComponent.WHEN_IN_FOCUSED_WINDOW);
     }

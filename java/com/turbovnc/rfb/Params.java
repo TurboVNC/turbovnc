@@ -26,6 +26,7 @@
 
 package com.turbovnc.rfb;
 
+import java.awt.event.*;
 import java.io.*;
 import java.util.*;
 
@@ -702,10 +703,11 @@ public final class Params {
   "\"Always\" = Automatically grab the keyboard in both full-screen mode " +
   "and windowed mode.\r " +
   "\"Manual\" = Only grab/ungrab the keyboard when the \"Grab Keyboard\" F8 " +
-  "menu option is selected or the Ctrl-Alt-Shift-G hotkey is pressed.\n " +
+  "menu option is selected or the corresponding hotkey is pressed.\n " +
 
-  "Regardless of the grabbing mode, the F8 menu option and hotkey can " +
-  "always be used to grab or ungrab the keyboard.", GrabParameter.FS);
+  "Regardless of the grabbing mode, the F8 menu option and corresponding " +
+  "hotkey can always be used to grab or ungrab the keyboard.",
+  GrabParameter.FS);
 
   public BoolParameter grabPointer =
   new BoolParameter("GrabPointer", this, false, false,
@@ -717,22 +719,29 @@ public final class Params {
   "cannot switch to other running applications.)  Thus, this parameter is " +
   "primarily useful with GrabKeyboard=FS." : null, true);
 
+  public ModifierParameter hotkeyModifiers =
+  new ModifierParameter("HotkeyModifiers", this,
+  "The combination of modifier keys used to trigger the various hotkey " +
+  "sequences.  Shift cannot be used as a modifier unless it is accompanied " +
+  "by another modifier.",
+  InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK |
+  InputEvent.SHIFT_DOWN_MASK);
+
   public MenuKeyParameter menuKey =
   new MenuKeyParameter("MenuKey", this,
   "The key used to display the popup menu", "F8");
 
   public BoolParameter noHotkeys =
   new BoolParameter("NoHotkeys", this, false, true,
-  "Setting this parameter disables all Ctrl-Alt-Shift hotkeys, thus " +
-  "allowing those key sequences to be transmitted to the VNC server.",
-  false);
+  "Setting this parameter disables all hotkeys, thus allowing those key " +
+  "sequences to be transmitted to the VNC server.", false);
 
   public BoolParameter noMacHotkeys =
   new BoolParameter("NoMacHotkeys", this, false, true,
   Utils.isMac() ? "On macOS, the TurboVNC Viewer normally assigns " +
-  "equivalent Command hotkeys for most of its Ctrl-Alt-Shift hotkeys.  " +
-  "However, since the Command key maps to the Super/Meta key on Un*x " +
-  "systems, those Command hotkeys may interfere with hotkeys used by " +
+  "equivalent Command key menu shortcuts (AKA accelerators) for most of its " +
+  "hotkeys.  However, since the Command key maps to the Super/Meta key on " +
+  "Un*x systems, those menu shortcuts may interfere with hotkeys used by " +
   "certain applications (such as Emacs) on the remote system.  Setting this " +
   "parameter allows as many Command key sequences as possible to be " +
   "transmitted to the VNC server as Super/Meta key sequences, although some " +

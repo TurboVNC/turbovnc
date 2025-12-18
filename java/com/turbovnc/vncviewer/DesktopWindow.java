@@ -688,12 +688,15 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
       e.consume();
       return;
     }
-    int ctrlAltShiftMask = InputEvent.SHIFT_DOWN_MASK |
-                           InputEvent.CTRL_DOWN_MASK |
-                           InputEvent.ALT_DOWN_MASK;
-    if (!cc.params.noHotkeys.get() &&
-        (e.getModifiersEx() & ctrlAltShiftMask) == ctrlAltShiftMask &&
-        (!Utils.isWindows() || !e.isAltGraphDown())) {
+    int modifierMask = cc.params.hotkeyModifiers.get();
+    boolean enableHotkeys = !cc.params.noHotkeys.get() &&
+                            (e.getModifiersEx() & modifierMask) ==
+                            modifierMask;
+    if ((modifierMask &
+         (InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK)) != 0 &&
+        Utils.isWindows() && e.isAltGraphDown())
+      enableHotkeys = false;
+    if (enableHotkeys) {
       switch (e.getKeyCode()) {
         case KeyEvent.VK_F:
           cc.toggleFullScreen();

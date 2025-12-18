@@ -20,6 +20,10 @@ but could not connect to it.
 server-to-client UTF-8 clipboard transfer was sometimes truncated if
 Compression Level 0 was used, causing the VNC viewer to abort.
 
+4. Added a new advanced parameter (`HotkeyModifiers`) to the TurboVNC Viewer
+that can be used to change the combination of modifier keys that trigger the
+various hotkey sequences.
+
 
 3.3 beta1
 =========

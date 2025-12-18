@@ -108,7 +108,8 @@
 static JavaVM *g_jvm = NULL;
 static jobject g_object = NULL;
 static jmethodID g_methodID = NULL, g_methodID_prox = NULL,
-  g_methodID_keyPress = NULL, g_methodID_keyRelease = NULL;
+  g_methodID_keyPress = NULL, g_methodID_keyRelease = NULL,
+  g_methodID_getModifiers = NULL;
 IMP origSendEvent = NULL;
 
 
@@ -171,18 +172,22 @@ static jint GetJNIEnv(JNIEnv **env, bool *mustDetach)
     case NSEventTypeKeyUp:
     case NSEventTypeFlagsChanged:
     {
-      int rfbKeyCode = -1;
+      int rfbKeyCode = -1, cocoaHotkeyModifiers;
 
-      if (!g_object || !g_methodID_keyPress || !g_methodID_keyRelease)
+      if (!g_object || !g_methodID_keyPress || !g_methodID_keyRelease ||
+          !g_methodID_getModifiers)
         break;
 
-      // Defer Ctrl-Alt-Shift-{key} and Command-{key} sequences to the Java key
-      // listener, because those sequences are used for hotkeys.
-      if ((([event modifierFlags] &
-            (NSEventModifierFlagControl | NSEventModifierFlagOption |
-             NSEventModifierFlagShift)) ==
-           (NSEventModifierFlagControl | NSEventModifierFlagOption |
-            NSEventModifierFlagShift) ||
+      // Defer hotkey and Command-{key} sequences to the Java key listener.
+      if (GetJNIEnv(&env, &shouldDetach) != JNI_OK) {
+        NSLog(@"Couldn't attach to JVM");
+        return;
+      }
+      cocoaHotkeyModifiers = (*env)->CallIntMethod(env, g_object,
+                                                   g_methodID_getModifiers);
+      if (((cocoaHotkeyModifiers != 0 &&
+            ([event modifierFlags] & cocoaHotkeyModifiers) ==
+            cocoaHotkeyModifiers) ||
            ([event modifierFlags] & NSEventModifierFlagCommand) ==
            NSEventModifierFlagCommand) &&
           [event keyCode] != kVK_Control &&
@@ -328,6 +333,8 @@ JNIEXPORT void JNICALL Java_com_turbovnc_vncviewer_Viewport_setupExtInput
     BAILIF0(g_methodID_keyRelease = (*env)->GetMethodID(env, cls,
                                                         "handleKeyRelease",
                                                         "(IJ)Z"));
+    BAILIF0(g_methodID_getModifiers =
+      (*env)->GetMethodID(env, cls, "getCocoaHotkeyModifiers", "()I"));
   }
 
   SET_LONG(cls, obj, x11dpy, 1);

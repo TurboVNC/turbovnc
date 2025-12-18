@@ -205,50 +205,46 @@ public final class Viewport extends JFrame implements Runnable {
 
   private void setScrollBarHotkeysEnabled(boolean enable) {
     InputMap im = sp.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-    int ctrlAltShiftMask = InputEvent.SHIFT_DOWN_MASK |
-                           InputEvent.CTRL_DOWN_MASK |
-                           InputEvent.ALT_DOWN_MASK;
+    int modifierMask = cc.params.hotkeyModifiers.get();
     if (im == null) return;
     if (enable) {
-      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, ctrlAltShiftMask),
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, modifierMask),
              "unitScrollUp");
-      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_UP, ctrlAltShiftMask),
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_UP, modifierMask),
              "unitScrollUp");
-      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, ctrlAltShiftMask),
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, modifierMask),
              "unitScrollDown");
-      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_DOWN, ctrlAltShiftMask),
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_DOWN, modifierMask),
              "unitScrollDown");
-      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, ctrlAltShiftMask),
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, modifierMask),
              "unitScrollLeft");
-      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_LEFT, ctrlAltShiftMask),
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_LEFT, modifierMask),
              "unitScrollLeft");
-      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, ctrlAltShiftMask),
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, modifierMask),
              "unitScrollRight");
-      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_RIGHT, ctrlAltShiftMask),
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_RIGHT, modifierMask),
              "unitScrollRight");
-      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, ctrlAltShiftMask),
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, modifierMask),
              "scrollUp");
-      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, ctrlAltShiftMask),
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, modifierMask),
              "scrollDown");
-      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, ctrlAltShiftMask),
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, modifierMask),
              "scrollLeft");
-      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_END, ctrlAltShiftMask),
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_END, modifierMask),
              "scrollRight");
     } else {
-      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_UP, ctrlAltShiftMask));
-      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_KP_UP, ctrlAltShiftMask));
-      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, ctrlAltShiftMask));
-      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_KP_DOWN, ctrlAltShiftMask));
-      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, ctrlAltShiftMask));
-      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_KP_LEFT, ctrlAltShiftMask));
-      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, ctrlAltShiftMask));
-      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_KP_RIGHT,
-                                       ctrlAltShiftMask));
-      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, ctrlAltShiftMask));
-      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN,
-                                       ctrlAltShiftMask));
-      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, ctrlAltShiftMask));
-      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_END, ctrlAltShiftMask));
+      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_UP, modifierMask));
+      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_KP_UP, modifierMask));
+      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, modifierMask));
+      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_KP_DOWN, modifierMask));
+      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, modifierMask));
+      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_KP_LEFT, modifierMask));
+      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, modifierMask));
+      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_KP_RIGHT, modifierMask));
+      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, modifierMask));
+      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, modifierMask));
+      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, modifierMask));
+      im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_END, modifierMask));
     }
   }
 
@@ -695,6 +691,24 @@ public final class Viewport extends JFrame implements Runnable {
   static final int NS_CTRL_KEY_MASK = 1 << 18;
   static final int NS_ALT_KEY_MASK = 1 << 19;
   static final int NS_COMMAND_KEY_MASK = 1 << 20;
+
+  int getCocoaHotkeyModifiers() {
+    int cocoaHotkeyModifiers = 0;
+
+    if (cc.params.noHotkeys.get())
+      return cocoaHotkeyModifiers;
+
+    if ((cc.params.hotkeyModifiers.get() & InputEvent.META_DOWN_MASK) != 0)
+      cocoaHotkeyModifiers |= NS_COMMAND_KEY_MASK;
+    if ((cc.params.hotkeyModifiers.get() & InputEvent.CTRL_DOWN_MASK) != 0)
+      cocoaHotkeyModifiers |= NS_CTRL_KEY_MASK;
+    if ((cc.params.hotkeyModifiers.get() & InputEvent.ALT_DOWN_MASK) != 0)
+      cocoaHotkeyModifiers |= NS_ALT_KEY_MASK;
+    if ((cc.params.hotkeyModifiers.get() & InputEvent.SHIFT_DOWN_MASK) != 0)
+      cocoaHotkeyModifiers |= NS_SHIFT_KEY_MASK;
+
+    return cocoaHotkeyModifiers;
+  }
 
   // At the moment, these four methods are used only by the Mac TurboVNC
   // Helper.
