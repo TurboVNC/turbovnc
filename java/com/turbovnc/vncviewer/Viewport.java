@@ -200,6 +200,8 @@ public final class Viewport extends JFrame implements Runnable {
   }
 
   private void setScrollBarHotkeysEnabled(boolean enable) {
+    if (cc.params.noHotkeys.get())
+      return;
     InputMap im = sp.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
     int ctrlAltShiftMask = InputEvent.SHIFT_DOWN_MASK |
                            InputEvent.CTRL_DOWN_MASK |
