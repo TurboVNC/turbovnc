@@ -27,7 +27,6 @@ import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.WindowConstants.*;
 import java.util.*;
-import java.util.prefs.Preferences;
 
 import com.turbovnc.rdr.*;
 import com.turbovnc.rfb.*;
@@ -241,7 +240,7 @@ class ServerDialog extends Dialog implements ActionListener {
         server.removeAllItems();
         String valueStr = UserPreferences.get("ServerDialog", "history");
         if (valueStr != null) {
-          String values[] = valueStr.split(",");
+          String[] values = valueStr.split(",");
           for (String value : values)
             server.addItem(value);
         }
