@@ -28,6 +28,10 @@ various hotkey sequences.
 JSch fork, which includes several minor security, compatibility, and
 performance improvements.
 
+6. Added a new **turbovncserver.conf** variable (`$vglrun`) that can be used to
+specify the location of the `vglrun` script or to specify additional arguments
+to `vglrun`, if the window manager is being launched using VirtualGL.
+
 
 3.3 beta1
 =========

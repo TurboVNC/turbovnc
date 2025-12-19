@@ -57,6 +57,7 @@ $noxstartup = 0;
 $deferUpdate = 1;
 $wm = "";
 $useVGL = 0;
+$vglrun = "vglrun +wm";
 $autokill = 1;
 $bits = @BITS@;
 $noVNC = "";
@@ -615,6 +616,9 @@ if (!$noxstartup) {
   if ($useVGL) {
     warn "(Enabling VirtualGL)\n";
     $ENV{TVNC_VGL} = "1";
+  }
+  if ($vglrun) {
+    $ENV{TVNC_VGLRUN} = "$vglrun";
   }
 }
 warn "Log file is $desktopLog\n\n";
@@ -1294,6 +1298,7 @@ sub ReadConfiguration
        userDBus
        useUDS
        useVGL
+       vglrun
        vncUserDir
        wm
        x509CertFile
