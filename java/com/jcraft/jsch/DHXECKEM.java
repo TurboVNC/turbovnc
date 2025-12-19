@@ -93,7 +93,7 @@ abstract class DHXECKEM extends KeyExchange {
       System.arraycopy(kem_public_key_C, 0, Q_C, 0, kem_pubkey_len);
       System.arraycopy(xec_public_key_C, 0, Q_C, kem_pubkey_len, xec_key_len);
       buf.putString(Q_C);
-    } catch (Exception | NoClassDefFoundError e) {
+    } catch (Exception | LinkageError e) {
       throw new JSchException(e.toString(), e);
     }
 
@@ -161,12 +161,12 @@ abstract class DHXECKEM extends KeyExchange {
           Util.bzero(tmp);
         }
         try {
-          tmp = normalize(xdh.getSecret(xec_public_key_S));
+          tmp = xdh.getSecret(xec_public_key_S);
           sha.update(tmp, 0, tmp.length);
         } finally {
           Util.bzero(tmp);
         }
-        K = encodeAsString(sha.digest());
+        K = encodeAsString(sha.digest(), true);
 
         byte[] sig_of_H = _buf.getString();
 
@@ -192,18 +192,21 @@ abstract class DHXECKEM extends KeyExchange {
         //    output from the key encapsulation mechanism of sntrup761 concatenated
         //    with the 32-byte octet string of X25519(a, X25519(b, 9)) = X25519(b,
         //    X25519(a, 9)).
-        buf.reset();
-        buf.putString(V_C);
-        buf.putString(V_S);
-        buf.putString(I_C);
-        buf.putString(I_S);
-        buf.putString(K_S);
-        buf.putString(Q_C);
-        buf.putString(Q_S);
-        byte[] foo = new byte[buf.getLength()];
-        buf.getByte(foo);
-
+        byte[] foo = encodeAsString(V_C, false);
         sha.update(foo, 0, foo.length);
+        foo = encodeAsString(V_S, false);
+        sha.update(foo, 0, foo.length);
+        foo = encodeAsString(I_C, false);
+        sha.update(foo, 0, foo.length);
+        foo = encodeAsString(I_S, false);
+        sha.update(foo, 0, foo.length);
+        foo = encodeAsString(K_S, false);
+        sha.update(foo, 0, foo.length);
+        foo = encodeAsString(Q_C, false);
+        sha.update(foo, 0, foo.length);
+        foo = encodeAsString(Q_S, false);
+        sha.update(foo, 0, foo.length);
+
         sha.update(K, 0, K.length);
         H = sha.digest();
 

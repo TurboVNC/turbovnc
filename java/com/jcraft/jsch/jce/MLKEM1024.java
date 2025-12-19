@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018 ymnk, JCraft,Inc. All rights reserved.
+ * Copyright (c) 2015-2018 ymnk, JCraft,Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted
  * provided that the following conditions are met:
@@ -26,28 +26,26 @@
 
 package com.jcraft.jsch.jce;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
+import com.jcraft.jsch.KEM;
 
-/** Use PBKDF2 instead. */
-@Deprecated
-public class PBKDF implements com.jcraft.jsch.PBKDF {
+public class MLKEM1024 implements KEM {
+
+  public MLKEM1024() {
+    throw new UnsupportedOperationException("MLKEM1024 requires Java24+.");
+  }
+
   @Override
-  public byte[] getKey(byte[] _pass, byte[] salt, int iterations, int size) {
-    char[] pass = new char[_pass.length];
-    for (int i = 0; i < _pass.length; i++) {
-      pass[i] = (char) (_pass[i] & 0xff);
-    }
-    try {
-      PBEKeySpec spec = new PBEKeySpec(pass, salt, iterations, size * 8);
-      SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-      byte[] key = skf.generateSecret(spec).getEncoded();
-      return key;
-    } catch (InvalidKeySpecException e) {
-    } catch (NoSuchAlgorithmException e) {
-    }
-    return null;
+  public void init() throws Exception {
+    throw new UnsupportedOperationException("MLKEM1024 requires Java24+.");
+  }
+
+  @Override
+  public byte[] getPublicKey() throws Exception {
+    throw new UnsupportedOperationException("MLKEM1024 requires Java24+.");
+  }
+
+  @Override
+  public byte[] decapsulate(byte[] encapsulation) throws Exception {
+    throw new UnsupportedOperationException("MLKEM1024 requires Java24+.");
   }
 }

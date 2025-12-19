@@ -3,7 +3,8 @@
 See original [README](README)
 
 [![GitHub release](https://img.shields.io/github/v/tag/mwiede/jsch.svg)](https://github.com/mwiede/jsch/releases/latest)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.mwiede/jsch/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.mwiede/jsch)
+[![Maven Central](https://maven-badges.sml.io/maven-central/com.github.mwiede/jsch/badge.svg)](https://maven-badges.sml.io/maven-central/com.github.mwiede/jsch)
+[![Maven Central](https://maven-badges.sml.io/sonatype-central/com.github.mwiede/jsch/badge.svg)](https://maven-badges.sml.io/sonatype-central/com.github.mwiede/jsch)
 ![Java CI with Maven](https://github.com/mwiede/jsch/workflows/Java%20CI%20with%20Maven/badge.svg)
 
 ## Why should you use this library?
@@ -13,6 +14,14 @@ As I explained in a [blog post](http://www.matez.de/index.php/2020/06/22/the-fut
 * Drop in replacement: just change dependency coordinates and you are good to go.
 * No active maintenance of [JSch at SourceForge](https://sourceforge.net/projects/jsch/).
 * Stay in sync with OpenJDK features so there is no need for additional dependencies.
+
+## Is there any documentation?
+
+Not much. Check the example code in the [examples](https://github.com/mwiede/jsch/tree/master/examples) folder. And there are some wiki pages, i.e. [Jsch-Configuration](https://github.com/mwiede/jsch/wiki/Jsch-Configuration) and [Jsch-Logging](https://github.com/mwiede/jsch/wiki/Jsch-Logging).
+
+## Versioning
+
+Up until `0.2.26` the versioning followed the original jsch scheme, from `2.27.0` on, we switched to [semantic versioning](https://semver.org), expressing that the library api is stable and used in production.
 
 ## How to you use this library as a replacement for `com.jcraft:jsch`
 
@@ -33,7 +42,7 @@ with
 <dependency>
   <groupId>com.github.mwiede</groupId>
   <artifactId>jsch</artifactId>
-  <version>0.2.23</version>
+  <version>2.27.5</version>
 </dependency>
 ```
 
@@ -43,7 +52,7 @@ When you have an artifact `foo:bar`, which contains `com.jcraft:jsch` as a trans
 <dependency>
   <groupId>com.github.mwiede</groupId>
   <artifactId>jsch</artifactId>
-  <version>0.2.23</version>
+  <version>2.27.5</version>
 </dependency>
 <dependency>
   <groupId>foo</groupId>

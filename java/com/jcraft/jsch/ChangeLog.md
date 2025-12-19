@@ -1,3 +1,27 @@
+* [2.27.5](https://github.com/mwiede/jsch/releases/tag/jsch-2.27.5)
+  * Throw JSchException if an incorrect passphrase is provided to `JSch.addIdentity()`
+* [2.27.4](https://github.com/mwiede/jsch/releases/tag/jsch-2.27.4)
+  * Slowness due to blocked threads in Channel.getChannel call
+  * fix for infinite looping issue
+  * Store Channel objects associated with a particular Session with the S…
+* [2.27.0](https://github.com/mwiede/jsch/releases/tag/jsch-2.27.0)
+  * switch to semver scheme by @mwiede in https://github.com/mwiede/jsch/pull/828
+  * 0.2.27 changes by @norrisjeremy in https://github.com/mwiede/jsch/pull/824
+    * Fix decryption of OpenSSH V1 keys that use AEAD ciphers.
+ -- I discovered that OpenSSH V1 keys that were encrypted with `aes128-gcm@openssh.com`, `aes256-gcm@openssh.com` or `chacha20-poly1305@openssh.com` were not working.
+    * Add support for writing OpenSSH V1 key files.
+ -- I decided to introduce new `KeyPair.writeOpenSSHv1PrivateKey()` methods to handle this, in order to allow users to optionally specify the encryption cipher they would like to use (equivalent of `ssh-keygen -Z [cipher]`) and/or the number of  KDF rounds to use (equivalent of `ssh-keygen -a [rounds]`).
+* [0.2.26](https://github.com/mwiede/jsch/releases/tag/jsch-0.2.26)
+  * Follow lead from OpenSSH and prefer AES-GCM ciphers to AES-CTR ciphers.
+  * Catch LinkageError in order to better handle cases in which classes cannot be loaded via reflection. ([#811](https://github.com/mwiede/jsch/issues/811))
+* [0.2.25](https://github.com/mwiede/jsch/releases/tag/jsch-0.2.25)
+  * Add support for mlkem768x25519-sha256, mlkem768nistp256-sha256 & mlkem1024nistp384-sha384 KEX algorithms using JEP 496.
+  * Stop abusing the packet buffer for signature verification.
+  * Fix intermittent KEX errors with hybrid PQ/EC algorithms: the EC shared secret should not be stripped of unnecessary leading zero bytes since they are concatenated with the PQ secret and encoded as a string.
+  * Support custom ThreadFactory. by @hstyi in https://github.com/mwiede/jsch/pull/793
+* [0.2.24](https://github.com/mwiede/jsch/releases/tag/jsch-0.2.24)
+  * [#768](https://github.com/mwiede/jsch/issues/768) Make more use of dedicated exceptions
+  * [#786](https://github.com/mwiede/jsch/issues/786) SSH server comparison the channel id from INT_MAX for a signed value.
 * [0.2.23](https://github.com/mwiede/jsch/releases/tag/jsch-0.2.23)
   * [#752](https://github.com/mwiede/jsch/issues/752): Add getKeys to JSch which makes access to all the config values… by @davsclaus in https://github.com/mwiede/jsch/pull/753
   * [#560](https://github.com/mwiede/jsch/issues/560) treat openssh config values ConnectTimeout and ServerAliveInterval as seconds. by @mwiede in https://github.com/mwiede/jsch/pull/755

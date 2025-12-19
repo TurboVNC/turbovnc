@@ -63,7 +63,7 @@ public class ChannelDirectTCPIP extends Channel {
       }
 
       if (io.in != null) {
-        thread = new Thread(this::run);
+        thread = _session.getThreadFactory().newThread(this::run);
         thread.setName("DirectTCPIP thread " + _session.getHost());
         if (_session.daemon_thread) {
           thread.setDaemon(_session.daemon_thread);
@@ -75,7 +75,10 @@ public class ChannelDirectTCPIP extends Channel {
     } catch (Exception e) {
       io.close();
       io = null;
-      Channel.del(this);
+      Session _session = this.session;
+      if (_session != null) {
+        _session.delChannel(this);
+      }
       if (e instanceof JSchException) {
         throw (JSchException) e;
       }

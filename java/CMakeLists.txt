@@ -111,15 +111,7 @@ set(JSCH_CLASSNAMES
 	jce/KeyPairGenEdDSA
 	jce/KeyPairGenRSA
 	jce/MD5
-	jce/PBKDF
 	jce/PBKDF2
-	jce/PBKDF2HMACSHA1
-	jce/PBKDF2HMACSHA224
-	jce/PBKDF2HMACSHA256
-	jce/PBKDF2HMACSHA384
-	jce/PBKDF2HMACSHA512
-	jce/PBKDF2HMACSHA512224
-	jce/PBKDF2HMACSHA512256
 	jce/Random
 	jce/SHA1
 	jce/SHA224
@@ -162,6 +154,7 @@ file(GLOB DEPEND_SOURCES
 	${SRCDIR}/com/turbovnc/rdr/*.java
 	${SRCDIR}/com/turbovnc/network/*.java
 	${SRCDIR}/com/jcraft/jsch/*.java
+	${SRCDIR}/com/jcraft/jsch/asn1/*.java
 	${SRCDIR}/com/jcraft/jsch/jbcrypt/*.java
 	${SRCDIR}/com/jcraft/jsch/jce/*.java
 	${SRCDIR}/com/jcraft/jsch/jgss/*.java
@@ -215,6 +208,7 @@ add_custom_command(OUTPUT VncViewer.jar
 		com/turbovnc/rdr/*.class
 		com/turbovnc/network/*.class
 		com/jcraft/jsch/*.class
+		com/jcraft/jsch/asn1/*.class
 		com/jcraft/jsch/jbcrypt/*.class
 		com/jcraft/jsch/jce/*.class
 		com/jcraft/jsch/jgss/*.class

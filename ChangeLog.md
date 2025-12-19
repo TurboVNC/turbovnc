@@ -24,6 +24,10 @@ Compression Level 0 was used, causing the VNC viewer to abort.
 that can be used to change the combination of modifier keys that trigger the
 various hotkey sequences.
 
+5. The TurboVNC Viewer's built-in SSH client has been rebased on v2.27.7 of the
+JSch fork, which includes several minor security, compatibility, and
+performance improvements.
+
 
 3.3 beta1
 =========

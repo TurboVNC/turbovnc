@@ -27,13 +27,14 @@
 
 package com.jcraft.jsch;
 
+import java.util.Locale;
+
 class AgentIdentity implements Identity {
 
   private AgentProxy agent;
   private byte[] blob;
   private String comment;
   private String algname;
-  private HASH hash;
 
   AgentIdentity(AgentProxy agent, byte[] blob, String comment) {
     this.agent = agent;
@@ -42,14 +43,16 @@ class AgentIdentity implements Identity {
     algname = Util.byte2str((new Buffer(blob)).getString());
   }
 
-  private HASH genHash() {
+  private HASH genFingerPrintHash() {
+    HASH _hash = null;
     try {
-      Class c = Class.forName(JSch.getConfig("md5"));
-      hash = (HASH)(c.getDeclaredConstructor().newInstance());
-      hash.init();
-    } catch (Exception e) {
+      String _c = JSch.getConfig("FingerprintHash").toLowerCase(Locale.ROOT);
+      Class<? extends HASH> c = Class.forName(JSch.getConfig(_c)).asSubclass(HASH.class);
+      _hash = c.getDeclaredConstructor().newInstance();
+      _hash.init();
+    } catch (Exception | LinkageError e) {
     }
-    return hash;
+    return _hash;
   }
 
   @Override
@@ -64,9 +67,13 @@ class AgentIdentity implements Identity {
 
   @Override
   public String getFingerPrint() {
-    if (hash == null) hash = genHash();
-    if (blob == null) return null;
-    return Util.getFingerPrint(hash, blob, false, true);
+    HASH _hash = genFingerPrintHash();
+    if (_hash == null)
+      return null;
+    byte[] kblob = getPublicKeyBlob();
+    if (kblob == null)
+      return null;
+    return Util.getFingerPrint(_hash, kblob, true, false);
   }
 
   @Override

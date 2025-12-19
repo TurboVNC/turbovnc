@@ -55,9 +55,9 @@ public class JSch {
     config.put("enable_ext_info_in_auth",
         Util.getSystemProperty("jsch.enable_ext_info_in_auth", "yes"));
     config.put("cipher.s2c", Util.getSystemProperty("jsch.cipher",
-        "aes128-ctr,aes192-ctr,aes256-ctr,aes128-gcm@openssh.com,aes256-gcm@openssh.com"));
+        "aes128-gcm@openssh.com,aes256-gcm@openssh.com,aes128-ctr,aes192-ctr,aes256-ctr"));
     config.put("cipher.c2s", Util.getSystemProperty("jsch.cipher",
-        "aes128-ctr,aes192-ctr,aes256-ctr,aes128-gcm@openssh.com,aes256-gcm@openssh.com"));
+        "aes128-gcm@openssh.com,aes256-gcm@openssh.com,aes128-ctr,aes192-ctr,aes256-ctr"));
     config.put("mac.s2c", Util.getSystemProperty("jsch.mac",
         "hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,hmac-sha1-etm@openssh.com,hmac-sha2-256,hmac-sha2-512,hmac-sha1"));
     config.put("mac.c2s", Util.getSystemProperty("jsch.mac",
@@ -185,14 +185,7 @@ public class JSch {
     config.put("zlib", "com.jcraft.jsch.jzlib.Compression");
     config.put("zlib@openssh.com", "com.jcraft.jsch.jzlib.Compression");
 
-    config.put("pbkdf", "com.jcraft.jsch.jce.PBKDF");
-    config.put("pbkdf2-hmac-sha1", "com.jcraft.jsch.jce.PBKDF2HMACSHA1");
-    config.put("pbkdf2-hmac-sha224", "com.jcraft.jsch.jce.PBKDF2HMACSHA224");
-    config.put("pbkdf2-hmac-sha256", "com.jcraft.jsch.jce.PBKDF2HMACSHA256");
-    config.put("pbkdf2-hmac-sha384", "com.jcraft.jsch.jce.PBKDF2HMACSHA384");
-    config.put("pbkdf2-hmac-sha512", "com.jcraft.jsch.jce.PBKDF2HMACSHA512");
-    config.put("pbkdf2-hmac-sha512-224", "com.jcraft.jsch.jce.PBKDF2HMACSHA512224");
-    config.put("pbkdf2-hmac-sha512-256", "com.jcraft.jsch.jce.PBKDF2HMACSHA512256");
+    config.put("pbkdf2", "com.jcraft.jsch.jce.PBKDF2");
     config.put("bcrypt", "com.jcraft.jsch.jbcrypt.JBCrypt");
 
     config.put("xdh", "com.jcraft.jsch.jce.XDH");
@@ -493,7 +486,9 @@ public class JSch {
         byte[] goo = new byte[passphrase.length];
         System.arraycopy(passphrase, 0, goo, 0, passphrase.length);
         passphrase = goo;
-        identity.setPassphrase(passphrase);
+        if (!identity.setPassphrase(passphrase)) {
+          JSch.getLogger().log(Logger.INFO, "Incorrect passphrase provided.");
+        }
       } finally {
         Util.bzero(passphrase);
       }

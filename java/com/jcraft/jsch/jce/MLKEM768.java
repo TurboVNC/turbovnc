@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018 ymnk, JCraft,Inc. All rights reserved.
+ * Copyright (c) 2015-2018 ymnk, JCraft,Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted
  * provided that the following conditions are met:
@@ -26,9 +26,26 @@
 
 package com.jcraft.jsch.jce;
 
-public class PBKDF2HMACSHA384 extends PBKDF2 {
+import com.jcraft.jsch.KEM;
+
+public class MLKEM768 implements KEM {
+
+  public MLKEM768() {
+    throw new UnsupportedOperationException("MLKEM768 requires Java24+.");
+  }
+
   @Override
-  String getName() {
-    return "PBKDF2WithHmacSHA384";
+  public void init() throws Exception {
+    throw new UnsupportedOperationException("MLKEM768 requires Java24+.");
+  }
+
+  @Override
+  public byte[] getPublicKey() throws Exception {
+    throw new UnsupportedOperationException("MLKEM768 requires Java24+.");
+  }
+
+  @Override
+  public byte[] decapsulate(byte[] encapsulation) throws Exception {
+    throw new UnsupportedOperationException("MLKEM768 requires Java24+.");
   }
 }

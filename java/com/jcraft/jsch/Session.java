@@ -39,8 +39,13 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Vector;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.crypto.AEADBadTagException;
 
 public class Session {
@@ -82,7 +87,7 @@ public class Session {
   private byte[] V_C = Util.str2byte("SSH-2.0-JSCH_" + JSch.VERSION); // client version
 
   private byte[] I_C; // the payload of the client's SSH_MSG_KEXINIT
-  private byte[] I_S; // the payload of the server's SSH_MSG_KEXINIT
+  byte[] I_S; // the payload of the server's SSH_MSG_KEXINIT
   private byte[] K_S; // the host key
 
   private byte[] session_id;
@@ -176,6 +181,12 @@ public class Session {
 
   JSch jsch;
   Logger logger;
+
+  private ThreadFactory threadFactory = Thread::new;
+
+  private boolean disconnectingChannels = false;
+  private final List<Channel> channels = new ArrayList<>();
+  private final ReadWriteLock channelsLock = new ReentrantReadWriteLock();
 
   Session(JSch jsch, String username, String host, int port) throws JSchException {
     super();
@@ -534,7 +545,7 @@ public class Session {
 
       synchronized (lock) {
         if (isConnected) {
-          connectThread = new Thread(this::run);
+          connectThread = getThreadFactory().newThread(this::run);
           connectThread.setName("Connect thread " + host + " session");
           if (daemon_thread) {
             connectThread.setDaemon(daemon_thread);
@@ -637,7 +648,7 @@ public class Session {
       Class<? extends KeyExchange> c = Class
           .forName(getConfig(guess[KeyExchange.PROPOSAL_KEX_ALGS])).asSubclass(KeyExchange.class);
       kex = c.getDeclaredConstructor().newInstance();
-    } catch (Exception | NoClassDefFoundError e) {
+    } catch (Exception | LinkageError e) {
       throw new JSchException(e.toString(), e);
     }
 
@@ -645,7 +656,7 @@ public class Session {
     return kex;
   }
 
-  private boolean checkServerStrictKex() {
+  boolean checkServerStrictKex() {
     Buffer sb = new Buffer(I_S);
     sb.setOffSet(17);
     byte[] sp = sb.getString(); // server proposal
@@ -655,15 +666,17 @@ public class Session {
     while (l < sp.length) {
       while (l < sp.length && sp[l] != ',')
         l++;
-      if (m == l)
+      if (m == l) {
+        l++;
+        m = l;
         continue;
+      }
       if ("kex-strict-s-v00@openssh.com".equals(Util.byte2str(sp, m, l - m))) {
         return true;
       }
       l++;
       m = l;
     }
-
     return false;
   }
 
@@ -983,7 +996,7 @@ public class Session {
       }
 
       if (!b) {
-        throw new JSchException("HostKey has been changed: " + chost);
+        throw new JSchChangedHostKeyException("HostKey has been changed: " + chost);
       }
 
       synchronized (hkr) {
@@ -995,7 +1008,7 @@ public class Session {
     if ((shkc.equalsIgnoreCase("ask") || shkc.equalsIgnoreCase("yes"))
         && (i != HostKeyRepository.OK) && !insert) {
       if (shkc.equalsIgnoreCase("yes")) {
-        throw new JSchException("reject HostKey: " + chost);
+        throw new JSchUnknownHostKeyException("reject HostKey: " + chost);
       }
       // System.err.println("finger-print: " + key_fprint);
       if (userinfo != null) {
@@ -1003,7 +1016,7 @@ public class Session {
             + "' can't be established.\n" + key_type + " key fingerprint is " + key_fprint + ".\n"
             + "Are you sure you want to continue connecting?");
         if (!foo) {
-          throw new JSchException("reject HostKey: " + chost);
+          throw new JSchUnknownHostKeyException("reject HostKey: " + chost);
         }
         insert = true;
       } else {
@@ -1061,15 +1074,24 @@ public class Session {
       throw new JSchException("session is down");
     }
     try {
-      Channel channel = Channel.getChannel(type, this);
-      addChannel(channel);
-      channel.init();
-      if (channel instanceof ChannelSession) {
-        applyConfigChannel((ChannelSession) channel);
+      Channel channel = createChannel(type);
+      if (channel != null) {
+        channel.init();
+        if (channel instanceof ChannelSession) {
+          applyConfigChannel((ChannelSession) channel);
+        }
+        return channel;
+      } else {
+        if (getLogger().isEnabled(Logger.DEBUG)) {
+          getLogger().log(Logger.DEBUG, "Failed to open channel of type " + type
+              + " - type unsupported or session may be disconnecting");
+        }
       }
-      return channel;
     } catch (Exception e) {
-      // e.printStackTrace();
+      if (getLogger().isEnabled(Logger.DEBUG)) {
+        getLogger().log(Logger.DEBUG,
+            "Exception creating channel of type " + type + ": " + e.getMessage(), e);
+      }
     }
     return null;
   }
@@ -1136,6 +1158,21 @@ public class Session {
 
   private int s2ccipher_size = 8;
   private int c2scipher_size = 8;
+
+  private Channel getChannelById(int id) {
+    Lock l = channelsLock.readLock();
+    l.lock();
+    try {
+      for (Channel c : channels) {
+        if (c.id == id) {
+          return c;
+        }
+      }
+    } finally {
+      l.unlock();
+    }
+    return null;
+  }
 
   Buffer read(Buffer buf) throws Exception {
     int j = 0;
@@ -1352,9 +1389,8 @@ public class Session {
         buf.rewind();
         buf.getInt();
         buf.getShort();
-        Channel c = Channel.getChannel(buf.getInt(), this);
-        if (c == null) {
-        } else {
+        Channel c = getChannelById(buf.getInt());
+        if (c != null) {
           c.addRemoteWindowSize(buf.getUInt());
         }
       } else if (type == SSH_MSG_EXT_INFO) {
@@ -1608,7 +1644,7 @@ public class Session {
 
       method = guess[KeyExchange.PROPOSAL_COMP_ALGS_STOC];
       initInflater(method);
-    } catch (Exception | NoClassDefFoundError e) {
+    } catch (Exception | LinkageError e) {
       if (e instanceof JSchException)
         throw e;
       throw new JSchException(e.toString(), e);
@@ -1848,7 +1884,7 @@ public class Session {
             buf.getByte();
             buf.getByte();
             i = buf.getInt();
-            channel = Channel.getChannel(i, this);
+            channel = getChannelById(i);
             foo = buf.getString(start, length);
             if (channel == null) {
               break;
@@ -1887,7 +1923,7 @@ public class Session {
             buf.getInt();
             buf.getShort();
             i = buf.getInt();
-            channel = Channel.getChannel(i, this);
+            channel = getChannelById(i);
             buf.getInt(); // data_type_code == 1
             foo = buf.getString(start, length);
             // System.err.println("stderr: " + new String(foo,start[0], length[0]));
@@ -1920,7 +1956,7 @@ public class Session {
             buf.getInt();
             buf.getShort();
             i = buf.getInt();
-            channel = Channel.getChannel(i, this);
+            channel = getChannelById(i);
             if (channel == null) {
               break;
             }
@@ -1931,7 +1967,7 @@ public class Session {
             buf.getInt();
             buf.getShort();
             i = buf.getInt();
-            channel = Channel.getChannel(i, this);
+            channel = getChannelById(i);
             if (channel != null) {
               // channel.eof_remote = true;
               // channel.eof();
@@ -1948,7 +1984,7 @@ public class Session {
             buf.getInt();
             buf.getShort();
             i = buf.getInt();
-            channel = Channel.getChannel(i, this);
+            channel = getChannelById(i);
             if (channel != null) {
               // channel.close();
               channel.disconnect();
@@ -1963,7 +1999,7 @@ public class Session {
             buf.getInt();
             buf.getShort();
             i = buf.getInt();
-            channel = Channel.getChannel(i, this);
+            channel = getChannelById(i);
             int r = buf.getInt();
             long rws = buf.getUInt();
             int rps = buf.getInt();
@@ -1978,7 +2014,7 @@ public class Session {
             buf.getInt();
             buf.getShort();
             i = buf.getInt();
-            channel = Channel.getChannel(i, this);
+            channel = getChannelById(i);
             if (channel != null) {
               int reason_code = buf.getInt();
               // foo = buf.getString(); // additional textual information
@@ -1995,7 +2031,7 @@ public class Session {
             i = buf.getInt();
             foo = buf.getString();
             boolean reply = (buf.getByte() != 0);
-            channel = Channel.getChannel(i, this);
+            channel = getChannelById(i);
             if (channel != null) {
               byte reply_type = (byte) SSH_MSG_CHANNEL_FAILURE;
               if ((Util.byte2str(foo)).equals("exit-status")) {
@@ -2019,8 +2055,10 @@ public class Session {
             String ctyp = Util.byte2str(foo);
             if (!"forwarded-tcpip".equals(ctyp) && !("x11".equals(ctyp) && x11_forwarding)
                 && !("auth-agent@openssh.com".equals(ctyp) && agent_forwarding)) {
-              // System.err.println("Session.run: CHANNEL OPEN " + ctyp);
-              // throw new IOException("Session.run: CHANNEL OPEN " + ctyp);
+              if (getLogger().isEnabled(Logger.DEBUG)) {
+                getLogger().log(Logger.DEBUG, "Failed to add channel of type " + ctyp
+                    + " - type either unsupported or prohibited");
+              }
               packet.reset();
               buf.putByte((byte) SSH_MSG_CHANNEL_OPEN_FAILURE);
               buf.putInt(buf.getInt());
@@ -2029,24 +2067,35 @@ public class Session {
               buf.putString(Util.empty);
               write(packet);
             } else {
-              channel = Channel.getChannel(ctyp, this);
-              addChannel(channel);
-              channel.getData(buf);
-              channel.init();
-
-              Thread tmp = new Thread(channel::run);
-              tmp.setName("Channel " + ctyp + " " + host);
-              if (daemon_thread) {
-                tmp.setDaemon(daemon_thread);
+              channel = openChannel(ctyp);
+              if (channel != null) {
+                channel.getData(buf);
+                Thread tmp = getThreadFactory().newThread(channel::run);
+                tmp.setName("Channel " + ctyp + " " + host);
+                if (daemon_thread) {
+                  tmp.setDaemon(daemon_thread);
+                }
+                tmp.start();
+              } else {
+                if (getLogger().isEnabled(Logger.DEBUG)) {
+                  getLogger().log(Logger.DEBUG,
+                      "Failed to add channel of type " + ctyp + " - session may be disconnecting");
+                }
+                packet.reset();
+                buf.putByte((byte) SSH_MSG_CHANNEL_OPEN_FAILURE);
+                buf.putInt(buf.getInt());
+                buf.putInt(Channel.SSH_OPEN_RESOURCE_SHORTAGE);
+                buf.putString(Util.empty);
+                buf.putString(Util.empty);
+                write(packet);
               }
-              tmp.start();
             }
             break;
           case SSH_MSG_CHANNEL_SUCCESS:
             buf.getInt();
             buf.getShort();
             i = buf.getInt();
-            channel = Channel.getChannel(i, this);
+            channel = getChannelById(i);
             if (channel == null) {
               break;
             }
@@ -2056,7 +2105,7 @@ public class Session {
             buf.getInt();
             buf.getShort();
             i = buf.getInt();
-            channel = Channel.getChannel(i, this);
+            channel = getChannelById(i);
             if (channel == null) {
               break;
             }
@@ -2112,6 +2161,16 @@ public class Session {
     isConnected = false;
   }
 
+  void delChannel(Channel c) {
+    Lock l = channelsLock.writeLock();
+    l.lock();
+    try {
+      channels.remove(c);
+    } finally {
+      l.unlock();
+    }
+  }
+
   public void disconnect() {
     if (!isConnected)
       return;
@@ -2130,7 +2189,26 @@ public class Session {
     }
     */
 
-    Channel.disconnect(this);
+    List<Channel> channelsCopy;
+    Lock l = channelsLock.writeLock();
+    l.lock();
+    try {
+      disconnectingChannels = true;
+      channelsCopy = new ArrayList<>(channels);
+    } finally {
+      l.unlock();
+    }
+
+    for (Channel c : channelsCopy) {
+      try {
+        c.disconnect();
+      } catch (Exception e) {
+        if (getLogger().isEnabled(Logger.DEBUG)) {
+          getLogger().log(Logger.DEBUG, "Exception disconnecting channel of type "
+              + Util.byte2str(c.type) + ": " + e.getMessage(), e);
+        }
+      }
+    }
 
     isConnected = false;
 
@@ -2169,6 +2247,13 @@ public class Session {
     }
     io = null;
     socket = null;
+    l.lock();
+    try {
+      disconnectingChannels = false;
+      channels.clear();
+    } finally {
+      l.unlock();
+    }
 
     // RFC 4253 6.4. the 'sequence_number' is never reset, even if keys/algorithms are renegotiated
     // later. Hence we only reset these on session disconnect as the sequence has to start at zero
@@ -2187,6 +2272,27 @@ public class Session {
     jsch.removeSession(this);
 
     // System.gc();
+  }
+
+  /**
+   * Sets a thread factory to be used for creating new threads in this instance.
+   *
+   * @param threadFactory The thread factory to be used; must not be <code>null</code>
+   * @throws NullPointerException if the provided thread factory is <code>null</code>
+   */
+  public void setThreadFactory(ThreadFactory threadFactory) {
+    this.threadFactory = Objects.requireNonNull(threadFactory);
+  }
+
+
+  /**
+   * Returns the thread factory used by this instance.
+   *
+   * @return The thread factory associated with this instance. If no specific thread factory has
+   *         been set, a default thread factory is returned.
+   */
+  public ThreadFactory getThreadFactory() {
+    return threadFactory;
   }
 
   /**
@@ -2263,7 +2369,7 @@ public class Session {
       ServerSocketFactory ssf, int connectTimeout) throws JSchException {
     PortWatcher pw = PortWatcher.addPort(this, bind_address, lport, host, rport, ssf);
     pw.setConnectTimeout(connectTimeout);
-    Thread tmp = new Thread(pw::run);
+    Thread tmp = getThreadFactory().newThread(pw::run);
     tmp.setName("PortWatcher Thread for " + host);
     if (daemon_thread) {
       tmp.setDaemon(daemon_thread);
@@ -2276,7 +2382,7 @@ public class Session {
       ServerSocketFactory ssf, int connectTimeout) throws JSchException {
     PortWatcher pw = PortWatcher.addSocket(this, bindAddress, lport, socketPath, ssf);
     pw.setConnectTimeout(connectTimeout);
-    Thread tmp = new Thread(pw::run);
+    Thread tmp = getThreadFactory().newThread(pw::run);
     tmp.setName("PortWatcher Thread for " + host);
     if (daemon_thread) {
       tmp.setDaemon(daemon_thread);
@@ -2551,12 +2657,19 @@ public class Session {
    * @param port remote port, which the given stream will be plugged to.
    */
   public Channel getStreamForwarder(String host, int port) throws JSchException {
-    ChannelDirectTCPIP channel = new ChannelDirectTCPIP();
-    channel.init();
-    this.addChannel(channel);
-    channel.setHost(host);
-    channel.setPort(port);
-    return channel;
+    ChannelDirectTCPIP channel = (ChannelDirectTCPIP) openChannel("direct-tcpip");
+    if (channel != null) {
+      channel.setHost(host);
+      channel.setPort(port);
+      return channel;
+    } else {
+      String msg = "Failed to add DirectTCPIP channel to " + host + ":" + port
+          + " - session may be disconnecting";
+      if (getLogger().isEnabled(Logger.DEBUG)) {
+        getLogger().log(Logger.DEBUG, msg);
+      }
+      throw new JSchException(msg);
+    }
   }
 
   private static class GlobalRequestReply {
@@ -2720,8 +2833,61 @@ public class Session {
     }
   }
 
-  void addChannel(Channel channel) {
-    channel.setSession(this);
+  private Channel createChannel(String type) {
+    Channel channel = null;
+    if (type.equals("session")) {
+      channel = new ChannelSession();
+    }
+    if (type.equals("shell")) {
+      channel = new ChannelShell();
+    }
+    if (type.equals("exec")) {
+      channel = new ChannelExec();
+    }
+    if (type.equals("x11")) {
+      channel = new ChannelX11();
+    }
+    if (type.equals("auth-agent@openssh.com")) {
+      channel = new ChannelAgentForwarding();
+    }
+    if (type.equals("direct-tcpip")) {
+      channel = new ChannelDirectTCPIP();
+    }
+    if (type.equals("forwarded-tcpip")) {
+      channel = new ChannelForwardedTCPIP();
+    }
+    if (type.equals("sftp")) {
+      ChannelSftp sftp = new ChannelSftp();
+      boolean useWriteFlushWorkaround = getConfig("use_sftp_write_flush_workaround").equals("yes");
+      sftp.setUseWriteFlushWorkaround(useWriteFlushWorkaround);
+      channel = sftp;
+    }
+    if (type.equals("subsystem")) {
+      channel = new ChannelSubsystem();
+    }
+    if (type.equals("direct-streamlocal@openssh.com")) {
+      channel = new ChannelDirectStreamLocal();
+    }
+    if (channel == null) {
+      return null;
+    }
+    return addChannel(channel);
+  }
+
+  private Channel addChannel(Channel channel) {
+    Lock l = channelsLock.writeLock();
+    l.lock();
+    try {
+      if (!disconnectingChannels && isConnected) {
+        channel.setSession(this);
+        channels.add(channel);
+        return channel;
+      } else {
+        return null;
+      }
+    } finally {
+      l.unlock();
+    }
   }
 
   String[] getServerSigAlgs() {
@@ -3020,7 +3186,7 @@ public class Session {
       Cipher _c = c.getDeclaredConstructor().newInstance();
       _c.init(Cipher.ENCRYPT_MODE, new byte[_c.getBlockSize()], new byte[_c.getIVSize()]);
       return true;
-    } catch (Exception | NoClassDefFoundError e) {
+    } catch (Exception | LinkageError e) {
       return false;
     }
   }
@@ -3066,7 +3232,7 @@ public class Session {
       MAC _c = c.getDeclaredConstructor().newInstance();
       _c.init(new byte[_c.getBlockSize()]);
       return true;
-    } catch (Exception | NoClassDefFoundError e) {
+    } catch (Exception | LinkageError e) {
       return false;
     }
   }
@@ -3106,7 +3272,7 @@ public class Session {
       KeyExchange _c = c.getDeclaredConstructor().newInstance();
       _c.doInit(s, null, null, null, null);
       return true;
-    } catch (Exception | NoClassDefFoundError e) {
+    } catch (Exception | LinkageError e) {
       return false;
     }
   }
@@ -3127,7 +3293,7 @@ public class Session {
             Class.forName(JSch.getConfig(_sigs[i])).asSubclass(Signature.class);
         final Signature sig = c.getDeclaredConstructor().newInstance();
         sig.init();
-      } catch (Exception | NoClassDefFoundError e) {
+      } catch (Exception | LinkageError e) {
         result.addElement(_sigs[i]);
       }
     }
