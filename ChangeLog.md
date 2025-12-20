@@ -32,6 +32,9 @@ performance improvements.
 specify the location of the `vglrun` script or to specify additional arguments
 to `vglrun`, if the window manager is being launched using VirtualGL.
 
+7. The TurboVNC Server's in-tree version of zlib-ng has been upgraded to
+v2.2.5, which fixes several minor bugs.
+
 
 3.3 beta1
 =========
