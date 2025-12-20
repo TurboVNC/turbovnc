@@ -17,5 +17,4 @@ if [ -d $BINDIR/../java ]; then
 	TVNC_JAVADIR=$BINDIR/../java
 fi
 
-exec "$JAVA" $JAVAARGS -server --enable-native-access=VncViewer \
-	-Djava.library.path=$TVNC_JAVADIR -jar $TVNC_JAVADIR/VncViewer.jar ${1+"$@"}
+exec "$JAVA" $JAVAARGS -server -Djava.library.path=$TVNC_JAVADIR -jar $TVNC_JAVADIR/VncViewer.jar ${1+"$@"}

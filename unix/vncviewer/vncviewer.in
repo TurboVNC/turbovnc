@@ -35,5 +35,4 @@ else
 	LD_LIBRARY_PATH=$JAWT_PATH:$LD_LIBRARY_PATH
 	export LD_LIBRARY_PATH
 fi
-exec $JAVA -server --enable-native-access=VncViewer \
-	-Djava.library.path=$TVNC_JAVADIR -jar $TVNC_JAVADIR/VncViewer.jar ${1+"$@"}
+exec $JAVA -server -Djava.library.path=$TVNC_JAVADIR -jar $TVNC_JAVADIR/VncViewer.jar ${1+"$@"}
