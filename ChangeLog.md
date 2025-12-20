@@ -73,6 +73,9 @@ CVE-2026-93515, CVE-2026-93516, CVE-2026-93517, CVE-2026-93518, CVE-2026-93519,
 CVE-2026-93520, CVE-2026-93521, CVE-2026-93523, and CVE-2026-93524) from the
 xorg-server 21.1.x code base.
 
+16. The TurboVNC Server's in-tree version of zlib-ng has been upgraded to
+v2.2.5, which fixes several minor bugs.
+
 
 3.2.1
 =====
