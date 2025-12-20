@@ -616,9 +616,9 @@ if (!$noxstartup) {
   if ($useVGL) {
     warn "(Enabling VirtualGL)\n";
     $ENV{TVNC_VGL} = "1";
-  }
-  if ($vglrun) {
-    $ENV{TVNC_VGLRUN} = "$vglrun";
+    if ($vglrun) {
+      $ENV{TVNC_VGLRUN} = "$vglrun";
+    }
   }
 }
 warn "Log file is $desktopLog\n\n";
