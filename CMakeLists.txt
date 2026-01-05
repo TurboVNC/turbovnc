@@ -8,7 +8,7 @@ project(TurboVNC NONE)
 string(TOLOWER ${CMAKE_PROJECT_NAME} CMAKE_PROJECT_NAME_LC)
 set(VERSION 3.2.92)
 set(DOCVERSION 3.3)
-set(COPYRIGHT_YEAR "1999-2025")
+set(COPYRIGHT_YEAR "1999-2026")
 set(COPYRIGHT "The VirtualGL Project and many others (see README.md)")
 set(URLTEXT "Visit http://www.TurboVNC.org for more information on TurboVNC")
 

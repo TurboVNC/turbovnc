@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2015, 2017-2018, 2020-2025 D. R. Commander.
+/* Copyright (C) 2012-2015, 2017-2018, 2020-2026 D. R. Commander.
  *                                               All Rights Reserved.
  * Copyright (C) 2021 Steffen Kieß
  * Copyright (C) 2012, 2016 Brian P. Hinz.  All Rights Reserved.
@@ -290,7 +290,8 @@ public class Tunnel {
       }
 
       String repoJumpHost = repo.getConfig(host).getValue("ProxyJump");
-      if (repoJumpHost != null && jumpHost == null) {
+      if (repoJumpHost != null && !repoJumpHost.equalsIgnoreCase("none") &&
+          jumpHost == null) {
         jumpHost = repoJumpHost.replaceAll("\\s", "");
         jumpUser = Hostname.getSSHUser(jumpHost);
         jumpPort = Hostname.getSSHPort(jumpHost);
@@ -338,6 +339,8 @@ public class Tunnel {
     Session sshSession = null, jumpSSHSession = null;
 
     if (jumpHost != null) {
+      if (jumpHost.equalsIgnoreCase(host) && jumpPort == port)
+        throw new ErrorException("Jump host loop via " + jumpHost);
       vlog.debug("Opening SSH connection to jump host " + jumpHost);
       jumpSSHSession = createTunnelJSch(jumpUser, jumpHost, jumpPort, null,
                                         null, -1, params);

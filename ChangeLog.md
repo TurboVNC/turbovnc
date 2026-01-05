@@ -1,3 +1,14 @@
+3.3
+===
+
+### Significant changes relative to 3.3 beta2:
+
+1. For compatibility with OpenSSH, the TurboVNC Viewer's built-in SSH client
+now disables multi-hop/multi-level SSH tunneling if a case-insensitive argument
+of `none` is specified for the `ProxyJump` OpenSSH config file keyword.  This
+is useful in conjunction with wildcard `Host` entries.
+
+
 3.3 beta2
 =========
 
