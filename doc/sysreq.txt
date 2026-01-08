@@ -2,16 +2,8 @@
 
 ** Linux and Other Un*x Operating Systems
 
-|| || Host || Client (Linux/x86-64, Linux/AArch64) \
-	|| Client (x86 or non-Linux) ||
-| Recommended CPU \
-	| {list type=ul: \
-			{item:(x86 only) For optimal performance, the CPU should support SSE2 \
-				extensions.} \
-			{item:Dual processors or dual cores recommended}} \
-	| {:} \
-	| For optimal performance, the CPU should support SSE2 extensions. \
-	|
+|| || Host (x86, x86-64, AArch64) || Client (Linux/x86-64, Linux/AArch64) \
+	|| Client (Other) ||
 | O/S \
 	| TurboVNC should work with a variety of Linux distributions, \
 		[[http://www.freebsd.org][FreeBSD]], and \
@@ -40,9 +32,6 @@
 ** Mac
 
 || || Client ||
-| Required CPU \
-	| 64-bit Intel or Apple silicon \
-	|
 | O/S \
 	| macOS 10.12 "Sierra" or later (Intel); macOS 11 "Big Sur" or later \
 		(Apple silicon) \
@@ -52,9 +41,6 @@
 ** Windows
 
 || || Client ||
-| Recommended CPU \
-	| For optimal performance, the CPU should support SSE2 extensions. \
-	|
 | O/S \
 	| Windows 7 or later \
 	|
