@@ -2,14 +2,8 @@
 
 ** Linux and Other Un*x Operating Systems
 
-|| || Host || Client (Linux) || Client (non-Linux) ||
-| CPU \
-	| {list type=ul: \
-			{item:x86-64 or AArch64 required} \
-			{item:At least two processors or cores recommended}} \
-	| x86-64 or AArch64 required \
-	| < \
-	|
+|| || Host (x86-64, AArch64) || Client (Linux/x86-64, Linux/AArch64) \
+	|| Client (Other) ||
 | O/S \
 	| TurboVNC should work with a variety of Linux distributions and \
 		[[https://freebsd.org][FreeBSD]*], but currently-supported versions of \
@@ -36,9 +30,6 @@
 ** Mac
 
 || || Client ||
-| CPU \
-	| 64-bit Intel or Apple silicon required \
-	|
 | O/S \
 	| macOS 10.12 "Sierra" or later (Intel); macOS 11 "Big Sur" or later \
 		(Apple silicon) \
@@ -47,10 +38,7 @@
 
 ** Windows
 
-|| || Client ||
-| CPU \
-	| x86-64 required \
-	|
+|| || Client (x86-64) ||
 | O/S \
 	| Windows 7 or later \
 	|
