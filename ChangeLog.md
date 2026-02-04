@@ -52,6 +52,10 @@ but could not connect to it.
 server-to-client UTF-8 clipboard transfer was sometimes truncated if
 Compression Level 0 was used, causing the VNC viewer to abort.
 
+11. The TurboVNC Viewer's built-in SSH client now prints an SSH debugging
+message, rather than throwing a fatal error, if it cannot parse an entry in the
+SSH known hosts file.  This mimics the behavior of OpenSSH.
+
 
 3.1.4
 =====
