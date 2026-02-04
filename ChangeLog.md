@@ -147,6 +147,10 @@ TurboVNC Server on Fedora 40 and later.
 Size/Position" feature did not work properly in full-screen mode if
 `TVNC_SINGLESCREEN`/`turbovnc.singlescreen` was enabled.
 
+31. The TurboVNC Viewer's built-in SSH client now prints an SSH debugging
+message, rather than throwing a fatal error, if it cannot parse an entry in the
+SSH known hosts file.  This mimics the behavior of OpenSSH.
+
 
 3.0.3
 =====

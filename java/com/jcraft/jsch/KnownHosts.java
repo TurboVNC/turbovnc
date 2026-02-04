@@ -1,7 +1,7 @@
 /* -*-mode:java; c-basic-offset:2; indent-tabs-mode:nil -*- */
 /*
 Copyright (c) 2002-2018 ymnk, JCraft,Inc. All rights reserved.
-Copyright (c) 2018 D. R. Commander. All rights reserved.
+Copyright (c) 2018, 2026 D. R. Commander. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -71,9 +71,10 @@ class KnownHosts implements HostKeyRepository{
       String key=null;
       int type;
       byte[] buf=new byte[1024];
-      int bufl=0;
+      int bufl=0, line=0;
 loop:
       while(true){
+        line++;
         bufl=0;
         while(true){
           j=fis.read();
@@ -217,9 +218,18 @@ loop:
         //System.err.println("|"+key+"|");
 
         HostKey hk = null;
-        hk = new HashedHostKey(marker, host, type,
-                               Util.fromBase64(Util.str2byte(key), 0,
-                                               key.length()), comment);
+        try{
+          hk = new HashedHostKey(marker, host, type,
+                                 Util.fromBase64(Util.str2byte(key), 0,
+                                                 key.length()), comment);
+        }
+        catch(JSchException e){
+          JSch.getLogger().log(Logger.DEBUG,
+            (known_hosts != null ? known_hosts : "known hosts") + ":" +
+            line + ": " + e.getMessage());
+          addInvalidLine(Util.byte2str(buf, 0, bufl));
+          continue loop;
+        }
         pool.addElement(hk);
       }
       if(error){
