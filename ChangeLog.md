@@ -20,6 +20,10 @@ now disables multi-hop/multi-level SSH tunneling if a case-insensitive argument
 of `none` is specified for the `ProxyJump` OpenSSH config file keyword.  This
 is useful in conjunction with wildcard `Host` entries.
 
+4. The TurboVNC Viewer's built-in SSH client now prints an SSH debugging
+message, rather than throwing a fatal error, if it cannot parse an entry in the
+SSH known hosts file.  This mimics the behavior of OpenSSH.
+
 
 3.2.1
 =====
