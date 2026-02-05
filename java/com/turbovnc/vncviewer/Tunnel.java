@@ -436,10 +436,10 @@ public class Tunnel {
       pb.redirectError(ProcessBuilder.Redirect.INHERIT);
       Process p = pb.start();
       if (p == null)
-        throw new ErrorException("socat error");
+        throw new ErrorException("Could not execute socat");
       return new StreamSocket(p.getInputStream(), p.getOutputStream(), true);
     } catch (Exception e) {
-      throw new ErrorException("Could not start socat:\n" + e.getMessage());
+      throw new ErrorException("Could not execute socat:\n" + e.getMessage());
     }
   }
 
@@ -559,14 +559,14 @@ public class Tunnel {
               pb.redirectError(ProcessBuilder.Redirect.INHERIT);
               Process p = pb.start();
               if (p == null)
-                throw new ErrorException("error calling 'uname -n'");
+                throw new ErrorException("Could not execute 'uname -n'");
               String id = new BufferedReader(
                 new InputStreamReader(p.getInputStream())).readLine();
               p.getOutputStream().close();
               p.waitFor();
               result += id;
             } catch (Exception e) {
-              throw new ErrorException("Could run 'uname -n':\n" +
+              throw new ErrorException("Could not execute 'uname -n':\n" +
                                        e.getMessage());
             }
             continue;
@@ -577,14 +577,14 @@ public class Tunnel {
               pb.redirectError(ProcessBuilder.Redirect.INHERIT);
               Process p = pb.start();
               if (p == null)
-                throw new ErrorException("error calling 'id -u'");
+                throw new ErrorException("Could not execute 'id -u'");
               String id = new BufferedReader(
                 new InputStreamReader(p.getInputStream())).readLine();
               p.getOutputStream().close();
               p.waitFor();
               result += id;
             } catch (Exception e) {
-              throw new ErrorException("Could run 'id -u':\n" +
+              throw new ErrorException("Could not execute 'id -u':\n" +
                                        e.getMessage());
             }
             continue;
