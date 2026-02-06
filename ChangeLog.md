@@ -24,6 +24,12 @@ is useful in conjunction with wildcard `Host` entries.
 message, rather than throwing a fatal error, if it cannot parse an entry in the
 SSH known hosts file.  This mimics the behavior of OpenSSH.
 
+5. The TurboVNC Server now includes various security fixes (CVE-2025-26594,
+CVE-2025-26595, CVE-2025-26596, CVE-2025-26597, CVE-2025-26598, CVE-2025-26599,
+CVE-2025-26600, CVE-2025-26601, CVE-2025-49175, CVE-2025-49176, CVE-2025-49178,
+CVE-2025-49179, CVE-2025-49180, CVE-2025-62229, CVE-2025-62230, and
+CVE-2025-62231) from the xorg-server 21.1.x code base.
+
 
 3.2.1
 =====

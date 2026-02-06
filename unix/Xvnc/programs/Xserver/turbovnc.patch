@@ -42,6 +42,193 @@ index 24c6b10..be2be20 100644
          char template[PATH_MAX];
          snprintf(template, ARRAY_SIZE(template), "%s/shmfd-XXXXXX", shmdirs[i]);
  #ifdef HAVE_MKOSTEMP
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xext/sync.c b/Xserver/Xext/sync.c
+index fd2ceb0..e2f2c27 100644
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xext/sync.c
++++ b/Xserver/Xext/sync.c
+@@ -199,8 +199,8 @@ SyncAddTriggerToSyncObject(SyncTrigger * pTrigger)
+             return Success;
+     }
+ 
+-    if (!(pCur = malloc(sizeof(SyncTriggerList))))
+-        return BadAlloc;
++    /* Failure is not an option, it's succeed or burst! */
++    pCur = XNFalloc(sizeof(SyncTriggerList));
+ 
+     pCur->pTrigger = pTrigger;
+     pCur->next = pTrigger->pSync->pTriglist;
+@@ -329,11 +329,6 @@ SyncInitTrigger(ClientPtr client, SyncTrigger * pTrigger, XID syncObject,
+             client->errorValue = syncObject;
+             return rc;
+         }
+-        if (pSync != pTrigger->pSync) { /* new counter for trigger */
+-            SyncDeleteTriggerFromSyncObject(pTrigger);
+-            pTrigger->pSync = pSync;
+-            newSyncObject = TRUE;
+-        }
+     }
+ 
+     /* if system counter, ask it what the current value is */
+@@ -355,6 +350,24 @@ SyncInitTrigger(ClientPtr client, SyncTrigger * pTrigger, XID syncObject,
+         }
+     }
+ 
++    if (changes & (XSyncCAValueType | XSyncCAValue)) {
++        if (pTrigger->value_type == XSyncAbsolute)
++            pTrigger->test_value = pTrigger->wait_value;
++        else {                  /* relative */
++            Bool overflow;
++
++            if (pCounter == NULL)
++                return BadMatch;
++
++            overflow = checked_int64_add(&pTrigger->test_value,
++                                         pCounter->value, pTrigger->wait_value);
++            if (overflow) {
++                client->errorValue = pTrigger->wait_value >> 32;
++                return BadValue;
++            }
++        }
++    }
++
+     if (changes & XSyncCATestType) {
+ 
+         if (pSync && SYNC_FENCE == pSync->type) {
+@@ -383,21 +396,11 @@ SyncInitTrigger(ClientPtr client, SyncTrigger * pTrigger, XID syncObject,
+         }
+     }
+ 
+-    if (changes & (XSyncCAValueType | XSyncCAValue)) {
+-        if (pTrigger->value_type == XSyncAbsolute)
+-            pTrigger->test_value = pTrigger->wait_value;
+-        else {                  /* relative */
+-            Bool overflow;
+-
+-            if (pCounter == NULL)
+-                return BadMatch;
+-
+-            overflow = checked_int64_add(&pTrigger->test_value,
+-                                         pCounter->value, pTrigger->wait_value);
+-            if (overflow) {
+-                client->errorValue = pTrigger->wait_value >> 32;
+-                return BadValue;
+-            }
++    if (changes & XSyncCACounter) {
++        if (pSync != pTrigger->pSync) { /* new counter for trigger */
++            SyncDeleteTriggerFromSyncObject(pTrigger);
++            pTrigger->pSync = pSync;
++            newSyncObject = TRUE;
+         }
+     }
+ 
+@@ -405,8 +408,7 @@ SyncInitTrigger(ClientPtr client, SyncTrigger * pTrigger, XID syncObject,
+      *  a new counter on a trigger
+      */
+     if (newSyncObject) {
+-        if ((rc = SyncAddTriggerToSyncObject(pTrigger)) != Success)
+-            return rc;
++        SyncAddTriggerToSyncObject(pTrigger);
+     }
+     else if (pCounter && IsSystemCounter(pCounter)) {
+         SyncComputeBracketValues(pCounter);
+@@ -797,8 +799,14 @@ SyncChangeAlarmAttributes(ClientPtr client, SyncAlarm * pAlarm, Mask mask,
+     int status;
+     XSyncCounter counter;
+     Mask origmask = mask;
++    SyncTrigger trigger;
++    Bool select_events_changed = FALSE;
++    Bool select_events_value = FALSE;
++    int64_t delta;
+ 
+-    counter = pAlarm->trigger.pSync ? pAlarm->trigger.pSync->id : None;
++    trigger = pAlarm->trigger;
++    delta = pAlarm->delta;
++    counter = trigger.pSync ? trigger.pSync->id : None;
+ 
+     while (mask) {
+         int index2 = lowbit(mask);
+@@ -814,24 +822,24 @@ SyncChangeAlarmAttributes(ClientPtr client, SyncAlarm * pAlarm, Mask mask,
+         case XSyncCAValueType:
+             mask &= ~XSyncCAValueType;
+             /* sanity check in SyncInitTrigger */
+-            pAlarm->trigger.value_type = *values++;
++            trigger.value_type = *values++;
+             break;
+ 
+         case XSyncCAValue:
+             mask &= ~XSyncCAValue;
+-            pAlarm->trigger.wait_value = ((int64_t)values[0] << 32) | values[1];
++            trigger.wait_value = ((int64_t)values[0] << 32) | values[1];
+             values += 2;
+             break;
+ 
+         case XSyncCATestType:
+             mask &= ~XSyncCATestType;
+             /* sanity check in SyncInitTrigger */
+-            pAlarm->trigger.test_type = *values++;
++            trigger.test_type = *values++;
+             break;
+ 
+         case XSyncCADelta:
+             mask &= ~XSyncCADelta;
+-            pAlarm->delta = ((int64_t)values[0] << 32) | values[1];
++            delta = ((int64_t)values[0] << 32) | values[1];
+             values += 2;
+             break;
+ 
+@@ -841,10 +849,8 @@ SyncChangeAlarmAttributes(ClientPtr client, SyncAlarm * pAlarm, Mask mask,
+                 client->errorValue = *values;
+                 return BadValue;
+             }
+-            status = SyncEventSelectForAlarm(pAlarm, client,
+-                                             (Bool) (*values++));
+-            if (status != Success)
+-                return status;
++            select_events_value = (Bool) (*values++);
++            select_events_changed = TRUE;
+             break;
+ 
+         default:
+@@ -853,25 +859,33 @@ SyncChangeAlarmAttributes(ClientPtr client, SyncAlarm * pAlarm, Mask mask,
+         }
+     }
+ 
++    if (select_events_changed) {
++        status = SyncEventSelectForAlarm(pAlarm, client, select_events_value);
++        if (status != Success)
++            return status;
++    }
++
+     /* "If the test-type is PositiveComparison or PositiveTransition
+      *  and delta is less than zero, or if the test-type is
+      *  NegativeComparison or NegativeTransition and delta is
+      *  greater than zero, a Match error is generated."
+      */
+     if (origmask & (XSyncCADelta | XSyncCATestType)) {
+-        if ((((pAlarm->trigger.test_type == XSyncPositiveComparison) ||
+-              (pAlarm->trigger.test_type == XSyncPositiveTransition))
+-             && pAlarm->delta < 0)
++        if ((((trigger.test_type == XSyncPositiveComparison) ||
++              (trigger.test_type == XSyncPositiveTransition))
++             && delta < 0)
+             ||
+-            (((pAlarm->trigger.test_type == XSyncNegativeComparison) ||
+-              (pAlarm->trigger.test_type == XSyncNegativeTransition))
+-             && pAlarm->delta > 0)
++            (((trigger.test_type == XSyncNegativeComparison) ||
++              (trigger.test_type == XSyncNegativeTransition))
++             && delta > 0)
+             ) {
+             return BadMatch;
+         }
+     }
+ 
+     /* postpone this until now, when we're sure nothing else can go wrong */
++    pAlarm->delta = delta;
++    pAlarm->trigger = trigger;
+     if ((status = SyncInitTrigger(client, &pAlarm->trigger, counter, RTCounter,
+                                   origmask & XSyncCAAllTrigger)) != Success)
+         return status;
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xext/xtest.c b/Xserver/Xext/xtest.c
 index 38b8012..bf11789 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xext/xtest.c
@@ -113,6 +300,90 @@ index 659816a..1930089 100644
  
          memcpy(to->button->labels, from->button->labels,
                 from->button->numButtons * sizeof(Atom));
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xi/xibarriers.c b/Xserver/Xi/xibarriers.c
+index 1926762..cb336f2 100644
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xi/xibarriers.c
++++ b/Xserver/Xi/xibarriers.c
+@@ -129,14 +129,15 @@ static void FreePointerBarrierClient(struct PointerBarrierClient *c)
+ 
+ static struct PointerBarrierDevice *GetBarrierDevice(struct PointerBarrierClient *c, int deviceid)
+ {
+-    struct PointerBarrierDevice *pbd = NULL;
++    struct PointerBarrierDevice *p, *pbd = NULL;
+ 
+-    xorg_list_for_each_entry(pbd, &c->per_device, entry) {
+-        if (pbd->deviceid == deviceid)
++    xorg_list_for_each_entry(p, &c->per_device, entry) {
++        if (p->deviceid == deviceid) {
++            pbd = p;
+             break;
++        }
+     }
+ 
+-    BUG_WARN(!pbd);
+     return pbd;
+ }
+ 
+@@ -337,6 +338,9 @@ barrier_find_nearest(BarrierScreenPtr cs, DeviceIntPtr dev,
+         double distance;
+ 
+         pbd = GetBarrierDevice(c, dev->id);
++        if (!pbd)
++            continue;
++
+         if (pbd->seen)
+             continue;
+ 
+@@ -445,6 +449,9 @@ input_constrain_cursor(DeviceIntPtr dev, ScreenPtr screen,
+         nearest = &c->barrier;
+ 
+         pbd = GetBarrierDevice(c, master->id);
++        if (!pbd)
++            continue;
++
+         new_sequence = !pbd->hit;
+ 
+         pbd->seen = TRUE;
+@@ -485,6 +492,9 @@ input_constrain_cursor(DeviceIntPtr dev, ScreenPtr screen,
+         int flags = 0;
+ 
+         pbd = GetBarrierDevice(c, master->id);
++        if (!pbd)
++            continue;
++
+         pbd->seen = FALSE;
+         if (!pbd->hit)
+             continue;
+@@ -679,6 +689,9 @@ BarrierFreeBarrier(void *data, XID id)
+             continue;
+ 
+         pbd = GetBarrierDevice(c, dev->id);
++        if (!pbd)
++            continue;
++
+         if (!pbd->hit)
+             continue;
+ 
+@@ -738,6 +751,8 @@ static void remove_master_func(void *res, XID id, void *devid)
+     barrier = container_of(b, struct PointerBarrierClient, barrier);
+ 
+     pbd = GetBarrierDevice(barrier, *deviceid);
++    if (!pbd)
++        return;
+ 
+     if (pbd->hit) {
+         BarrierEvent ev = {
+@@ -903,6 +918,10 @@ ProcXIBarrierReleasePointer(ClientPtr client)
+         barrier = container_of(b, struct PointerBarrierClient, barrier);
+ 
+         pbd = GetBarrierDevice(barrier, dev->id);
++        if (!pbd) {
++            client->errorValue = dev->id;
++            return BadDevice;
++        }
+ 
+         if (pbd->barrier_event_id == event_id)
+             pbd->release_event_id = event_id;
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xi/xichangehierarchy.c b/Xserver/Xi/xichangehierarchy.c
 index 504defe..cb0c6df 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xi/xichangehierarchy.c
@@ -374,6 +645,67 @@ index 0498e01..b969242 100644
  
      free(buffer);
      return Success;
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/composite/compalloc.c b/Xserver/composite/compalloc.c
+index 3e2f14f..d1c205c 100644
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/composite/compalloc.c
++++ b/Xserver/composite/compalloc.c
+@@ -138,6 +138,7 @@ compRedirectWindow(ClientPtr pClient, WindowPtr pWin, int update)
+     CompScreenPtr cs = GetCompScreen(pWin->drawable.pScreen);
+     WindowPtr pLayerWin;
+     Bool anyMarked = FALSE;
++    int status = Success;
+ 
+     if (pWin == cs->pOverlayWin) {
+         return Success;
+@@ -216,13 +217,13 @@ compRedirectWindow(ClientPtr pClient, WindowPtr pWin, int update)
+ 
+     if (!compCheckRedirect(pWin)) {
+         FreeResource(ccw->id, RT_NONE);
+-        return BadAlloc;
++        status = BadAlloc;
+     }
+ 
+     if (anyMarked)
+         compHandleMarkedWindows(pWin, pLayerWin);
+ 
+-    return Success;
++    return status;
+ }
+ 
+ void
+@@ -603,9 +604,12 @@ compAllocPixmap(WindowPtr pWin)
+     int h = pWin->drawable.height + (bw << 1);
+     PixmapPtr pPixmap = compNewPixmap(pWin, x, y, w, h);
+     CompWindowPtr cw = GetCompWindow(pWin);
++    Bool status;
+ 
+-    if (!pPixmap)
+-        return FALSE;
++    if (!pPixmap) {
++        status = FALSE;
++        goto out;
++    }
+     if (cw->update == CompositeRedirectAutomatic)
+         pWin->redirectDraw = RedirectDrawAutomatic;
+     else
+@@ -619,14 +623,16 @@ compAllocPixmap(WindowPtr pWin)
+         DamageRegister(&pWin->drawable, cw->damage);
+         cw->damageRegistered = TRUE;
+     }
++    status = TRUE;
+ 
++out:
+     /* Make sure our borderClip is up to date */
+     RegionUninit(&cw->borderClip);
+     RegionCopy(&cw->borderClip, &pWin->borderClip);
+     cw->borderClipX = pWin->drawable.x;
+     cw->borderClipY = pWin->drawable.y;
+ 
+-    return TRUE;
++    return status;
+ }
+ 
+ void
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/composite/compwindow.c b/Xserver/composite/compwindow.c
 index 54b4e6a..8db9d03 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/composite/compwindow.c
@@ -391,7 +723,7 @@ index 54b4e6a..8db9d03 100644
      return ret;
  }
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dix/devices.c b/Xserver/dix/devices.c
-index e7c74d7..bf1aa1c 100644
+index e7c74d7..fab8d72 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dix/devices.c
 +++ b/Xserver/dix/devices.c
 @@ -451,14 +451,20 @@ DisableDevice(DeviceIntPtr dev, BOOL sendevent)
@@ -442,7 +774,39 @@ index e7c74d7..bf1aa1c 100644
      *prev = dev->next;
      dev->next = inputInfo.off_devices;
      inputInfo.off_devices = dev;
-@@ -1067,6 +1083,11 @@ CloseDownDevices(void)
+@@ -949,6 +965,23 @@ FreeAllDeviceClasses(ClassesPtr classes)
+ 
+ }
+ 
++static void
++FreePendingFrozenDeviceEvents(DeviceIntPtr dev)
++{
++    QdEventPtr qe, tmp;
++
++    if (!dev->deviceGrab.sync.frozen)
++        return;
++
++    /* Dequeue any frozen pending events */
++    xorg_list_for_each_entry_safe(qe, tmp, &syncEvents.pending, next) {
++        if (qe->device == dev) {
++            xorg_list_del(&qe->next);
++            free(qe);
++        }
++    }
++}
++
+ /**
+  * Close down a device and free all resources.
+  * Once closed down, the driver will probably not expect you that you'll ever
+@@ -1013,6 +1046,7 @@ CloseDevice(DeviceIntPtr dev)
+         free(dev->last.touches[j].valuators);
+     free(dev->last.touches);
+     dev->config_info = NULL;
++    FreePendingFrozenDeviceEvents(dev);
+     dixFreePrivates(dev->devPrivates, PRIVATE_DEVICE);
+     free(dev);
+ }
+@@ -1067,6 +1101,11 @@ CloseDownDevices(void)
              dev->master = NULL;
      }
  
@@ -454,7 +818,7 @@ index e7c74d7..bf1aa1c 100644
      CloseDeviceList(&inputInfo.devices);
      CloseDeviceList(&inputInfo.off_devices);
  
-@@ -2502,6 +2523,8 @@ RecalculateMasterButtons(DeviceIntPtr slave)
+@@ -2502,6 +2541,8 @@ RecalculateMasterButtons(DeviceIntPtr slave)
  
      if (master->button && master->button->numButtons != maxbuttons) {
          int i;
@@ -463,7 +827,7 @@ index e7c74d7..bf1aa1c 100644
          DeviceChangedEvent event = {
              .header = ET_Internal,
              .type = ET_DeviceChanged,
-@@ -2512,6 +2535,14 @@ RecalculateMasterButtons(DeviceIntPtr slave)
+@@ -2512,6 +2553,14 @@ RecalculateMasterButtons(DeviceIntPtr slave)
          };
  
          master->button->numButtons = maxbuttons;
@@ -478,6 +842,44 @@ index e7c74d7..bf1aa1c 100644
  
          memcpy(&event.buttons.names, master->button->labels, maxbuttons *
                 sizeof(Atom));
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dix/dispatch.c b/Xserver/dix/dispatch.c
+index a33bfaa..8e19c55 100644
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dix/dispatch.c
++++ b/Xserver/dix/dispatch.c
+@@ -447,9 +447,10 @@ Dispatch(void)
+ 
+                 /* now, finally, deal with client requests */
+                 result = ReadRequestFromClient(client);
+-                if (result <= 0) {
+-                    if (result < 0)
+-                        CloseDownClient(client);
++                if (result == 0)
++                    break;
++                else if (result == -1) {
++                    CloseDownClient(client);
+                     break;
+                 }
+ 
+@@ -470,7 +471,7 @@ Dispatch(void)
+                                           client->index,
+                                           client->requestBuffer);
+ #endif
+-                if (result > (maxBigRequestSize << 2))
++                if (result < 0 || result > (maxBigRequestSize << 2))
+                     result = BadLength;
+                 else {
+                     result = XaceHookDispatch(client, client->majorOp);
+@@ -3039,6 +3040,10 @@ ProcFreeCursor(ClientPtr client)
+     rc = dixLookupResourceByType((void **) &pCursor, stuff->id, RT_CURSOR,
+                                  client, DixDestroyAccess);
+     if (rc == Success) {
++        if (pCursor == rootCursor) {
++            client->errorValue = stuff->id;
++            return BadCursor;
++        }
+         FreeResource(stuff->id, RT_NONE);
+         return Success;
+     }
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dix/enterleave.c b/Xserver/dix/enterleave.c
 index a2f625b..72a953f 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dix/enterleave.c
@@ -710,6 +1112,28 @@ index 427b891..0f32bd8 100644
 +
      /* The client's event type must be a core event type or one defined by an
         extension. */
+ 
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dix/main.c b/Xserver/dix/main.c
+index b228d9c..f2606d3 100644
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dix/main.c
++++ b/Xserver/dix/main.c
+@@ -235,6 +235,8 @@ dix_main(int argc, char *argv[], char *envp[])
+                        defaultCursorFont);
+         }
+ 
++        rootCursor = RefCursor(rootCursor);
++
+ #ifdef PANORAMIX
+         /*
+          * Consolidate window and colourmap information for each screen
+@@ -275,6 +277,8 @@ dix_main(int argc, char *argv[], char *envp[])
+ 
+         Dispatch();
+ 
++        UnrefCursor(rootCursor);
++
+         UndisplayDevices();
+         DisableAllDevices();
  
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dix/property.c b/Xserver/dix/property.c
 index ff1d669..5f493af 100644
@@ -994,6 +1418,19 @@ index 46081ad..9b3a4d5 100644
 +#endif
 +
  #endif
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/include/xkbsrv.h b/Xserver/include/xkbsrv.h
+index fbb5427..b276627 100644
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/include/xkbsrv.h
++++ b/Xserver/include/xkbsrv.h
+@@ -58,6 +58,8 @@ THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ #include "inputstr.h"
+ #include "events.h"
+ 
++extern RESTYPE RT_XKBCLIENT;
++
+ typedef struct _XkbInterest {
+     DeviceIntPtr dev;
+     ClientPtr client;
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/mi/miinitext.c b/Xserver/mi/miinitext.c
 index b7c7021..0e28272 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/mi/miinitext.c
@@ -1034,6 +1471,39 @@ index 2aad0e3..d0447d7 100644
  
  #if defined(HAVE_WALKCONTEXT)   /* Solaris 9 & later */
  
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/os/io.c b/Xserver/os/io.c
+index 939f517..b7f2750 100644
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/os/io.c
++++ b/Xserver/os/io.c
+@@ -296,6 +296,10 @@ ReadRequestFromClient(ClientPtr client)
+                 needed = get_big_req_len(request, client);
+         }
+         client->req_len = needed;
++        if (needed > MAXINT >> 2) {
++            /* Check for potential integer overflow */
++            return -(BadLength);
++        }
+         needed <<= 2;           /* needed is in bytes now */
+     }
+     if (gotnow < needed) {
+@@ -391,6 +395,8 @@ ReadRequestFromClient(ClientPtr client)
+                     needed = get_big_req_len(request, client);
+             }
+             client->req_len = needed;
++            if (needed > MAXINT >> 2)
++                return -(BadLength);
+             needed <<= 2;
+         }
+         if (gotnow < needed) {
+@@ -438,7 +444,7 @@ ReadRequestFromClient(ClientPtr client)
+      */
+ 
+     gotnow -= needed;
+-    if (!gotnow)
++    if (!gotnow && !oci->ignoreBytes)
+         AvailableInput = oc;
+     if (move_header) {
+         if (client->req_len < bytes_to_int32(sizeof(xBigReq) - sizeof(xReq))) {
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/os/log.c b/Xserver/os/log.c
 index cc82191..f5d2891 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/os/log.c
@@ -1047,6 +1517,19 @@ index cc82191..f5d2891 100644
  }
  
  void
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/present/present_notify.c b/Xserver/present/present_notify.c
+index e272e08..924de38 100644
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/present/present_notify.c
++++ b/Xserver/present/present_notify.c
+@@ -94,7 +94,7 @@ present_create_notifies(ClientPtr client, int num_notifies, xPresentNotify *x_no
+         if (status != Success)
+             goto bail;
+ 
+-        added = i;
++        added++;
+     }
+     return Success;
+ 
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/randr/rrmode.c b/Xserver/randr/rrmode.c
 index d34025b..d76a24d 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/randr/rrmode.c
@@ -1106,10 +1589,20 @@ index c2fb958..c4fef8a 100644
  
      REQUEST_AT_LEAST_SIZE(xRRChangeOutputPropertyReq);
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/randr/rrproviderproperty.c b/Xserver/randr/rrproviderproperty.c
-index b79c17f..90c5a9a 100644
+index b79c17f..0aa35ad 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/randr/rrproviderproperty.c
 +++ b/Xserver/randr/rrproviderproperty.c
-@@ -498,7 +498,7 @@ ProcRRChangeProviderProperty(ClientPtr client)
+@@ -179,7 +179,8 @@ RRChangeProviderProperty(RRProviderPtr provider, Atom property, Atom type,
+ 
+     if (mode == PropModeReplace || len > 0) {
+         void *new_data = NULL, *old_data = NULL;
+-
++        if (total_len > MAXINT / size_in_bytes)
++            return BadValue;
+         total_size = total_len * size_in_bytes;
+         new_value.data = (void *) malloc(total_size);
+         if (!new_value.data && total_size) {
+@@ -498,7 +499,7 @@ ProcRRChangeProviderProperty(ClientPtr client)
      char format, mode;
      unsigned long len;
      int sizeInBytes;
@@ -1118,6 +1611,46 @@ index b79c17f..90c5a9a 100644
      int err;
  
      REQUEST_AT_LEAST_SIZE(xRRChangeProviderPropertyReq);
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/record/record.c b/Xserver/record/record.c
+index a8aec23..afaceb5 100644
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/record/record.c
++++ b/Xserver/record/record.c
+@@ -45,6 +45,7 @@ and Jim Haggerty of Metheus.
+ #include "inputstr.h"
+ #include "eventconvert.h"
+ #include "scrnintstr.h"
++#include "opaque.h"
+ 
+ #include <stdio.h>
+ #include <assert.h>
+@@ -1298,6 +1299,13 @@ RecordSanityCheckRegisterClients(RecordContextPtr pContext, ClientPtr client,
+     int i;
+     XID recordingClient;
+ 
++    /* LimitClients is 2048 at max, way less that MAXINT */
++    if (stuff->nClients > LimitClients)
++        return BadValue;
++
++    if (stuff->nRanges > (MAXINT - 4 * stuff->nClients) / SIZEOF(xRecordRange))
++        return BadValue;
++
+     if (((client->req_len << 2) - SIZEOF(xRecordRegisterClientsReq)) !=
+         4 * stuff->nClients + SIZEOF(xRecordRange) * stuff->nRanges)
+         return BadLength;
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/render/animcur.c b/Xserver/render/animcur.c
+index ef27bda..77942d8 100644
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/render/animcur.c
++++ b/Xserver/render/animcur.c
+@@ -304,6 +304,9 @@ AnimCursorCreate(CursorPtr *cursors, CARD32 *deltas, int ncursor,
+     int rc = BadAlloc, i;
+     AnimCurPtr ac;
+ 
++    if (ncursor <= 0)
++        return BadValue;
++
+     for (i = 0; i < screenInfo.numScreens; i++)
+         if (!GetAnimCurScreen(screenInfo.screens[i]))
+             return BadImplementation;
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/render/glyph.c b/Xserver/render/glyph.c
 index f3ed9cf..d5fc5f3 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/render/glyph.c
@@ -1158,7 +1691,7 @@ index 2f51bd2..e803455 100644
   ResizeGlyphSet(GlyphSetPtr glyphSet, CARD32 change);
  
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/render/render.c b/Xserver/render/render.c
-index 456f156..5bc2a20 100644
+index 456f156..a8c2da0 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/render/render.c
 +++ b/Xserver/render/render.c
 @@ -1076,6 +1076,7 @@ ProcRenderAddGlyphs(ClientPtr client)
@@ -1198,6 +1731,15 @@ index 456f156..5bc2a20 100644
      if (glyphsBase != glyphsLocal)
          free(glyphsBase);
      return err;
+@@ -1788,6 +1795,8 @@ ProcRenderCreateAnimCursor(ClientPtr client)
+     ncursor =
+         (client->req_len -
+          (bytes_to_int32(sizeof(xRenderCreateAnimCursorReq)))) >> 1;
++    if (ncursor <= 0)
++        return BadValue;
+     cursors = xallocarray(ncursor, sizeof(CursorPtr) + sizeof(CARD32));
+     if (!cursors)
+         return BadAlloc;
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/xfixes/xfixes.c b/Xserver/xfixes/xfixes.c
 index 53a6bd6..28248d4 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/xfixes/xfixes.c
@@ -1230,16 +1772,54 @@ index 53a6bd6..28248d4 100644
                                   XFixesNumberErrors,
                                   ProcXFixesDispatch, SProcXFixesDispatch,
                                   NULL, StandardMinorOpcode)) != 0) {
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/xkb/XKBMisc.c b/Xserver/xkb/XKBMisc.c
+index f171945..c454716 100644
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/xkb/XKBMisc.c
++++ b/Xserver/xkb/XKBMisc.c
+@@ -553,6 +553,7 @@ XkbChangeTypesOfKey(XkbDescPtr xkb,
+         i = XkbSetNumGroups(i, 0);
+         xkb->map->key_sym_map[key].group_info = i;
+         XkbResizeKeySyms(xkb, key, 0);
++        XkbResizeKeyActions(xkb, key, 0);
+         return Success;
+     }
+ 
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/xkb/xkb.c b/Xserver/xkb/xkb.c
-index 68c59df..7b5c623 100644
+index 68c59df..2c4aafa 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/xkb/xkb.c
 +++ b/Xserver/xkb/xkb.c
-@@ -2993,13 +2993,13 @@ _XkbSetCompatMap(ClientPtr client, DeviceIntPtr dev,
+@@ -51,7 +51,7 @@ int XkbKeyboardErrorCode;
+ CARD32 xkbDebugFlags = 0;
+ static CARD32 xkbDebugCtrls = 0;
+ 
+-static RESTYPE RT_XKBCLIENT;
++RESTYPE RT_XKBCLIENT = 0;
+ 
+ /***====================================================================***/
+ 
+@@ -1093,10 +1093,10 @@ XkbSizeKeySyms(XkbDescPtr xkb, xkbGetMapReply * rep)
+     len = rep->nKeySyms * SIZEOF(xkbSymMapWireDesc);
+     symMap = &xkb->map->key_sym_map[rep->firstKeySym];
+     for (i = nSyms = 0; i < rep->nKeySyms; i++, symMap++) {
+-        if (symMap->offset != 0) {
+-            nSymsThisKey = XkbNumGroups(symMap->group_info) * symMap->width;
+-            nSyms += nSymsThisKey;
+-        }
++        nSymsThisKey = XkbNumGroups(symMap->group_info) * symMap->width;
++        if (nSymsThisKey == 0)
++            continue;
++        nSyms += nSymsThisKey;
+     }
+     len += nSyms * 4;
+     rep->totalSyms = nSyms;
+@@ -2993,13 +2993,15 @@ _XkbSetCompatMap(ClientPtr client, DeviceIntPtr dev,
          XkbSymInterpretPtr sym;
          unsigned int skipped = 0;
  
 -        if ((unsigned) (req->firstSI + req->nSI) > compat->num_si) {
 -            compat->num_si = req->firstSI + req->nSI;
++        if ((unsigned) (req->firstSI + req->nSI) > USHRT_MAX)
++            return BadValue;
 +        if ((unsigned) (req->firstSI + req->nSI) > compat->size_si) {
 +            compat->num_si = compat->size_si = req->firstSI + req->nSI;
              compat->sym_interpret = reallocarray(compat->sym_interpret,
@@ -1252,7 +1832,7 @@ index 68c59df..7b5c623 100644
                  return BadAlloc;
              }
          }
-@@ -5157,7 +5157,7 @@ _GetCountedString(char **wire_inout, ClientPtr client, char **str)
+@@ -5157,7 +5159,7 @@ _GetCountedString(char **wire_inout, ClientPtr client, char **str)
  }
  
  static Status
@@ -1261,7 +1841,7 @@ index 68c59df..7b5c623 100644
                  XkbGeometryPtr geom, XkbSectionPtr section, ClientPtr client)
  {
      char *wire;
-@@ -5168,6 +5168,9 @@ _CheckSetDoodad(char **wire_inout,
+@@ -5168,6 +5170,9 @@ _CheckSetDoodad(char **wire_inout,
      Status status;
  
      dWire = (xkbDoodadWireDesc *) (*wire_inout);
@@ -1271,7 +1851,7 @@ index 68c59df..7b5c623 100644
      any = dWire->any;
      wire = (char *) &dWire[1];
      if (client->swapped) {
-@@ -5270,7 +5273,7 @@ _CheckSetDoodad(char **wire_inout,
+@@ -5270,7 +5275,7 @@ _CheckSetDoodad(char **wire_inout,
  }
  
  static Status
@@ -1280,7 +1860,7 @@ index 68c59df..7b5c623 100644
                   XkbGeometryPtr geom, XkbSectionPtr section, ClientPtr client)
  {
      register int r;
-@@ -5281,6 +5284,9 @@ _CheckSetOverlay(char **wire_inout,
+@@ -5281,6 +5286,9 @@ _CheckSetOverlay(char **wire_inout,
  
      wire = *wire_inout;
      olWire = (xkbOverlayWireDesc *) wire;
@@ -1290,7 +1870,7 @@ index 68c59df..7b5c623 100644
      if (client->swapped) {
          swapl(&olWire->name);
      }
-@@ -5292,6 +5298,9 @@ _CheckSetOverlay(char **wire_inout,
+@@ -5292,6 +5300,9 @@ _CheckSetOverlay(char **wire_inout,
          xkbOverlayKeyWireDesc *kWire;
          XkbOverlayRowPtr row;
  
@@ -1300,7 +1880,7 @@ index 68c59df..7b5c623 100644
          if (rWire->rowUnder > section->num_rows) {
              client->errorValue = _XkbErrCode4(0x20, r, section->num_rows,
                                                rWire->rowUnder);
-@@ -5300,6 +5309,9 @@ _CheckSetOverlay(char **wire_inout,
+@@ -5300,6 +5311,9 @@ _CheckSetOverlay(char **wire_inout,
          row = XkbAddGeomOverlayRow(ol, rWire->rowUnder, rWire->nKeys);
          kWire = (xkbOverlayKeyWireDesc *) &rWire[1];
          for (k = 0; k < rWire->nKeys; k++, kWire++) {
@@ -1310,7 +1890,7 @@ index 68c59df..7b5c623 100644
              if (XkbAddGeomOverlayKey(ol, row,
                                       (char *) kWire->over,
                                       (char *) kWire->under) == NULL) {
-@@ -5333,6 +5345,9 @@ _CheckSetSections(XkbGeometryPtr geom,
+@@ -5333,6 +5347,9 @@ _CheckSetSections(XkbGeometryPtr geom,
          register int r;
          xkbRowWireDesc *rWire;
  
@@ -1320,7 +1900,7 @@ index 68c59df..7b5c623 100644
          if (client->swapped) {
              swapl(&sWire->name);
              swaps(&sWire->top);
-@@ -5358,6 +5373,9 @@ _CheckSetSections(XkbGeometryPtr geom,
+@@ -5358,6 +5375,9 @@ _CheckSetSections(XkbGeometryPtr geom,
              XkbRowPtr row;
              xkbKeyWireDesc *kWire;
  
@@ -1330,7 +1910,7 @@ index 68c59df..7b5c623 100644
              if (client->swapped) {
                  swaps(&rWire->top);
                  swaps(&rWire->left);
-@@ -5369,16 +5387,19 @@ _CheckSetSections(XkbGeometryPtr geom,
+@@ -5369,16 +5389,19 @@ _CheckSetSections(XkbGeometryPtr geom,
              row->left = rWire->left;
              row->vertical = rWire->vertical;
              kWire = (xkbKeyWireDesc *) &rWire[1];
@@ -1355,7 +1935,7 @@ index 68c59df..7b5c623 100644
                  if (key->shape_ndx >= geom->num_shapes) {
                      client->errorValue = _XkbErrCode3(0x10, key->shape_ndx,
                                                        geom->num_shapes);
-@@ -5390,14 +5411,14 @@ _CheckSetSections(XkbGeometryPtr geom,
+@@ -5390,14 +5413,14 @@ _CheckSetSections(XkbGeometryPtr geom,
                      return BadMatch;
                  }
              }
@@ -1372,7 +1952,7 @@ index 68c59df..7b5c623 100644
                  if (status != Success)
                      return status;
              }
-@@ -5406,7 +5427,7 @@ _CheckSetSections(XkbGeometryPtr geom,
+@@ -5406,7 +5429,7 @@ _CheckSetSections(XkbGeometryPtr geom,
              register int o;
  
              for (o = 0; o < sWire->nOverlays; o++) {
@@ -1381,7 +1961,7 @@ index 68c59df..7b5c623 100644
                  if (status != Success)
                      return status;
              }
-@@ -5440,6 +5461,9 @@ _CheckSetShapes(XkbGeometryPtr geom,
+@@ -5440,6 +5463,9 @@ _CheckSetShapes(XkbGeometryPtr geom,
              xkbOutlineWireDesc *olWire;
              XkbOutlinePtr ol;
  
@@ -1391,7 +1971,7 @@ index 68c59df..7b5c623 100644
              shape =
                  XkbAddGeomShape(geom, shapeWire->name, shapeWire->nOutlines);
              if (!shape)
-@@ -5450,21 +5474,27 @@ _CheckSetShapes(XkbGeometryPtr geom,
+@@ -5450,21 +5476,27 @@ _CheckSetShapes(XkbGeometryPtr geom,
                  XkbPointPtr pt;
                  xkbPointWireDesc *ptWire;
  
@@ -1423,7 +2003,7 @@ index 68c59df..7b5c623 100644
              }
              if (shapeWire->primaryNdx != XkbNoShape)
                  shape->primary = &shape->outlines[shapeWire->primaryNdx];
-@@ -5561,12 +5591,15 @@ _CheckSetGeom(XkbGeometryPtr geom, xkbSetGeometryReq * req, ClientPtr client)
+@@ -5561,12 +5593,15 @@ _CheckSetGeom(XkbGeometryPtr geom, xkbSetGeometryReq * req, ClientPtr client)
          return status;
  
      for (i = 0; i < req->nDoodads; i++) {
@@ -1440,7 +2020,7 @@ index 68c59df..7b5c623 100644
          if (XkbAddGeomKeyAlias(geom, &wire[XkbKeyNameLength], wire) == NULL)
              return BadAlloc;
          wire += 2 * XkbKeyNameLength;
-@@ -6551,7 +6584,8 @@ ProcXkbGetDeviceInfo(ClientPtr client)
+@@ -6551,7 +6586,8 @@ ProcXkbGetDeviceInfo(ClientPtr client)
  static char *
  CheckSetDeviceIndicators(char *wire,
                           DeviceIntPtr dev,
@@ -1450,7 +2030,7 @@ index 68c59df..7b5c623 100644
  {
      xkbDeviceLedsWireDesc *ledWire;
      int i;
-@@ -6559,6 +6593,11 @@ CheckSetDeviceIndicators(char *wire,
+@@ -6559,6 +6595,11 @@ CheckSetDeviceIndicators(char *wire,
  
      ledWire = (xkbDeviceLedsWireDesc *) wire;
      for (i = 0; i < num; i++) {
@@ -1462,7 +2042,7 @@ index 68c59df..7b5c623 100644
          if (client->swapped) {
              swaps(&ledWire->ledClass);
              swaps(&ledWire->ledID);
-@@ -6586,6 +6625,11 @@ CheckSetDeviceIndicators(char *wire,
+@@ -6586,6 +6627,11 @@ CheckSetDeviceIndicators(char *wire,
              atomWire = (CARD32 *) &ledWire[1];
              if (nNames > 0) {
                  for (n = 0; n < nNames; n++) {
@@ -1474,7 +2054,7 @@ index 68c59df..7b5c623 100644
                      if (client->swapped) {
                          swapl(atomWire);
                      }
-@@ -6597,6 +6641,10 @@ CheckSetDeviceIndicators(char *wire,
+@@ -6597,6 +6643,10 @@ CheckSetDeviceIndicators(char *wire,
              mapWire = (xkbIndicatorMapWireDesc *) atomWire;
              if (nMaps > 0) {
                  for (n = 0; n < nMaps; n++) {
@@ -1485,7 +2065,7 @@ index 68c59df..7b5c623 100644
                      if (client->swapped) {
                          swaps(&mapWire->virtualMods);
                          swapl(&mapWire->ctrls);
-@@ -6648,11 +6696,6 @@ SetDeviceIndicators(char *wire,
+@@ -6648,11 +6698,6 @@ SetDeviceIndicators(char *wire,
          xkbIndicatorMapWireDesc *mapWire;
          XkbSrvLedInfoPtr sli;
  
@@ -1497,7 +2077,7 @@ index 68c59df..7b5c623 100644
          namec = mapc = statec = 0;
          sli = XkbFindSrvLedInfo(dev, ledWire->ledClass, ledWire->ledID,
                                  XkbXI_IndicatorMapsMask);
-@@ -6671,10 +6714,6 @@ SetDeviceIndicators(char *wire,
+@@ -6671,10 +6716,6 @@ SetDeviceIndicators(char *wire,
              memset((char *) sli->names, 0, XkbNumIndicators * sizeof(Atom));
              for (n = 0, bit = 1; n < XkbNumIndicators; n++, bit <<= 1) {
                  if (ledWire->namesPresent & bit) {
@@ -1508,7 +2088,7 @@ index 68c59df..7b5c623 100644
                      sli->names[n] = (Atom) *atomWire;
                      if (sli->names[n] == None)
                          ledWire->namesPresent &= ~bit;
-@@ -6692,10 +6731,6 @@ SetDeviceIndicators(char *wire,
+@@ -6692,10 +6733,6 @@ SetDeviceIndicators(char *wire,
          if (ledWire->mapsPresent) {
              for (n = 0, bit = 1; n < XkbNumIndicators; n++, bit <<= 1) {
                  if (ledWire->mapsPresent & bit) {
@@ -1519,7 +2099,7 @@ index 68c59df..7b5c623 100644
                      sli->maps[n].flags = mapWire->flags;
                      sli->maps[n].which_groups = mapWire->whichGroups;
                      sli->maps[n].groups = mapWire->groups;
-@@ -6731,13 +6766,17 @@ SetDeviceIndicators(char *wire,
+@@ -6731,13 +6768,17 @@ SetDeviceIndicators(char *wire,
  }
  
  static int
@@ -1538,7 +2118,7 @@ index 68c59df..7b5c623 100644
          if (!dev->button) {
              client->errorValue = _XkbErrCode2(XkbErr_BadClass, ButtonClass);
              return XkbKeyboardErrorCode;
-@@ -6748,13 +6787,13 @@ _XkbSetDeviceInfo(ClientPtr client, DeviceIntPtr dev,
+@@ -6748,13 +6789,13 @@ _XkbSetDeviceInfo(ClientPtr client, DeviceIntPtr dev,
                               dev->button->numButtons);
              return BadMatch;
          }
@@ -1554,7 +2134,7 @@ index 68c59df..7b5c623 100644
          if (status != Success)
              return status;
      }
-@@ -6765,8 +6804,8 @@ _XkbSetDeviceInfo(ClientPtr client, DeviceIntPtr dev,
+@@ -6765,8 +6806,8 @@ _XkbSetDeviceInfo(ClientPtr client, DeviceIntPtr dev,
  }
  
  static int
@@ -1565,7 +2145,7 @@ index 68c59df..7b5c623 100644
  {
      char *wire;
      xkbExtensionDeviceNotify ed;
-@@ -6790,8 +6829,6 @@ _XkbSetDeviceInfoCheck(ClientPtr client, DeviceIntPtr dev,
+@@ -6790,8 +6831,6 @@ _XkbSetDeviceInfoCheck(ClientPtr client, DeviceIntPtr dev,
          if (stuff->firstBtn + stuff->nBtns > nBtns)
              return BadValue;
          sz = stuff->nBtns * SIZEOF(xkbActionWireDesc);
@@ -1574,6 +2154,26 @@ index 68c59df..7b5c623 100644
          memcpy((char *) &acts[stuff->firstBtn], (char *) wire, sz);
          wire += sz;
          ed.reason |= XkbXI_ButtonActionsMask;
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/xkb/xkbEvents.c b/Xserver/xkb/xkbEvents.c
+index 0bbd661..3d04ecf 100644
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/xkb/xkbEvents.c
++++ b/Xserver/xkb/xkbEvents.c
+@@ -1056,6 +1056,7 @@ XkbRemoveResourceClient(DevicePtr inDev, XID id)
+             autoCtrls = interest->autoCtrls;
+             autoValues = interest->autoCtrlValues;
+             client = interest->client;
++            FreeResource(interest->resource, RT_XKBCLIENT);
+             free(interest);
+             found = TRUE;
+         }
+@@ -1067,6 +1068,7 @@ XkbRemoveResourceClient(DevicePtr inDev, XID id)
+                 autoCtrls = victim->autoCtrls;
+                 autoValues = victim->autoCtrlValues;
+                 client = victim->client;
++                FreeResource(victim->resource, RT_XKBCLIENT);
+                 free(victim);
+                 found = TRUE;
+             }
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/xkb/xkbInit.c b/Xserver/xkb/xkbInit.c
 index 9e45b4b..ddd5ef7 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/xkb/xkbInit.c
@@ -1621,3 +2221,30 @@ index 8975ade..9bc51fc 100644
          }
          dst->names->num_rg = src->names->num_rg;
  
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/xkb/xkbtext.c b/Xserver/xkb/xkbtext.c
+index d2a2567..0026264 100644
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/xkb/xkbtext.c
++++ b/Xserver/xkb/xkbtext.c
+@@ -175,14 +175,14 @@ XkbVModMaskText(XkbDescPtr xkb,
+                 len = strlen(tmp) + 1 + (str == buf ? 0 : 1);
+                 if (format == XkbCFile)
+                     len += 4;
+-                if ((str - (buf + len)) <= VMOD_BUFFER_SIZE) {
+-                    if (str != buf) {
+-                        if (format == XkbCFile)
+-                            *str++ = '|';
+-                        else
+-                            *str++ = '+';
+-                        len--;
+-                    }
++                if ((str - buf) + len > VMOD_BUFFER_SIZE)
++                    continue; /* Skip */
++                if (str != buf) {
++                    if (format == XkbCFile)
++                        *str++ = '|';
++                    else
++                        *str++ = '+';
++                    len--;
+                 }
+                 if (format == XkbCFile)
+                     sprintf(str, "%sMask", tmp);
