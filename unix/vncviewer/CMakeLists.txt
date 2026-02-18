@@ -46,7 +46,7 @@ else()
 	target_link_libraries(JavaAppLauncher "-framework Cocoa")
 endif()
 
-install(TARGETS turbovnchelper DESTINATION ${CMAKE_INSTALL_JAVADIR})
+install(TARGETS turbovnchelper DESTINATION ${CMAKE_INSTALL_FULL_JAVADIR})
 
 else() # APPLE AND TVNC_BUILDVIEWER
 
@@ -84,7 +84,7 @@ endif()
 target_link_libraries(turbovnchelper ${X11_LIBRARIES} ${X11_Xi_LIB} ${LIBDL}
 	${TJPEG_LIBRARY})
 
-install(TARGETS turbovnchelper DESTINATION ${CMAKE_INSTALL_JAVADIR})
+install(TARGETS turbovnchelper DESTINATION ${CMAKE_INSTALL_FULL_JAVADIR})
 
 install(FILES ${CMAKE_SOURCE_DIR}/java/com/turbovnc/vncviewer/turbovnc-128.png
 	DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/icons/hicolor/128x128/apps
@@ -100,7 +100,7 @@ endif()
 endif() # APPLE AND TVNC_BUILDVIEWER
 
 install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncviewer
-	DESTINATION ${CMAKE_INSTALL_BINDIR})
+	DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
 
-install(FILES vncviewer.man DESTINATION ${CMAKE_INSTALL_MANDIR}/man1
+install(FILES vncviewer.man DESTINATION ${CMAKE_INSTALL_FULL_MANDIR}/man1
 	RENAME vncviewer.1)

@@ -5,7 +5,7 @@ add_executable(vncconnect vncconnect.c
 
 target_link_libraries(vncconnect ${X11_LIBRARIES})
 
-install(TARGETS vncconnect DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS vncconnect DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
 
-install(FILES vncconnect.man DESTINATION ${CMAKE_INSTALL_MANDIR}/man1
+install(FILES vncconnect.man DESTINATION ${CMAKE_INSTALL_FULL_MANDIR}/man1
 	RENAME vncconnect.1)
