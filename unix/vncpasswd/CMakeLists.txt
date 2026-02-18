@@ -9,7 +9,7 @@ add_executable(vncpasswd vncpasswd.c)
 
 target_link_libraries(vncpasswd ${X11_LIBRARIES} vncauth)
 
-install(TARGETS vncpasswd DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS vncpasswd DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
 
-install(FILES vncpasswd.man DESTINATION ${CMAKE_INSTALL_MANDIR}/man1
+install(FILES vncpasswd.man DESTINATION ${CMAKE_INSTALL_FULL_MANDIR}/man1
 	RENAME vncpasswd.1)
