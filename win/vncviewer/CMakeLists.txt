@@ -31,4 +31,4 @@ set_target_properties(turbovnchelper PROPERTIES PREFIX ""
 target_link_libraries(turbovnchelper ${TJPEG_LIBRARY})
 
 install(TARGETS turbovnchelper RUNTIME
-  DESTINATION ${CMAKE_INSTALL_FULL_JAVADIR})
+	DESTINATION ${CMAKE_INSTALL_FULL_JAVADIR})
