@@ -68,7 +68,7 @@ Group:     User Interface/Desktops
 Requires:  bash >= 2.0
 %if "%{server}" == "1"
 %if "%{initscript}" == "1"
-Requires:  /sbin/chkconfig /usr/sbin/semanage %{_sysconfdir}/init.d
+Requires:  /sbin/chkconfig /usr/sbin/semanage %{_sysconfdir}/init.d initscripts
 %endif
 Requires:  /usr/bin/xauth /usr/bin/xkbcomp xkeyboard-config
 Requires:  /usr/bin/dbus-launch
