@@ -62,6 +62,9 @@ CVE-2025-26600, CVE-2025-26601, CVE-2025-49175, CVE-2025-49176, CVE-2025-49178,
 CVE-2025-49179, CVE-2025-49180, CVE-2025-62229, CVE-2025-62230, and
 CVE-2025-62231) from the xorg-server 21.1.x code base.
 
+13. The simple web server for noVNC (part of the TurboVNC Server) now supports
+Python 3.12 and later when using TLS encryption.
+
 
 3.1.4
 =====

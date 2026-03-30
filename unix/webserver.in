@@ -57,7 +57,8 @@ httpServer = HTTPServer(('', httpPort), SimpleHTTPRequestHandler)
 if x509CertFile != '' and x509KeyFile != '':
   print("noVNC web server: Using X.509 certificate file " + x509CertFile)
   print("noVNC web server: Using X.509 private key file " + x509KeyFile)
-  httpServer.socket = ssl.wrap_socket(httpServer.socket, server_side = True,
-                                      certfile = x509CertFile,
-                                      keyfile = x509KeyFile)
+  context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+  context.load_cert_chain(certfile = x509CertFile, keyfile = x509KeyFile)
+  httpServer.socket = context.wrap_socket(httpServer.socket,
+                                          server_side = True)
 httpServer.serve_forever()
