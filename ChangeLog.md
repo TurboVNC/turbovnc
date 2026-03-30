@@ -1,3 +1,12 @@
+3.3.1
+=====
+
+### Significant changes relative to 3.3:
+
+1. The simple web server for noVNC (part of the TurboVNC Server) now supports
+Python 3.12 and later when using TLS encryption.
+
+
 3.3
 ===
 
