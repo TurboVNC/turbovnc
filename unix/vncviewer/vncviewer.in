@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-BINDIR=`dirname $0`
+BINDIR=$(dirname "$(realpath "$0")")
 if [ -d $BINDIR/../java/jre ]; then
 	JAVA=$BINDIR/../java/jre/bin/java
 else
