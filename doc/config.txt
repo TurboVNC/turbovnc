@@ -161,7 +161,11 @@ on Linux/Un*x and Mac systems or
 
 on Windows systems to display a list of command-line options and commonly-used
 parameters and their descriptions.  Replace ''-?'' with ''-??'' to display a
-list of advanced parameters and their descriptions.
+list of advanced parameters and their descriptions.  For convenience, those
+lists are duplicated below:
+
+	- [[viewer_parameters.txt][TurboVNC Viewer command-line options and commonly-used parameters]!*]
+	- [[viewer_advanced_parameters.txt][TurboVNC Viewer advanced parameters]!*]
 
 {nl}
 This section documents rarely-used advanced TurboVNC Viewer settings that can
