@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2026-04-03T09:14:09">
+<meta name="date" content="2026-04-03T10:07:03">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.3.1</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -1195,7 +1195,19 @@ c:\Program&nbsp;Files\TurboVNC\vncviewer.bat&nbsp;-?
         on Windows systems to display a list of command-line options and 
         commonly-used parameters and their descriptions.  Replace 
         <code>-?</code> with <code>-??</code> to display a list of advanced 
-        parameters and their descriptions.
+        parameters and their descriptions.  For convenience, those lists are 
+        duplicated below: <br /><br />
+        <ul class="Itemize">
+            <li class="Itemize-3 Itemize dash">
+                <a href="viewer_parameters.txt" target="_blank">TurboVNC Viewer 
+                command-line options and commonly-used 
+                parameters</a><a name="idx0036"></a>
+            </li>
+            <li class="Itemize-3 Itemize dash">
+                <a href="viewer_advanced_parameters.txt" target="_blank">TurboVNC Viewer 
+                advanced parameters</a><a name="idx0037"></a>
+            </li>
+        </ul>
     </dd>
 </dl>
 
@@ -1266,7 +1278,7 @@ TurboVNC compresses images:</p>
         </li>
         <li class="Ordered-0">
             whether or not <a href="#InterframeComparison">interframe 
-            comparison</a><a name="idx0036"></a> should be used
+            comparison</a><a name="idx0038"></a> should be used
         </li></ol> See Section 
         <a href="#AdvancedCompression" class="ref">7.2</a> below for more 
         details.
@@ -1318,7 +1330,7 @@ options described above:</p>
     <td class="standard">30</td>
     <td class="standard">4x</td>
     <td class="standard">7</td>
-    <td class="standard">For subrectangles that have a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the <a href="#LR">Lossless Refresh feature</a><a name="idx0037"></a>.  In addition to reducing the JPEG quality to a &ldquo;minimum usable&rdquo; level, this encoding method also enables interframe comparison and Compression Level 2.  (CL 7 = CL 2 + interframe comparison.)  Compression Level 2 can reduce network usage for low-color application workloads that are not good candidates for JPEG compression.</td>
+    <td class="standard">For subrectangles that have a high number of unique colors, this encoding method produces very noticeable image compression artifacts.  However, it performs optimally on low-bandwidth connections.  If image quality is more critical than performance, then use one of the other encoding methods or take advantage of the <a href="#LR">Lossless Refresh feature</a><a name="idx0039"></a>.  In addition to reducing the JPEG quality to a &ldquo;minimum usable&rdquo; level, this encoding method also enables interframe comparison and Compression Level 2.  (CL 7 = CL 2 + interframe comparison.)  Compression Level 2 can reduce network usage for low-color application workloads that are not good candidates for JPEG compression.</td>
   </tr>
   <tr class="standard">
     <td class="standard">&ldquo;Lossless Tight&rdquo;</td>
@@ -1616,7 +1628,7 @@ regions to just the subset of regions that were drawn using
 <code>X[Shm]PutImage()</code> and CopyRect.</p>
 
 <div class="important"><p class="important">
-NOTE: Ill-behaved applications that continuously render the same image will cause a variation of the &ldquo;blinking cursor dilemma&rdquo; and thus defeat ALR unless <a href="#InterframeComparison">interframe comparison</a><a name="idx0038"></a> is enabled.
+NOTE: Ill-behaved applications that continuously render the same image will cause a variation of the &ldquo;blinking cursor dilemma&rdquo; and thus defeat ALR unless <a href="#InterframeComparison">interframe comparison</a><a name="idx0040"></a> is enabled.
 </p></div>
 
 <p>You can override the default ALR behavior, thus making all screen 
@@ -1728,7 +1740,7 @@ uses the following terminology when referring to its security extensions:</p>
          from a job scheduler. OTP authentication is also useful for allowing 
          temporary access to a TurboVNC session for collaboration purposes.  The 
          <a href="#TurboVNC_Session_Manager">TurboVNC Session 
-         Manager</a><a name="idx0039"></a> uses OTP authentication by default, 
+         Manager</a><a name="idx0041"></a> uses OTP authentication by default, 
          which allows it to securely authenticate with a TurboVNC session 
          without prompting for additional credentials.
     </dd>
@@ -1936,7 +1948,7 @@ more of the security types or change their preferred order by editing
 the TurboVNC security configuration file.  See the <code>Xvnc</code> man 
 page for more details.  Note that only the OTP security type is needed 
 when using the <a href="#TurboVNC_Session_Manager">TurboVNC Session 
-Manager</a><a name="idx0040"></a> with its default settings.</p>
+Manager</a><a name="idx0042"></a> with its default settings.</p>
 
 <p>If the VNC server allows multiple security types, then the TurboVNC 
 Viewer&rsquo;s default security type will be determined by the 
@@ -2263,7 +2275,7 @@ corresponding to a GPU on the TurboVNC host (for example,
 node under <strong class="filename">/dev/dri</strong>.</p>
 
 
-<h3 id="hd0010000001">Advantages of DRI3 (when compared to <a href="#VGL">VirtualGL</a><a name="idx0041"></a>)</h3>
+<h3 id="hd0010000001">Advantages of DRI3 (when compared to <a href="#VGL">VirtualGL</a><a name="idx0043"></a>)</h3>
 
 <ul class="Itemize">
     <li class="Itemize-1 Itemize asterisk">
@@ -2276,7 +2288,7 @@ node under <strong class="filename">/dev/dri</strong>.</p>
 
 
 
-<h3 id="hd0010000002">Disadvantages of DRI3 (when compared to <a href="#VGL">VirtualGL</a><a name="idx0042"></a>)</h3>
+<h3 id="hd0010000002">Disadvantages of DRI3 (when compared to <a href="#VGL">VirtualGL</a><a name="idx0044"></a>)</h3>
 
 <ul class="Itemize">
     <li class="Itemize-1 Itemize asterisk">
@@ -2320,7 +2332,7 @@ flavors.  You can use the TurboVNC Viewer to connect to a non-TurboVNC
 server (or vice versa), although this will generally result in some 
 decrease in performance, and features such as the 
 <a href="#TurboVNC_Session_Manager">TurboVNC Session 
-Manager</a><a name="idx0043"></a> will not be available.</p>
+Manager</a><a name="idx0045"></a> will not be available.</p>
 
 <p>The following sections list additional things to bear in mind when 
 mixing TurboVNC with other VNC flavors.</p>
@@ -2906,11 +2918,11 @@ duplicated below:</p>
     <li class="Itemize-1 Itemize dash">
         <a href="viewer_parameters.txt" target="_blank">TurboVNC Viewer 
         command-line options and commonly-used 
-        parameters</a><a name="idx0044"></a>
+        parameters</a><a name="idx0046"></a>
     </li>
     <li class="Itemize-1 Itemize dash">
         <a href="viewer_advanced_parameters.txt" target="_blank">TurboVNC Viewer 
-        advanced parameters</a><a name="idx0045"></a>
+        advanced parameters</a><a name="idx0047"></a>
     </li>
 </ul>
 

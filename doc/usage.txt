@@ -421,4 +421,8 @@ For more detailed instructions on the usage of TurboVNC:
 	---
 	on Windows systems to display a list of command-line options and
 	commonly-used parameters and their descriptions.  Replace ''-?'' with ''-??''
-	to display a list of advanced parameters and their descriptions.
+	to display a list of advanced parameters and their descriptions.  For
+	convenience, those lists are duplicated below:
+	{nl}{nl}
+		- [[viewer_parameters.txt][TurboVNC Viewer command-line options and commonly-used parameters]!*]
+		- [[viewer_advanced_parameters.txt][TurboVNC Viewer advanced parameters]!*]
