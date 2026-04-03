@@ -1,0 +1,280 @@
+
+The advanced parameters are:
+
+CONNECTION PARAMETERS
+---------------------
+
+--> AlwaysShowConnectionDialog
+    Values: 0, 1 (default = 0)
+
+    Always show the "New TurboVNC Connection" dialog even if the server has
+    been specified on the command line.
+
+--> ConfirmClose
+    Values: 0, 1 (default = 0)
+
+    Prompt for confirmation before closing a connection.
+
+--> MaxClipboard
+    Values: 0- (default = 1048576)
+
+    Maximum permitted length of an incoming or outgoing clipboard update (in
+    bytes)
+
+--> NoNewConn
+    Values: 0, 1 (default = 0)
+
+    Always exit after the first connection closes, and do not allow new
+    connections to be made without restarting the viewer.  This is useful in
+    portal environments that need to control when and how the viewer is
+    launched.  Setting this parameter also disables the "Close Connection"
+    option in the F8 menu and the "Disconnect" button in the toolbar.
+
+--> NoReconnect
+    Values: 0, 1 (default = 0)
+
+    If the viewer is disconnected from the server unexpectedly, exit rather
+    than ask whether you want to reconnect.
+
+--> Profile
+    Values: 0, 1 (default = 0)
+
+    Display performance statistics about the connection, such as how many
+    updates per second are being received and how much network bandwidth is
+    being used, to the console.  Profiling can also be activated by selecting
+    "Performance Info..." in the F8 menu, which pops up a dialog that displays
+    the same statistics.
+
+--> ProfileInterval
+    (default = 5)
+
+    How often (in seconds) that performance statistics are updated in the
+    profiling dialog or on the console when profiling is enabled.  The
+    statistics are averaged over this interval.
+
+INPUT PARAMETERS
+----------------
+
+--> HotkeyModifiers
+    Values: Any case-insensitive combination of
+    Cmd/Command/Meta/Super/Win/Windows, Ctrl/Control, Alt/Opt/Option, or Shift
+    separated by dashes (default = Control-Option-Shift)
+
+    The combination of modifier keys used to trigger the various hotkey
+    sequences.  Shift cannot be used as a modifier unless it is accompanied by
+    another modifier.
+
+--> NoHotkeys
+    Values: 0, 1 (default = 0)
+
+    Setting this parameter disables all hotkeys, thus allowing those key
+    sequences to be transmitted to the VNC server.
+
+--> NoMacHotkeys
+    Values: 0, 1 (default = 0)
+
+    On macOS, the TurboVNC Viewer normally assigns equivalent Command key menu
+    shortcuts (AKA accelerators) for most of its hotkeys.  However, since the
+    Command key maps to the Super/Meta key on Un*x systems, those menu
+    shortcuts may interfere with hotkeys used by certain applications (such as
+    Emacs) on the remote system.  Setting this parameter allows as many Command
+    key sequences as possible to be transmitted to the VNC server as Super/Meta
+    key sequences, although some Command key sequences (notably Command-F5,
+    Command-Tab, Command-H, Command-Q, Command-Comma, and Command-Space) will
+    still be intercepted by macOS.
+
+DISPLAY PARAMETERS
+------------------
+
+--> BumpScroll
+    Values: 0, 1 (default = 1)
+
+    In full-screen mode, if the scaled remote desktop is larger than the viewer
+    window, then automatically scroll the remote desktop as the mouse pointer
+    approaches one of the edges of the viewer window.  If this parameter is
+    disabled, then the full-screen viewer window will have scrollbars if the
+    scaled remote desktop is larger than the viewer window.
+
+--> Colors
+
+    Color depth to use for the viewer's window
+
+    Values:
+    8 = BGR111 pixel format (1 bit for each red, green, and blue component)
+    64 = BGR222 pixel format
+    256 = BGR233 pixel format
+    32768 = BGR555 pixel format
+    65536 = BGR565 pixel format
+
+    Lowering the color depth can significantly reduce network usage when using
+    encoding types other than Tight or when using Tight encoding without JPEG. 
+    However, colors will not be represented accurately, and CPU usage will
+    increase substantially (causing a corresponding decrease in performance on
+    fast networks.)  The default is to use the native color depth of the
+    display on which the viewer is running, which is usually true color (8 bits
+    per component.)
+
+--> CurrentMonitorIsPrimary
+    Values: 0, 1 (default = 1)
+
+    For the purposes of multi-screen spanning, treat the monitor that contains
+    the largest number of pixels from the viewer window as the primary monitor.
+    If this parameter is disabled, then the left-most and top-most monitor will
+    always be the primary monitor (as was the case in TurboVNC 2.0 and prior.)
+
+--> LocalCursor
+    Values: 0, 1 (default = 0)
+
+    The default behavior of the TurboVNC Viewer is to hide the local cursor and
+    show only the remote cursor, which can be rendered either by the VNC server
+    or on the client, depending on the value of the CursorShape parameter. 
+    However, certain (broken) VNC server implementations do not support either
+    method of remote cursor rendering, so this parameter is provided as a
+    workaround for connecting to such servers.  If this parameter is set, then
+    any cursor shape updates from the server are ignored, and the local cursor
+    is always displayed.
+
+SECURITY AND AUTHENTICATION PARAMETERS
+--------------------------------------
+
+--> AutoPass
+    Values: 0, 1 (default = 0)
+
+    Read a plain-text password from stdin and use this password when
+    authenticating with the VNC server.  It is strongly recommended that this
+    parameter be used only with a one-time password or other disposable token.
+
+--> CipherSuites
+
+    If the logging level is 100 or higher and one of the TLS* or X509* security
+    types is selected, then a list of cipher suites that are available for use
+    with the current TLS encryption method will be printed during RFB
+    authentication.  You can then set this parameter to further restrict the
+    available cipher suites or change their preferred order.
+
+--> EncPassword
+
+    Encrypted password, in ASCII hex format, to use when authenticating with
+    the VNC server.  You can generate an ASCII hex encrypted password on a
+    TurboVNC host by executing
+
+    echo {unencrypted_password} | /opt/TurboVNC/bin/vncpasswd -f | xxd -c 256
+    -ps
+
+    This parameter allows a password to be supplied to the TurboVNC Viewer
+    without exposing the password as plain text.  However, the encryption
+    scheme (DES) used for VNC passwords is not particularly strong, so
+    encrypting the password guards against only the most casual of attacks. 
+    Thus, it is recommended that this parameter be used only with a one-time
+    password or other disposable token.
+
+--> ExtSSH
+    Values: 0, 1 (default = 0)
+
+    When using the Tunnel, Jump, or Via parameter, use an external SSH client
+    instead of the built-in SSH client.  The external SSH client command can be
+    specified using the ExtSSHCommand parameter, and you can also use the
+    ExtSSHTemplate parameter to specify the SSH command-line template for
+    creating the tunnel.  If ExtSSHTemplate is set, then an external SSH client
+    is automatically used.
+
+    When using the TurboVNC Session Manager, this parameter is effectively
+    disabled.  (The built-in SSH client is always used with the TurboVNC
+    Session Manager.)
+
+--> ExtSSHCommand
+    (default = /usr/bin/env ssh -ax)
+
+    The command that should be used to start the external SSH client
+
+--> ExtSSHTemplate
+
+    SSH command-line template to use when creating an SSH tunnel for the
+    Tunnel, Jump, or Via parameter with an external SSH client
+
+    Patterns beginning with the "%" character are expanded as follows:
+    %% --> a literal "%" character
+    %G --> the value of the Jump or Via parameter (the jump/gateway host name
+    or IP address, including the SSH username and/or the jump host's SSH port
+    if specified)
+    %H --> remote VNC host name or IP address, including the SSH username if
+    specified (if using the Jump or Via parameter, then the VNC host is
+    specified from the point of view of the jump/gateway host)
+    %L --> local TCP port number
+    %R --> remote TCP port number or the escaped name of a Unix domain socket
+    on the VNC host
+    %S --> the external SSH client command, which can be specified using the
+    ExtSSHCommand parameter
+
+    %H and %R are required.  %G is also required if using the Jump or Via
+    parameter.  %L is also required for TCP connections.  For Unix domain
+    socket connections, %L can be used to forward a local TCP port to the
+    remote Unix domain socket (for instance, by specifying a template of '%S -f
+    -L %L:%R %H sleep 20' with the Tunnel parameter.)  If %L is not present,
+    then the SSH command line should connect standard input and standard output
+    to the remote Unix domain socket.
+
+    Specifying this parameter effectively sets the ExtSSH parameter.  If ExtSSH
+    is set and this parameter is unset, then the SSH command-line template
+    defaults to one of the following values:
+
+    Default SSH command-line templates for TCP connections
+    Tunnel parameter:       %S -f -L %L:localhost:%R %H sleep 20
+    Jump parameter:         %S -J %G -f -L %L:localhost:%R %H sleep 20
+    Via parameter:          %S -f -L %L:%H:%R %G sleep 20
+
+    Default SSH command-line templates for Unix domain socket connections
+    Tunnel parameter:       %S -- %H exec socat stdio unix-connect:%R
+    Jump or Via parameter:  %S -J %G -- %H exec socat stdio unix-connect:%R
+
+--> Password
+
+    Plain-text password to use when authenticating with the VNC server.  It is
+    strongly recommended that this parameter be used only with a one-time
+    password or other disposable token.
+
+--> PasswordFile
+
+    Password file from which to read the password for Standard VNC
+    authentication.  This is useful if your home directory is shared between
+    the client machine and VNC host.
+
+--> passwd
+
+    Alias for PasswordFile
+
+--> ServerArgs
+
+    Additional arguments that the TurboVNC Session Manager will pass to
+    vncserver when starting a new TurboVNC session
+
+--> ServerDir
+    (default = /opt/TurboVNC)
+
+    The directory in which the TurboVNC Server is installed on the TurboVNC
+    host.  The TurboVNC Session Manager will execute bin/vncserver and
+    bin/vncpasswd from this directory.
+
+--> SessMgrAuto
+    Values: 0, 1 (default = 1)
+
+    When using the TurboVNC Session Manager, automatically enable OTP
+    authentication and SSH tunneling.  Disabling this parameter allows any
+    security configuration to be used with the TurboVNC Session Manager.
+
+--> Via
+
+    Tunnel the VNC connection through the specified SSH server, or forward the
+    VNC connection through the specified UltraVNC repeater.  The SSH server or
+    UltraVNC repeater ("gateway") can be specified in the format
+    [{ssh_user}@]{gateway_host}, {gateway_host}:{repeater_display_number}, or
+    {gateway_host}::{repeater_port}, where {ssh_user} is the SSH username on
+    the gateway host (default = local username).  When using this parameter,
+    the VNC host should be specified from the point of view of the gateway.  If
+    using the UltraVNC Repeater in "Mode II", specify ID:xxxx as the VNC server
+    name, where xxxx is the ID number of the VNC server to which you want to
+    connect.
+
+    Via=[{ssh_user}@]{vnc_host} Server=localhost:{display_number} is equivalent
+    to Tunnel=1 Server=[{ssh_user}@]{vnc_host}:{display_number}.
+

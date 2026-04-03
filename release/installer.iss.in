@@ -52,6 +52,7 @@ Source: "@CMAKE_SOURCE_DIR@\doc\*.html"; DestDir: "{app}\doc"; Flags: ignorevers
 Source: "@CMAKE_SOURCE_DIR@\doc\LIC*.TXT"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
 Source: "@CMAKE_SOURCE_DIR@\doc\LIC*.txt"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
 Source: "@CMAKE_SOURCE_DIR@\doc\*.css"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
+Source: "@CMAKE_SOURCE_DIR@\doc\viewer_*.txt"; DestDir: "{app}\doc"; Flags: ignoreversion; Components: doc
 
 [Icons]
 Name: "{group}\@CMAKE_PROJECT_NAME@ Viewer";                      FileName: "{app}\vncviewerw.bat";                                WorkingDir: "{app}";      Flags: "runminimized";  IconFileName: "{app}\vncviewer.ico"
