@@ -1,4 +1,4 @@
-/* Copyright (C) 2010, 2019, 2021 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2010, 2019, 2021, 2026 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                    All Rights Reserved.
  * Copyright (C) 2002-2003 Constantin Kaplinsky.  All Rights Reserved.
@@ -199,6 +199,7 @@ int main(int argc, char *argv[])
 {
   int read_from_stdin = 0;
   int make_directory = 1;
+  int tmp_directory = 0;
   int check_strictly = 0;
   char passwd1[9];
   char passwd2[9];
@@ -268,6 +269,7 @@ int main(int argc, char *argv[])
         sprintf(passwdFile, "%s/passwd", passwdDir);
         read_from_stdin = 0;
         make_directory = 1;
+        tmp_directory = 1;
         check_strictly = 1;
         break;
 
@@ -282,39 +284,27 @@ int main(int argc, char *argv[])
   }
 
   if (otp) {
-    if (read_from_stdin) {
-      fprintf(stderr, "Error: -f is incompatible with -o\n");
-      exit(1);
-    }
+    if (read_from_stdin)
+      fprintf(stderr, "WARNING: -f has no effect with -o or -c\n");
 
-    if (!strncmp(passwdDir, "/tmp", 4)) {
-      fprintf(stderr, "Error: -t is incompatible with -o\n");
-      exit(1);
-    }
+    if (tmp_directory)
+      fprintf(stderr, "WARNING: -t has no effect with -o or -c\n");
 
-    if (userList) {
-      fprintf(stderr, "Error: -a and -r are incompatible with -o\n");
-      exit(1);
-    }
+    if (userList)
+      fprintf(stderr, "WARNING: -a and -r have no effect with -o or -c\n");
 
     exit(DoOTP());
   }
 
   if (userList) {
-    if (read_from_stdin) {
-      fprintf(stderr, "Error: -f is incompatible with -a and -r\n");
-      exit(1);
-    }
+    if (read_from_stdin)
+      fprintf(stderr, "WARNING: -f has no effect with -a or -r\n");
 
-    if (!strncmp(passwdDir, "/tmp", 4)) {
-      fprintf(stderr, "Error: -t is incompatible with -a and -r\n");
-      exit(1);
-    }
+    if (tmp_directory)
+      fprintf(stderr, "WARNING: -t has no effect with -a or -r\n");
 
-    if (otp) {
-      fprintf(stderr, "Error: -o is incompatible with -a and -r\n");
-      exit(1);
-    }
+    if (otp)
+      fprintf(stderr, "WARNING: -o and -c have no effect with -a or -r\n");
 
     exit(DoUserList());
   }
