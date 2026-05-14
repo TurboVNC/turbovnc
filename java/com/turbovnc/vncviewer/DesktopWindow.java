@@ -1,4 +1,4 @@
-/* Copyright (C) 2010, 2012-2013, 2015-2018, 2020-2025 D. R. Commander.
+/* Copyright (C) 2010, 2012-2013, 2015-2018, 2020-2026 D. R. Commander.
  *                                                     All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  * Copyright (C) 2009 Paul Donohue.  All Rights Reserved.
@@ -588,7 +588,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
         e.getY() >= y &&
         e.getX() <= x + scaledWidth &&
         e.getY() <= y + scaledHeight)
-      cc.writePointerEvent(e);
+      cc.processPointerEvent(e);
     // If local cursor rendering is enabled, then use it.
     if (cursorAvailable) {
       // Render the cursor
@@ -621,7 +621,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
           e.getY() >= y &&
           e.getX() <= x + scaledWidth &&
           e.getY() <= y + scaledHeight)))
-      cc.writePointerEvent(e);
+      cc.processPointerEvent(e);
     lastX = e.getX();
     lastY = e.getY();
   }

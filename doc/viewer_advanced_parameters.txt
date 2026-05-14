@@ -55,6 +55,26 @@ CONNECTION PARAMETERS
 INPUT PARAMETERS
 ----------------
 
+--> Emulate3
+    Values: 0, 1 (default = 0)
+
+    Send a middle mouse button event when both the left and right mouse buttons
+    are pressed or released.
+
+--> Emulate3Fuzz
+    Values: 0- (default = 4)
+
+    Maximum distance (in pixels) allowed between the left and right mouse
+    button events in order for the events to be interpreted as a middle mouse
+    button event
+
+--> Emulate3Timeout
+    Values: 0- (default = 100)
+
+    Maximum time period (in milliseconds) allowed between the left and right
+    mouse button events in order for the events to be interpreted as a middle
+    mouse button event
+
 --> HotkeyModifiers
     Values: Any case-insensitive combination of
     Cmd/Command/Meta/Super/Win/Windows, Ctrl/Control, Alt/Opt/Option, or Shift

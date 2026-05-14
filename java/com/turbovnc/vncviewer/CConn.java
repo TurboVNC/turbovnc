@@ -3,7 +3,10 @@
  * Copyright 2009-2011, 2016-2019 Pierre Ossman <ossman@cendio.se>
  *                                for Cendio AB
  * Copyright (C) 2011-2015 Brian P. Hinz
+ * Copyright (C) 2003 Constantin Kaplinsky.  All Rights Reserved.
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
+ * Copyright (C) 2000 Tridia Corporation.  All Rights Reserved.
+ * Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -235,6 +238,10 @@ public final class CConn extends CConnection implements UserPasswdGetter,
   // EDT: deleteWindow() is called when the user closes the window or selects
   // "Close Connection" from the F8 menu.
   void deleteWindow(boolean disposeViewport) {
+    if (emulate3Timer != null) {
+      emulate3Timer.stop();
+      emulate3Timer = null;
+    }
     if (desktop != null && desktop.bumpScrollTimer != null)
       desktop.bumpScrollTimer.stop();
     if (viewport != null) {
@@ -2890,7 +2897,7 @@ public final class CConn extends CConnection implements UserPasswdGetter,
 
 
   // EDT
-  public void writePointerEvent(MouseEvent ev) {
+  private void writePointerEvent(MouseEvent ev) {
     if (state() != RFBSTATE_NORMAL || shuttingDown || benchmark)
       return;
 
@@ -3008,6 +3015,134 @@ public final class CConn extends CConnection implements UserPasswdGetter,
         vlog.error("Error writing pointer event:");
         vlog.error("  " + e.toString());
       }
+    }
+  }
+
+  public void processPointerEvent(MouseEvent ev) {
+    if (params.emulate3.get()) {
+      if (emulate3Timer != null) {
+        // The emulation timer is active, meaning that the left or right button
+        // is currently pressed (but not both.)
+        if ((ev.getID() == MouseEvent.MOUSE_RELEASED &&
+             (ev.getButton() == MouseEvent.BUTTON1 ||
+              ev.getButton() == MouseEvent.BUTTON3)) ||
+            Math.abs(ev.getX() - emulate3Event.getX()) >
+            params.emulate3Fuzz.get() ||
+            Math.abs(ev.getY() - emulate3Event.getY()) >
+            params.emulate3Fuzz.get()) {
+          // If this is a left or right button release or there is too much
+          // screen distance between the button presses, then cancel the timer
+          // and send the stored event as well as the new event.
+          emulate3Timer.stop();  emulate3Timer = null;
+          writePointerEvent(emulate3Event);
+          writePointerEvent(ev);
+        } else if (ev.getID() == MouseEvent.MOUSE_PRESSED &&
+                   ((ev.getButton() == MouseEvent.BUTTON1 &&
+                     emulate3Event.getButton() == MouseEvent.BUTTON3) ||
+                    (ev.getButton() == MouseEvent.BUTTON3 &&
+                     emulate3Event.getButton() == MouseEvent.BUTTON1))) {
+          // If this is a left or right button press and the other button is
+          // already pressed, then cancel the timer and send an emulated middle
+          // button press.
+          emulate3Timer.stop();  emulate3Timer = null;
+          writePointerEvent(new MouseEvent((Component)ev.getSource(),
+                                           ev.getID(), ev.getWhen(),
+                                           ev.getModifiersEx(), ev.getX(),
+                                           ev.getY(), ev.getXOnScreen(),
+                                           ev.getYOnScreen(),
+                                           ev.getClickCount(),
+                                           ev.isPopupTrigger(),
+                                           MouseEvent.BUTTON2));
+          emulatingMiddleButton = true;
+        } else {
+          // This must be a mouse motion event with either the left or right
+          // button down.  Don't cancel the timer, but send the event without
+          // the button down.
+          int modifiers = ev.getModifiersEx();
+          if (emulate3Event.getButton() == MouseEvent.BUTTON1)
+            modifiers &= ~MouseEvent.BUTTON1_DOWN_MASK;
+          else if (emulate3Event.getButton() == MouseEvent.BUTTON3)
+            modifiers &= ~MouseEvent.BUTTON3_DOWN_MASK;
+          writePointerEvent(new MouseEvent((Component)ev.getSource(),
+                                           ev.getID(), ev.getWhen(), modifiers,
+                                           ev.getX(), ev.getY(),
+                                           ev.getXOnScreen(),
+                                           ev.getYOnScreen(),
+                                           ev.getClickCount(),
+                                           ev.isPopupTrigger(),
+                                           MouseEvent.NOBUTTON));
+        }
+      } else if (emulatingMiddleButton) {
+        // An emulated middle button press was previously sent.
+        if (ev.getID() == MouseEvent.MOUSE_RELEASED &&
+            ((ev.getButton() == MouseEvent.BUTTON1 &&
+              (ev.getModifiersEx() & MouseEvent.BUTTON3_DOWN_MASK) == 0) ||
+             (ev.getButton() == MouseEvent.BUTTON3 &&
+              (ev.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) == 0))) {
+          // If this is a left or right button release and the other button has
+          // already been released, then send an emulated middle button
+          // release.
+          writePointerEvent(new MouseEvent((Component)ev.getSource(),
+                                           ev.getID(), ev.getWhen(),
+                                           ev.getModifiersEx(), ev.getX(),
+                                           ev.getY(), ev.getXOnScreen(),
+                                           ev.getYOnScreen(),
+                                           ev.getClickCount(),
+                                           ev.isPopupTrigger(),
+                                           MouseEvent.BUTTON2));
+          emulatingMiddleButton = false;
+        } else {
+          // Keep emulating.  Modify the event as if the middle button is
+          // pressed and the left and right buttons are released.
+          int modifiers = ev.getModifiersEx();
+          modifiers &= ~(MouseEvent.BUTTON1_DOWN_MASK |
+                         MouseEvent.BUTTON3_DOWN_MASK);
+          modifiers |= MouseEvent.BUTTON2_DOWN_MASK;
+          writePointerEvent(new MouseEvent((Component)ev.getSource(),
+                                           ev.getID(), ev.getWhen(), modifiers,
+                                           ev.getX(), ev.getY(),
+                                           ev.getXOnScreen(),
+                                           ev.getYOnScreen(),
+                                           ev.getClickCount(),
+                                           ev.isPopupTrigger(),
+                                           MouseEvent.BUTTON2));
+        }
+      } else {
+        // Consider emulation if the left or right button is pressed and the
+        // other isn't pressed.
+        if (ev.getID() == MouseEvent.MOUSE_PRESSED &&
+            ((ev.getButton() == MouseEvent.BUTTON1 &&
+              (ev.getModifiersEx() & MouseEvent.BUTTON3_DOWN_MASK) == 0) ||
+             (ev.getButton() == MouseEvent.BUTTON3 &&
+              (ev.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) == 0))) {
+          ActionListener actionListener = new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+              // Timer has expired.  Send the stored event.
+              writePointerEvent(emulate3Event);
+              emulate3Timer = null;
+            }
+          };
+          // Start the emulation timer.
+          emulate3Timer = new javax.swing.Timer(params.emulate3Timeout.get(),
+                                                actionListener);
+          emulate3Timer.setRepeats(false);
+          emulate3Timer.start();
+
+          // Store the event in case emulation is cancelled and we need to send
+          // it.
+          emulate3Event = new MouseEvent((Component)ev.getSource(), ev.getID(),
+                                         ev.getWhen(), ev.getModifiersEx(),
+                                         ev.getX(), ev.getY(),
+                                         ev.getXOnScreen(), ev.getYOnScreen(),
+                                         ev.getClickCount(),
+                                         ev.isPopupTrigger(), ev.getButton());
+        } else
+          // Send the event normally.
+          writePointerEvent(ev);
+      }
+    } else {
+      // Middle button emulation is disabled.
+      writePointerEvent(ev);
     }
   }
 
@@ -3163,6 +3298,10 @@ public final class CConn extends CConnection implements UserPasswdGetter,
   long updates;
   ProfileDialog profileDialog;
   boolean alwaysProfile;
+
+  javax.swing.Timer emulate3Timer;
+  MouseEvent emulate3Event;
+  boolean emulatingMiddleButton;
 
   static LogWriter vlog = new LogWriter("CConn");
 }

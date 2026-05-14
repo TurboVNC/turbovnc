@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2018, 2020-2025 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012-2018, 2020-2026 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2021 Steffen Kieß
  * Copyright (C) 2011-2012, 2016 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
@@ -686,6 +686,23 @@ public final class Params {
   private HeaderParameter inputHeader =
   new HeaderParameter("InputHeader", this, Utils.isMac(),
   "INPUT PARAMETERS");
+
+  public BoolParameter emulate3 =
+  new BoolParameter("Emulate3", this, false, true,
+  "Send a middle mouse button event when both the left and right mouse " +
+  "buttons are pressed or released.", false);
+
+  public IntParameter emulate3Fuzz =
+  new IntParameter("Emulate3Fuzz", this, false, true,
+  "Maximum distance (in pixels) allowed between the left and right mouse " +
+  "button events in order for the events to be interpreted as a middle " +
+  "mouse button event", 4, 0);
+
+  public IntParameter emulate3Timeout =
+  new IntParameter("Emulate3Timeout", this, false, true,
+  "Maximum time period (in milliseconds) allowed between the left and right " +
+  "mouse button events in order for the events to be interpreted as a " +
+  "middle mouse button event", 100, 0);
 
   public BoolParameter fsAltEnter =
   new BoolParameter("FSAltEnter", this, true, false,
