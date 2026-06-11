@@ -55,12 +55,6 @@ CONNECTION PARAMETERS
 INPUT PARAMETERS
 ----------------
 
---> Emulate3
-    Values: 0, 1 (default = 0)
-
-    Send a middle mouse button event when both the left and right mouse buttons
-    are pressed or released.
-
 --> Emulate3Fuzz
     Values: 0- (default = 4)
 

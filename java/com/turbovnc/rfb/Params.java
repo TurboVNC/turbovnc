@@ -688,7 +688,7 @@ public final class Params {
   "INPUT PARAMETERS");
 
   public BoolParameter emulate3 =
-  new BoolParameter("Emulate3", this, false, true,
+  new BoolParameter("Emulate3", this, true, false,
   "Send a middle mouse button event when both the left and right mouse " +
   "buttons are pressed or released.", false);
 

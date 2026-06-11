@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2018, 2020-2025 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012-2018, 2020-2026 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -48,7 +48,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     desktopSize, grabKeyboard;
   private JSlider jpegQualityLevel, subsamplingLevel, compressionLevel;
   private JCheckBox viewOnly, recvClipboard, sendClipboard, acceptBell,
-    reverseScroll, fsAltEnter;
+    reverseScroll, emulate3, fsAltEnter;
   private JCheckBox fullScreen, shared, cursorShape, showToolbar;
   private JCheckBox secNone, secVnc, secPlain, secTLSNone, secTLSVnc,
     secTLSPlain, secX509None, secX509Vnc, secX509Plain, secUnixLogin;
@@ -409,6 +409,15 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           GridBagConstraints.LINE_START,
                           new Insets(4, 5, 0, 5));
 
+    emulate3 = new JCheckBox("3-button mouse emulation");
+    emulate3.addItemListener(this);
+
+    Dialog.addGBComponent(emulate3, inputPanel,
+                          0, 3, 2, 1, 2, 2, 1, 0,
+                          GridBagConstraints.HORIZONTAL,
+                          GridBagConstraints.LINE_START,
+                          new Insets(4, 5, 0, 5));
+
     JLabel menuKeyLabel = new JLabel("Menu key:");
     String[] menuKeys = new String[MenuKey.getSymbolCount()];
     for (int i = 0; i < MenuKey.getSymbolCount(); i++)
@@ -417,12 +426,12 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     menuKey.addItemListener(this);
 
     Dialog.addGBComponent(menuKeyLabel, inputPanel,
-                          0, 3, 1, 1, 2, 2, 1, 0,
+                          0, 4, 1, 1, 2, 2, 1, 0,
                           GridBagConstraints.NONE,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(8, 8, 0, 5));
     Dialog.addGBComponent(menuKey, inputPanel,
-                          1, 3, 1, 1, 2, 2, 25, 0,
+                          1, 4, 1, 1, 2, 2, 25, 0,
                           GridBagConstraints.NONE,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(4, 5, 0, 5));
@@ -440,12 +449,12 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       grabKeyboard.addItemListener(this);
 
       Dialog.addGBComponent(grabLabel, inputPanel,
-                            0, 4, 1, 1, 2, 2, 1, 0,
+                            0, 5, 1, 1, 2, 2, 1, 0,
                             GridBagConstraints.NONE,
                             GridBagConstraints.FIRST_LINE_START,
                             new Insets(8, 8, 0, 5));
       Dialog.addGBComponent(grabKeyboard, inputPanel,
-                            1, 4, 1, 1, 2, 2, 25, 0,
+                            1, 5, 1, 1, 2, 2, 25, 0,
                             GridBagConstraints.NONE,
                             GridBagConstraints.FIRST_LINE_START,
                             new Insets(4, 5, 0, 5));
@@ -1267,6 +1276,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       menuKey.setSelectedItem(menuKeyStr);
     if (Utils.osGrab() && Helper.isAvailable())
       grabKeyboard.setSelectedIndex(params.grabKeyboard.get());
+    emulate3.setSelected(params.emulate3.get());
 
     // Connection: Restrictions
     shared.setSelected(params.shared.get());
@@ -1361,6 +1371,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     params.menuKey.set(MenuKey.getSymbols()[menuKey.getSelectedIndex()].name);
     if (Utils.osGrab() && Helper.isAvailable())
       params.grabKeyboard.set(grabKeyboard.getSelectedIndex());
+    params.emulate3.set(emulate3.isSelected());
 
     // Connection: Restrictions
     params.shared.set(shared.isSelected());

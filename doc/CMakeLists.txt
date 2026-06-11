@@ -16,7 +16,7 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/viewer_parameters.txt
 	COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncviewer -?
 		>viewer_parameters.txt || true
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-	DEPENDS java
+	DEPENDS ${CMAKE_SOURCE_DIR}/java/com/turbovnc/rfb/Params.java java
 	COMMENT "Generating TurboVNC Viewer parameter list"
 )
 
@@ -25,7 +25,7 @@ add_custom_command(OUTPUT
 	COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncviewer -??
 		>viewer_advanced_parameters.txt || true
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-	DEPENDS java
+	DEPENDS ${CMAKE_SOURCE_DIR}/java/com/turbovnc/rfb/Params.java java
 	COMMENT "Generating TurboVNC Viewer advanced parameter list"
 )
 
