@@ -175,7 +175,7 @@ jobs:
       - name: Build
         shell: bash
         run: |
-          export VSINSTALLDIR='C:\Program Files\Microsoft Visual Studio\2022\Enterprise\'
+          export VSINSTALLDIR='C:\Program Files\Microsoft Visual Studio\18\Enterprise\'
           eval "$(c:/vcvars-bash/vcvarsall.sh amd64)"
           export PATH="$PATH:/c/Program Files (x86)/Inno Setup 6/:/c/msys64/usr/bin/"
           echo INCLUDE=$INCLUDE
