@@ -80,7 +80,8 @@ Add {file: ~/turbovnc} to any paths specified in this document.
 ** Installing the TurboVNC Viewer on Windows
 
 	#. Download the TurboVNC Windows installer package
-		({file: TurboVNC-{val: _VERSION}.exe}) from the
+		({file: TurboVNC-{val: _VERSION}-x64.exe} for x86-64 systems or
+		{file: TurboVNC-{val: _VERSION}-arm64.exe} for Arm64 systems) from the
 		[[https://github.com/TurboVNC/turbovnc/releases][Releases area]*] of the
 		[[https://github.com/TurboVNC/turbovnc][TurboVNC GitHub project page]*].
 

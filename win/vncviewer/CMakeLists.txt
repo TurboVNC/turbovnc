@@ -1,5 +1,7 @@
-if(BITS EQUAL 64)
+if(CPU_TYPE STREQUAL "x86_64")
 	set(REQARCH amd64)
+elseif(CPU_TYPE STREQUAL "arm64")
+	set(REQARCH aarch64)
 else()
 	set(REQARCH x86)
 endif()

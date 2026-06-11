@@ -38,7 +38,7 @@
 
 ** Windows
 
-|| || Client (x86-64) ||
+|| || Client (x86-64, Arm64) ||
 | O/S \
 	| Windows 7 or later \
 	|

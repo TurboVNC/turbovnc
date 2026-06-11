@@ -183,6 +183,10 @@ jobs:
             curl -fSL -o c:/installers/libjpeg-turbo-$LJT_VERSION-vc-x64.exe $LJT_URL/libjpeg-turbo-$LJT_VERSION-vc-x64.exe
           fi
           c:/installers/libjpeg-turbo-$LJT_VERSION-vc-x64.exe //S
+          if [ ! -f c:/installers/libjpeg-turbo-$LJT_VERSION-vc-arm64.exe ]; then
+            curl -fSL -o c:/installers/libjpeg-turbo-$LJT_VERSION-vc-arm64.exe $LJT_URL/libjpeg-turbo-$LJT_VERSION-vc-arm64.exe
+          fi
+          7z x c:/installers/libjpeg-turbo-$LJT_VERSION-vc-arm64.exe -o"c:/libjpeg-turbo-arm64"
           git clone --depth=1 https://github.com/nathan818fr/vcvars-bash.git c:/vcvars-bash
           git clone --depth=1 https://github.com/TurboVNC/buildscripts.git -b $BRANCH c:/buildscripts
           mkdir /opt
