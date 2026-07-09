@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 #
-# Copyright (C) 2009-2018, 2020-2022, 2024-2025 D. R. Commander.
+# Copyright (C) 2009-2018, 2020-2022, 2024-2026 D. R. Commander.
 #                                               All Rights Reserved.
 # Copyright (C) 2021 Steffen Kieß
 # Copyright (C) 2010 University Corporation for Atmospheric Research.
@@ -1082,6 +1082,11 @@ sub Kill
     }
   }
 
+  if ($xcleanup) {
+    warn "Running X cleanup script $xcleanup\n";
+    system("$xcleanup");
+  }
+
   unless (-r $pidFile) {
     die "\nCan't find file $pidFile\n".
         "You'll have to kill the Xvnc process manually\n\n";
@@ -1303,7 +1308,8 @@ sub ReadConfiguration
        wm
        x509CertFile
        x509KeyFile
-       xstartup);
+       xstartup
+       xcleanup);
 
   if (open CONF, "<$configFile") {
     while (<CONF>) {
