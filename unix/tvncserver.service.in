@@ -1,0 +1,20 @@
+[Unit]
+SourcePath=@CMAKE_INSTALL_FULL_BINDIR@/tvncserver
+Description=Starts and stops the TurboVNC Server
+After=multi-user.target
+
+[Service]
+Type=forking
+Restart=no
+TimeoutSec=5min
+IgnoreSIGPIPE=no
+KillMode=process
+GuessMainPID=no
+RemainAfterExit=yes
+SuccessExitStatus=5 6
+ExecStart=@CMAKE_INSTALL_FULL_BINDIR@/tvncserver start
+ExecStop=@CMAKE_INSTALL_FULL_BINDIR@/tvncserver stop
+ExecReload=@CMAKE_INSTALL_FULL_BINDIR@/tvncserver reload
+
+[Install]
+WantedBy=multi-user.target

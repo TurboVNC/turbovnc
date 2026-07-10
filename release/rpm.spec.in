@@ -16,6 +16,9 @@
 # Path under which man pages should be installed
 %define mandir @CMAKE_INSTALL_FULL_MANDIR@
 
+# Path under which systemd units should be installed
+%define unitdir @CMAKE_INSTALL_FULL_UNITDIR@
+
 # Whether or not to include the Java viewer
 %define viewer @TVNC_BUILDVIEWER@
 
@@ -34,9 +37,9 @@
 # Whether or not to include the web server
 %define webserver @TVNC_BUILDWEBSERVER@
 
-# Whether or not to include the TurboVNC Server init script
+# Whether or not to include the TurboVNC Server systemd service
 %if "%{server}" == "1"
-%define initscript @TVNC_BUILDINITSCRIPT@
+%define systemd @TVNC_BUILDSYSTEMD@
 %endif
 
 # Path under which the Java viewer should be installed
@@ -64,8 +67,8 @@ License:   GPL
 Group:     User Interface/Desktops
 Requires:  bash >= 2.0
 %if "%{server}" == "1"
-%if "%{initscript}" == "1"
-Requires:  /sbin/chkconfig /usr/sbin/semanage %{_sysconfdir}/init.d initscripts
+%if "%{systemd}" == "1"
+Requires:  /usr/sbin/semanage systemd
 %endif
 Requires:  /usr/bin/xauth /usr/bin/xkbcomp xkeyboard-config
 Requires:  /usr/bin/dbus-launch
@@ -98,10 +101,11 @@ solution for remotely displaying 3D applications with interactive performance.
 #-->  -DCMAKE_INSTALL_JAVADIR=%{javadir} -DCMAKE_INSTALL_MANDIR=%{mandir} \
 #-->  -DCMAKE_INSTALL_PREFIX=%{prefix} \
 #-->  -DCMAKE_INSTALL_SYSCONFDIR=%{sysconfdir} \
+#-->  -DCMAKE_INSTALL_UNITDIR=%{unitdir} \
 #-->  -DCMAKE_VERBOSE_MAKEFILE=@CMAKE_VERBOSE_MAKEFILE@ \
 #-->  -DTVNC_BUILDVIEWER=%{viewer} \
 #-->  -DTVNC_BUILDSERVER=%{server} -DTVNC_BUILDWEBSERVER=%{webserver} \
-#-->  -DTVNC_BUILDINITSCRIPT=%{initscript} \
+#-->  -DTVNC_BUILDSYSTEMD=%{systemd} \
 #-->  -DPYTHON_EXECUTABLE=@PYTHON_EXECUTABLE@ -DTVNC_INCLUDEJRE=%{jre} \
 #-->  .
 #-->export NUMCPUS=`grep -c '^processor' /proc/cpuinfo`
@@ -211,46 +215,29 @@ chmod 755 %{_tmppath}/%{name}-%{version}-%{release}-find-requires
 %clean
 rm -rf %{buildroot}
 
-%if "%{initscript}" == "1"
+%if "%{systemd}" == "1"
 %post
-%if "%{sysconfdir}" == "%{_sysconfdir}"
-if [ -x %{_sysconfdir}/rc.d/init.d/tvncserver ]; then
-  semanage fcontext -a -t bin_t %{_sysconfdir}/rc.d/init.d/tvncserver
-  restorecon -R -v %{_sysconfdir}/rc.d/init.d/tvncserver
-else
-  semanage fcontext -a -t bin_t %{_sysconfdir}/init.d/tvncserver
-  restorecon -R -v %{_sysconfdir}/init.d/tvncserver
-fi
+%if "%{unitdir}" == "%{_unitdir}"
+semanage fcontext -a -t systemd_unit_file_t %{_unitdir}/tvncserver.service
+restorecon -R -v %{_unitdir}/tvncserver.service
 if [ "$1" = 1 ]; then
-  /sbin/chkconfig --add tvncserver
+  systemctl preset tvncserver
+fi
+if [ "$1" -gt "1" -a -x /sbin/chkconfig ]; then
+  if [ -x %{_sysconfdir}/rc.d/init.d/tvncserver -o \
+    -x %{_sysconfdir}/init.d/tvncserver ]; then
+    /sbin/chkconfig --del tvncserver
+  fi
 fi
 %endif
 
 %preun
-%if "%{sysconfdir}" == "%{_sysconfdir}"
+%if "%{unitdir}" == "%{_unitdir}"
 if [ "$1" = 0 ]; then
-  if [ -x %{_sysconfdir}/init.d/tvncserver ]; then
-    %{_sysconfdir}/init.d/tvncserver stop >/dev/null 2>&1
-  fi
-  if [ -f %{_sysconfdir}/init.d/tvncserver ]; then
-    /sbin/chkconfig --del tvncserver
-  fi
-  if [ -x %{_sysconfdir}/rc.d/init.d/tvncserver ]; then
-    semanage fcontext -d %{_sysconfdir}/rc.d/init.d/tvncserver
-    restorecon -R -v %{_sysconfdir}/rc.d/init.d/tvncserver
-  else
-    semanage fcontext -d %{_sysconfdir}/init.d/tvncserver
-    restorecon -R -v %{_sysconfdir}/init.d/tvncserver
-  fi
-fi
-%endif
-
-%postun
-%if "%{sysconfdir}" == "%{_sysconfdir}"
-if [ "$1" -ge "1" ]; then
-  if [ -x %{_sysconfdir}/init.d/tvncserver ]; then
-    %{_sysconfdir}/init.d/tvncserver condrestart >/dev/null 2>&1
-  fi
+  systemctl disable tvncserver
+  systemctl stop tvncserver
+  semanage fcontext -d %{_unitdir}/tvncserver.service
+  restorecon -R -v %{_unitdir}/tvncserver.service
 fi
 %endif
 %endif
@@ -260,13 +247,15 @@ fi
 %if "%{server}" == "1"
  %if "%{sysconfdir}" != "%{_sysconfdir}"
   %dir %{sysconfdir}
-  %if "%{initscript}" == "1"
-   %dir %{sysconfdir}/init.d
+  %if "%{systemd}" == "1"
    %dir %{sysconfdir}/sysconfig
   %endif
  %endif
- %if "%{initscript}" == "1"
-  %attr(0755,root,root) %config %{sysconfdir}/init.d/tvncserver
+ %if "%{systemd}" == "1"
+  %if "%{unitdir}" != "%{_unitdir}"
+   %dir %{unitdir}
+  %endif
+  %config(noreplace) %{unitdir}/tvncserver.service
   %config(noreplace) %{sysconfdir}/sysconfig/tvncservers
  %endif
  %config(noreplace) %{sysconfdir}/turbovncserver.conf
@@ -308,6 +297,9 @@ fi
 %if "%{server}" == "1"
  %{bindir}/Xvnc
  %{bindir}/tvncconfig
+ %if "%{systemd}" == "1"
+  %attr(0755,root,root) %{bindir}/tvncserver
+ %endif
  %{bindir}/vncserver
  %{bindir}/xstartup.turbovnc
  %{bindir}/vncpasswd

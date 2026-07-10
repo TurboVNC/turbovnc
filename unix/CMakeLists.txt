@@ -130,15 +130,28 @@ install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/xstartup.turbovnc
 	DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	option(TVNC_BUILDINITSCRIPT "Build TurboVNC Server init script" 1)
-	boolean_number(TVNC_BUILDINITSCRIPT)
-	boolean_number(TVNC_BUILDINITSCRIPT PARENT_SCOPE)
-	report_option(TVNC_BUILDINITSCRIPT "TurboVNC Server init script")
+	option(TVNC_BUILDSYSTEMD "Build TurboVNC Server systemd service" 1)
+	boolean_number(TVNC_BUILDSYSTEMD)
+	boolean_number(TVNC_BUILDSYSTEMD PARENT_SCOPE)
+	report_option(TVNC_BUILDSYSTEMD "TurboVNC Server systemd service")
 
-	if(TVNC_BUILDINITSCRIPT)
-		configure_file(vncserver.init.in vncserver.init @ONLY)
-		install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/vncserver.init
-			DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/init.d RENAME tvncserver)
+	if(TVNC_BUILDSYSTEMD)
+		set(CMAKE_INSTALL_DEFAULT_UNITDIR "lib/systemd/system")
+		GNUInstallDirs_set_install_dir(UNITDIR
+			"The directory into which systemd units should be installed")
+		GNUInstallDirs_get_absolute_install_dir(CMAKE_INSTALL_FULL_UNITDIR
+			CMAKE_INSTALL_UNITDIR)
+		set(CMAKE_INSTALL_UNITDIR ${CMAKE_INSTALL_UNITDIR} PARENT_SCOPE)
+		set(CMAKE_INSTALL_FULL_UNITDIR ${CMAKE_INSTALL_FULL_UNITDIR} PARENT_SCOPE)
+		mark_as_advanced(CLEAR CMAKE_INSTALL_UNITDIR)
+		report_directory(UNITDIR)
+
+		configure_file(tvncserver.service.in tvncserver.service @ONLY)
+		install(FILES ${CMAKE_CURRENT_BINARY_DIR}/tvncserver.service
+			DESTINATION ${CMAKE_INSTALL_FULL_UNITDIR})
+		configure_file(tvncserver.in tvncserver @ONLY)
+		install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/tvncserver
+			DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
 		install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/tvncservers
 			DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/sysconfig)
 	endif()

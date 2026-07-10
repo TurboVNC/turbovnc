@@ -55,6 +55,8 @@ BINDIR=@CMAKE_INSTALL_FULL_BINDIR@
 DATADIR=@CMAKE_INSTALL_FULL_DATADIR@
 DOCDIR=@CMAKE_INSTALL_FULL_DOCDIR@
 SYSCONFDIR=@CMAKE_INSTALL_FULL_SYSCONFDIR@
+UNITDIR=@CMAKE_INSTALL_FULL_UNITDIR@
+BUILDSYSTEMD=@TVNC_BUILDSYSTEMD@
 BUILDVIEWER=@TVNC_BUILDVIEWER@
 
 if [ ! `uid` -eq 0 ]; then
@@ -118,10 +120,32 @@ fi
 SIZE=`du -s $TMPDIR | cut -f1`
 cat pkgscripts/deb-control | sed s/{__SIZE}/$SIZE/g > $TMPDIR/DEBIAN/control
 cat > $TMPDIR/DEBIAN/conffiles << EOF
-$SYSCONFDIR/sysconfig/tvncservers
 $SYSCONFDIR/turbovncserver.conf
 $SYSCONFDIR/turbovncserver-security.conf
 EOF
+if [ "$BUILDSYSTEMD" = "1" -a "$UNITDIR" = "/usr/lib/systemd/system" ]; then
+	cat >> $TMPDIR/DEBIAN/conffiles << EOF
+$UNITDIR/tvncserver.service
+$SYSCONFDIR/sysconfig/tvncservers
+EOF
+	cat > $TMPDIR/DEBIAN/postinst << EOF
+if [ "\$1" = "configure" ]; then
+	if [ \$# -lt 2 -o "\$2" = "" ]; then
+		systemctl preset tvncserver
+	elif [ -x /usr/sbin/update-rc.d ]; then
+		/usr/sbin/update-rc.d -f tvncserver remove
+	fi
+fi
+EOF
+	chmod 755 $TMPDIR/DEBIAN/postinst
+	cat > $TMPDIR/DEBIAN/prerm << EOF
+if [ "\$1" = "remove" ]; then
+	systemctl disable tvncserver
+	systemctl stop tvncserver
+fi
+EOF
+	chmod 755 $TMPDIR/DEBIAN/prerm
+fi
 
 $SUDO chown -Rh root:root $TMPDIR/*
 dpkg -b $TMPDIR $PKGNAME\_$VERSION\_$DEBARCH.deb

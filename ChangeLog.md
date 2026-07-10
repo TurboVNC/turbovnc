@@ -13,6 +13,25 @@ box in the TurboVNC Viewer Options dialog can be used to enable and configure
 3-button mouse emulation.  The parameters work identically to the corresponding
 command-line options in the native Windows TurboVNC 2.2.x Viewer.
 
+3. The optional TurboVNC Server init.d script for Linux has been improved in
+the following ways:
+
+     - The script has been reimplemented as a systemd service, which extends
+compatibility to Fedora 45 and later, SUSE 16 and later, and other Linux
+distributions that no longer translate SysV init scripts.
+(`systemd-sysv-generator` was removed in systemd v260.)  This also fixes a
+dependency error when installing the TurboVNC RPM package on SUSE 16.
+     - To match the behavior of the RPM packages, the TurboVNC DEB packages now
+configure the TurboVNC Server service when the package is installed and
+unconfigure it when the package is removed.
+     - The TurboVNC RPM and DEB packages now invoke
+ `systemctl preset tvncserver` when the package is installed, which allows
+ system administrators to use a systemd preset file to specify that the
+ TurboVNC Server service should be enabled or disabled by default.
+     - The TurboVNC Server service is no longer restarted when the TurboVNC RPM
+package is upgraded.  This allows system administrators to hot patch systems
+with active TurboVNC sessions.
+
 
 3.3
 ===

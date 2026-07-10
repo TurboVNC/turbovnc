@@ -1,52 +1,9 @@
 #!/bin/bash
-#
-# chkconfig: - 91 35
-# description: Starts and stops the TurboVNC Server
-#
-### If you are using LDAP or another distributed authentication system, then
-### be sure to add any services needed for your distributed authentication
-### system to the Required-Start line below.
-#
-### BEGIN INIT INFO
-# Provides: tvncserver
-# Required-Start: $syslog
-# Required-Stop:
-# Default-Start: 2 3 4 5
-# Default-Stop: 0 1 6
-# Short-Description: Starts and stops the TurboVNC Server
-### END INIT INFO
-
-# Source function library.
-REDHAT=0
-if [ -f /etc/rc.d/init.d/functions ]; then
-    . /etc/rc.d/init.d/functions
-    REDHAT=1
-else
-    if [ -f /lib/lsb/init-functions ]; then
-        . /lib/lsb/init-functions
-    else
-        echo "Unsupported platform"
-        exit 1
-    fi
-fi
-
-if [ $REDHAT -eq 1 ]; then
-    # Source networking configuration.
-    . /etc/sysconfig/network
-
-    # Check that networking is up.
-    [ "${NETWORKING}" = "no" ] && exit 0
-fi
 
 unset VNCSERVERARGS
 VNCSERVERS=""
 if [ -f @CMAKE_INSTALL_FULL_SYSCONFDIR@/sysconfig/tvncservers ]; then
     . @CMAKE_INSTALL_FULL_SYSCONFDIR@/sysconfig/tvncservers
-fi
-
-LOCKDIR=/var/lock
-if [ -d /var/lock/subsys ]; then
-    LOCKDIR=/var/lock/subsys
 fi
 
 prog=$"TurboVNC server"
@@ -68,20 +25,10 @@ start() {
             logger -p local7.notice "$_OUT"
         fi
     done
-    if [ "$RETVAL" != "NONE" ]; then
-        if [ $REDHAT -eq 1 ]; then
-            [ "$RETVAL" -eq 0 ] && success $"vncserver startup" || \
-                failure $"vncserver start"
-        else
-            [ "$RETVAL" -eq 0 ] && log_success_msg "[  OK  ]" || \
-                log_failure_msg "[FAILED]"
-        fi
-        [ "$RETVAL" -eq 0 ] && touch $LOCKDIR/tvncserver
-    fi
     echo
 }
 
-shutdown() {
+stop() {
     echo -n $"Shutting down $prog: "
     RETVAL=NONE
     for display in ${VNCSERVERS}
@@ -94,23 +41,7 @@ shutdown() {
             logger -p local7.notice "$_OUT"
         fi
     done
-    if [ "$RETVAL" != "NONE" ]; then
-        if [ $REDHAT -eq 1 ]; then
-            [ "$RETVAL" -eq 0 ] && success $"vncserver shutdown" || \
-                failure $"vncserver shutdown"
-        else
-            [ "$RETVAL" -eq 0 ] && log_success_msg "[  OK  ]" || \
-                log_failure_msg "[FAILED]"
-        fi
-    fi
     echo
-}
-
-stop() {
-    shutdown
-    if [ "$RETVAL" != "NONE" ]; then
-        [ "$RETVAL" -eq 0 ] && rm -f $LOCKDIR/tvncserver
-    fi
 }
 
 reload() {
@@ -132,7 +63,7 @@ reload() {
     done
     VNCSERVERS_BAK=${VNCSERVERS}
     VNCSERVERS=${killlist}
-    shutdown
+    stop
     VNCSERVERS=${VNCSERVERS_BAK}
 
     # Start any TurboVNC sessions specified in the tvncservers file that
@@ -148,23 +79,10 @@ case "$1" in
     stop)
         stop
         ;;
-    restart)
-        stop
-        start
-        ;;
     reload)
         reload
         ;;
-    condrestart)
-        if [ -f $LOCKDIR/tvncserver ]; then
-            stop
-            start
-        fi
-        ;;
-    status)
-        status Xvnc
-        ;;
     *)
-        echo $"Usage: $0 {start|stop|restart|reload|condrestart|status}"
+        echo $"Usage: $0 {start|stop|reload}"
         exit 1
 esac
