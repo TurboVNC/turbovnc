@@ -124,23 +124,34 @@ $SYSCONFDIR/turbovncserver.conf
 $SYSCONFDIR/turbovncserver-security.conf
 EOF
 if [ "$BUILDSYSTEMD" = "1" -a "$UNITDIR" = "/usr/lib/systemd/system" ]; then
+	mkdir -p $TMPDIR/usr/lib/systemd/system-preset
+	cat > $TMPDIR/usr/lib/systemd/system-preset/50-tvncserver.preset << EOF
+disable tvncserver.service
+EOF
 	cat >> $TMPDIR/DEBIAN/conffiles << EOF
 $UNITDIR/tvncserver.service
 $SYSCONFDIR/sysconfig/tvncservers
+/usr/lib/systemd/system-preset/50-tvncserver.preset
 EOF
 	cat > $TMPDIR/DEBIAN/postinst << EOF
+#!/bin/bash
 if [ "\$1" = "configure" ]; then
 	if [ \$# -lt 2 -o "\$2" = "" ]; then
 		systemctl preset tvncserver
-	elif [ -x /usr/sbin/update-rc.d ]; then
+	fi
+	if [ -x /usr/sbin/update-rc.d ]; then
 		/usr/sbin/update-rc.d -f tvncserver remove
 	fi
 fi
 EOF
 	chmod 755 $TMPDIR/DEBIAN/postinst
 	cat > $TMPDIR/DEBIAN/prerm << EOF
-if [ "\$1" = "remove" ]; then
+#!/bin/bash
+if [ "\$1" = "upgrade" ] && dpkg --compare-versions "\$2" lt "3.3.1" || \
+	[ "\$1" = "remove" ]; then
 	systemctl disable tvncserver
+fi
+if [ "\$1" = "remove" ]; then
 	systemctl stop tvncserver
 fi
 EOF
