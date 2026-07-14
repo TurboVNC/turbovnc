@@ -125,13 +125,12 @@ $SYSCONFDIR/turbovncserver-security.conf
 EOF
 if [ "$BUILDSYSTEMD" = "1" -a "$UNITDIR" = "/usr/lib/systemd/system" ]; then
 	mkdir -p $TMPDIR/usr/lib/systemd/system-preset
-	cat > $TMPDIR/usr/lib/systemd/system-preset/50-tvncserver.preset << EOF
+	cat > $TMPDIR/usr/lib/systemd/system-preset/90-tvncserver.preset << EOF
 disable tvncserver.service
 EOF
 	cat >> $TMPDIR/DEBIAN/conffiles << EOF
 $UNITDIR/tvncserver.service
 $SYSCONFDIR/sysconfig/tvncservers
-/usr/lib/systemd/system-preset/50-tvncserver.preset
 EOF
 	cat > $TMPDIR/DEBIAN/postinst << EOF
 #!/bin/bash
