@@ -33,6 +33,9 @@ CVE-2025-62231) from the xorg-server 21.1.x code base.
 6. The simple web server for noVNC (part of the TurboVNC Server) now supports
 Python 3.12 and later when using TLS encryption.
 
+7. Fixed an issue whereby the TurboVNC Viewer became unresponsive if the
+TigerVNC Server intentionally disconnected a TLS-encrypted connection.
+
 
 3.2.1
 =====
