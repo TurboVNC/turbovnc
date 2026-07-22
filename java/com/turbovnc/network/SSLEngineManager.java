@@ -1,4 +1,4 @@
-/* Copyright (C) 2012, 2018 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012, 2018, 2026 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2012, 2014 Brian P. Hinz
  *
  * This library is free software; you can redistribute it and/or
@@ -25,6 +25,7 @@ import javax.net.ssl.SSLEngineResult.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import com.turbovnc.rdr.EndOfStream;
 import com.turbovnc.rdr.FdInStream;
 import com.turbovnc.rdr.FdOutStream;
 
@@ -174,7 +175,7 @@ public class SSLEngineManager {
 
       case CLOSED:
         engine.closeInbound();
-        break;
+        throw new EndOfStream();
     }
     return bytesRead;
   }
@@ -200,7 +201,7 @@ public class SSLEngineManager {
 
         case CLOSED:
           engine.closeOutbound();
-          break;
+          throw new EndOfStream();
       }
     }
     ((Buffer)myAppData).clear();
