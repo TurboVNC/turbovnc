@@ -34,6 +34,9 @@ RPM package was freshly installed.)
 TurboVNC RPM package is upgraded.  This allows system administrators to hot
 patch systems with active TurboVNC sessions.
 
+4. Fixed an issue whereby the TurboVNC Viewer became unresponsive if the
+TigerVNC Server intentionally disconnected a TLS-encrypted connection.
+
 
 3.3
 ===
