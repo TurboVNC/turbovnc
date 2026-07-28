@@ -2,7 +2,7 @@
  * rfb.h - header file for RFB DDX implementation.
  */
 
-/* Copyright (C) 2010-2025 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2010-2026 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011, 2015 Pierre Ossman for Cendio AB.  All Rights Reserved.
  * Copyright (C) 2011 Joel Martin
  * Copyright (C) 2011 Gernot Tenchio
@@ -728,6 +728,7 @@ extern Bool  rfbAuthDisableRevCon;
 extern Bool  rfbAuthDisableCBSend;
 extern Bool  rfbAuthDisableCBRecv;
 extern Bool  rfbAuthDisableX11TCP;
+extern Bool  rfbAuthDisableX11HostAccess;
 
 #ifdef XVNC_AuthPAM
 extern void rfbAuthAddUser(const char *name, Bool viewOnly);

@@ -185,6 +185,10 @@ SOFTWARE.
 
 #include "xace.h"
 
+#ifdef TURBOVNC
+extern Bool rfbAuthDisableX11HostAccess;
+#endif
+
 Bool defeatAccessControl = FALSE;
 
 #define addrEqual(fam, address, length, host) \
@@ -1277,6 +1281,11 @@ static int
 AuthorizedClient(ClientPtr client)
 {
     int rc;
+
+#ifdef TURBOVNC
+    if (rfbAuthDisableX11HostAccess)
+        return BadAccess;
+#endif
 
     if (!client || defeatAccessControl)
         return Success;

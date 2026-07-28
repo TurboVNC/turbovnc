@@ -4,7 +4,8 @@
  * This file implements authentication when setting up an RFB connection.
  */
 
-/* Copyright (C) 2010, 2012-2022, 2024 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2010, 2012-2022, 2024, 2026 D. R. Commander.
+ *                                           All Rights Reserved.
  * Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                    All Rights Reserved.
  * Copyright (C) 2003-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -65,6 +66,7 @@ Bool rfbAuthDisableRevCon = FALSE;
 Bool rfbAuthDisableCBSend = FALSE;
 Bool rfbAuthDisableCBRecv = FALSE;
 Bool rfbAuthDisableX11TCP = FALSE;
+Bool rfbAuthDisableX11HostAccess = FALSE;
 
 static int nSecTypesEnabled = 0;
 static int preferenceLimit = 1;  /* Force one iteration of the loop in
@@ -544,6 +546,11 @@ static void ReadConfigFile(void)
 
     if (!strcmp(buf2, "no-x11-tcp-connections")) {
       rfbAuthDisableX11TCP = TRUE;
+      continue;
+    }
+
+    if (!strcmp(buf2, "no-x11-host-access")) {
+      rfbAuthDisableX11HostAccess = TRUE;
       continue;
     }
 
