@@ -37,6 +37,11 @@ patch systems with active TurboVNC sessions.
 4. Fixed an issue whereby the TurboVNC Viewer became unresponsive if the
 TigerVNC Server intentionally disconnected a TLS-encrypted connection.
 
+5. Fixed an issue in the TurboVNC Viewer whereby hotkey sequences could be
+triggered with any superset of the modifier keys specified in the
+`HotkeyModifiers` parameter (for example, Ctrl-Alt-Meta if Ctrl-Meta was
+specified.)
+
 
 3.3
 ===
