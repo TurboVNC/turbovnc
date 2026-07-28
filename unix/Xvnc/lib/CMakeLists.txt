@@ -28,7 +28,8 @@ if(TVNC_ZLIBNG)
 			-DZLIB_COMPAT=1
 			-DZLIB_ENABLE_TESTS=0
 		INSTALL_COMMAND ""
-		STEP_TARGETS build)
+		STEP_TARGETS build
+		BUILD_BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/zlib-ng/libz.a)
 endif()
 
 add_subdirectory(libsha1)

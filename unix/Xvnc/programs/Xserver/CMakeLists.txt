@@ -175,7 +175,7 @@ if(HAVE_MONOTONIC_CLOCK)
 	set(EXTRA_LIB ${EXTRA_LIB} rt)
 endif()
 if(TVNC_ZLIBNG)
-	add_dependencies(Xvnc zlib-ng-build)
+	add_dependencies(vnc zlib-ng-build)
 endif()
 target_link_libraries(Xvnc dix mi vnc fb Xi composite mi damage damageext randr
 	record render os present Xext-server sync xfixes xkb ${X11_Xau_LIB}
