@@ -1,4 +1,4 @@
-/* Copyright (C) 2025 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2025-2026 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,14 +25,16 @@ import com.turbovnc.rdr.*;
 public final class ModifierParameter extends IntParameter {
 
   public ModifierParameter(String name, Params params, String desc,
-                           int defValue) {
+                           int defValue, boolean allowZero_) {
     super(name, params, true, true, desc, defValue);
+    allowZero = allowZero_;
   }
 
   public synchronized boolean set(String modifierString) {
     int modifierMask = getMaskFromString(modifierString);
 
-    if (modifierMask == 0 || modifierMask == InputEvent.SHIFT_DOWN_MASK)
+    if ((modifierMask == 0 && !allowZero) ||
+        modifierMask == InputEvent.SHIFT_DOWN_MASK)
       throw new ErrorException(getName() + " parameter is incorrect");
 
     return set(modifierMask);
@@ -41,7 +43,8 @@ public final class ModifierParameter extends IntParameter {
   public synchronized boolean setDefault(String modifierString) {
     int modifierMask = getMaskFromString(modifierString);
 
-    if (modifierMask == 0 || modifierMask == InputEvent.SHIFT_DOWN_MASK)
+    if ((modifierMask == 0 && !allowZero) ||
+        modifierMask == InputEvent.SHIFT_DOWN_MASK)
       return false;
 
     return super.setDefault(modifierMask);
@@ -127,4 +130,13 @@ public final class ModifierParameter extends IntParameter {
 
     return sb.toString();
   }
+
+  public boolean isDown(InputEvent ev) {
+    return value != 0 &&
+           (ev.getModifiersEx() &
+            (InputEvent.SHIFT_DOWN_MASK | InputEvent.ALT_DOWN_MASK |
+             InputEvent.CTRL_DOWN_MASK | InputEvent.META_DOWN_MASK)) == value;
+  }
+
+  boolean allowZero;
 };

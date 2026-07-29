@@ -690,11 +690,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
     }
     int modifierMask = cc.params.hotkeyModifiers.get();
     boolean enableHotkeys = !cc.params.noHotkeys.get() &&
-                            (e.getModifiersEx() &
-                             (InputEvent.SHIFT_DOWN_MASK |
-                              InputEvent.ALT_DOWN_MASK |
-                              InputEvent.CTRL_DOWN_MASK |
-                              InputEvent.META_DOWN_MASK)) == modifierMask;
+                            cc.params.hotkeyModifiers.isDown(e);
     if ((modifierMask &
          (InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK)) != 0 &&
         Utils.isWindows() && e.isAltGraphDown())

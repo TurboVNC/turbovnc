@@ -704,6 +704,11 @@ public final class Params {
   "mouse button events in order for the events to be interpreted as a " +
   "middle mouse button event", 100, 0);
 
+  public ModifierParameter emulate3Modifiers =
+  new ModifierParameter("Emulate3Modifiers", this,
+  "Send a middle mouse button event when the left mouse button is pressed " +
+  "or released along with the specified modifier keys.", 0, true);
+
   public BoolParameter fsAltEnter =
   new BoolParameter("FSAltEnter", this, true, false,
   "Toggle full-screen mode when Alt-Enter is pressed.", false);
@@ -742,7 +747,7 @@ public final class Params {
   "sequences.  Shift cannot be used as a modifier unless it is accompanied " +
   "by another modifier.",
   InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK |
-  InputEvent.SHIFT_DOWN_MASK);
+  InputEvent.SHIFT_DOWN_MASK, false);
 
   public MenuKeyParameter menuKey =
   new MenuKeyParameter("MenuKey", this,

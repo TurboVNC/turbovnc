@@ -69,6 +69,14 @@ INPUT PARAMETERS
     mouse button events in order for the events to be interpreted as a middle
     mouse button event
 
+--> Emulate3Modifiers
+    Values: Any case-insensitive combination of
+    Cmd/Command/Meta/Super/Win/Windows, Ctrl/Control, Alt/Opt/Option, or Shift
+    separated by dashes
+
+    Send a middle mouse button event when the left mouse button is pressed or
+    released along with the specified modifier keys.
+
 --> HotkeyModifiers
     Values: Any case-insensitive combination of
     Cmd/Command/Meta/Super/Win/Windows, Ctrl/Control, Alt/Opt/Option, or Shift

@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2025 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2011-2026 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2021 Steffen Kieß
  * Copyright 2009-2011, 2016-2019 Pierre Ossman <ossman@cendio.se>
  *                                for Cendio AB
@@ -2907,7 +2907,12 @@ public final class CConn extends CConnection implements UserPasswdGetter,
       case MouseEvent.MOUSE_PRESSED:
         switch (ev.getButton()) {
           case 1:
-            buttonMask |= RFB.BUTTON1_MASK;  break;
+            if (params.emulate3Modifiers.isDown(ev)) {
+              buttonMask |= RFB.BUTTON2_MASK;
+              emulatingMiddleButtonMods = true;
+            } else
+              buttonMask |= RFB.BUTTON1_MASK;
+            break;
           case 2:
             buttonMask |= RFB.BUTTON2_MASK;  break;
           case 3:
@@ -2954,7 +2959,12 @@ public final class CConn extends CConnection implements UserPasswdGetter,
       case MouseEvent.MOUSE_RELEASED:
         switch (ev.getButton()) {
           case 1:
-            buttonMask &= ~RFB.BUTTON1_MASK;  break;
+            if (emulatingMiddleButtonMods) {
+              buttonMask &= ~RFB.BUTTON2_MASK;
+              emulatingMiddleButtonMods = false;
+            } else
+              buttonMask &= ~RFB.BUTTON1_MASK;
+            break;
           case 2:
             buttonMask &= ~RFB.BUTTON2_MASK;  break;
           case 3:
@@ -3301,7 +3311,7 @@ public final class CConn extends CConnection implements UserPasswdGetter,
 
   javax.swing.Timer emulate3Timer;
   MouseEvent emulate3Event;
-  boolean emulatingMiddleButton;
+  boolean emulatingMiddleButton, emulatingMiddleButtonMods;
 
   static LogWriter vlog = new LogWriter("CConn");
 }

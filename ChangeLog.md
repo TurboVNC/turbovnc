@@ -8,10 +8,14 @@ Python 3.12 and later when using TLS encryption.
 
 2. The TurboVNC Viewer now supports 3-button mouse emulation, which addresses a
 feature regression relative to the native Windows TurboVNC 2.2.x Viewer.  New
-parameters (`Emulate3`, `Emulate3Fuzz`, and `Emulate3Timeout`) and a new check
-box in the TurboVNC Viewer Options dialog can be used to enable and configure
-3-button mouse emulation.  The parameters work identically to the corresponding
-command-line options in the native Windows TurboVNC 2.2.x Viewer.
+parameters (`Emulate3`, `Emulate3Fuzz`, `Emulate3Timeout`, and
+`Emulate3Modifiers`) and a new check box in the TurboVNC Viewer Options dialog
+can be used to enable and configure 3-button mouse emulation.  `Emulate3`,
+`Emulate3Fuzz`, and `Emulate3Timeout` work identically to the corresponding
+command-line options in the native Windows TurboVNC 2.2.x Viewer, enabling
+middle mouse button emulation with a left and right mouse button chord.
+`Emulate3Modifiers` enables middle mouse button emulation with the left mouse
+button and a specified combination of modifier keys.
 
 3. The optional TurboVNC Server init.d script for Linux has been improved in
 the following ways:
