@@ -1,3 +1,13 @@
+3.3.2
+=====
+
+### Significant changes relative to 3.3.1:
+
+1. Fixed an issue in the Windows TurboVNC Viewer that caused right Windows key
+press/release events to be transmitted incorrectly to the VNC server when
+server-side key mapping was enabled.
+
+
 3.3.1
 =====
 

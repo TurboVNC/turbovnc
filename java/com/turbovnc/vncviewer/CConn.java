@@ -2249,7 +2249,8 @@ public final class CConn extends CConnection implements UserPasswdGetter,
             (rfbKeyCode == 0x30 && vKeyCode == 0) ||  // Volume Up
             (rfbKeyCode == 0x22 && vKeyCode == 0) ||  // Play/Pause
             (rfbKeyCode == 0x21 && vKeyCode == 0) ||  // Calculator
-            rfbKeyCode == 0x5b ||  // Windows
+            rfbKeyCode == 0x5b ||  // Left Windows
+            rfbKeyCode == 0x5c ||  // Right Windows
             rfbKeyCode == 0x5d ||  // Menu
             (rfbKeyCode == 0x38 &&
              location == KeyEvent.KEY_LOCATION_RIGHT) ||  // Right Alt
