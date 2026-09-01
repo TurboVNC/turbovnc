@@ -68,6 +68,10 @@ Python 3.12 and later when using TLS encryption.
 14. Fixed an issue whereby the TurboVNC Viewer became unresponsive if the
 TigerVNC Server intentionally disconnected a TLS-encrypted connection.
 
+15. Fixed an issue in the Windows TurboVNC Viewer that caused right Windows key
+press/release events to be transmitted incorrectly to the VNC server when
+server-side key mapping was enabled.
+
 
 3.1.4
 =====
