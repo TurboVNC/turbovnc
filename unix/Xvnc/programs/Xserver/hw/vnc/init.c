@@ -1208,6 +1208,15 @@ void InitInput(int argc, char *argv[])
   if (!EnableDevice(p, TRUE) || !EnableDevice(k, TRUE))
     FatalError("Could not enable TurboVNC input devices");
 
+  /* Assign the standard X Input device type Atoms to the core devices, as
+     Xvfb and the X.org input drivers do.  Chromium only recognizes a pointing
+     device if its type Atom is XI_MOUSE, so without this, the CSS interaction
+     media features report "hover: none" and "pointer: none", and web pages
+     that gate hover styles behind @media (hover: hover) (e.g. any site built
+     with Tailwind CSS v4) never show their hover-triggered UI. */
+  p->xinput_type = MakeAtom(XI_MOUSE, sizeof(XI_MOUSE) - 1, TRUE);
+  k->xinput_type = MakeAtom(XI_KEYBOARD, sizeof(XI_KEYBOARD) - 1, TRUE);
+
   mieqInit();
   mieqSetHandler(ET_KeyPress, vncXkbProcessDeviceEvent);
   mieqSetHandler(ET_KeyRelease, vncXkbProcessDeviceEvent);
