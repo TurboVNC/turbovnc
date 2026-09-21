@@ -167,6 +167,10 @@ TigerVNC Server intentionally disconnected a TLS-encrypted connection.
 view-only mode, and the TurboVNC Server no longer allows remote desktop
 resizing if `-viewonly` was passed to Xvnc.
 
+36. The TurboVNC Server no longer allows extended input device events if
+`-viewonly` was passed to Xvnc or the viewer authenticated with view-only
+credentials.
+
 
 3.0.3
 =====
