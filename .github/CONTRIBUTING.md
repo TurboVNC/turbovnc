@@ -1,3 +1,10 @@
+Pull Requests
+=============
+
+This project does not allow unsolicited pull requests.  If, after discussing a
+proposed code contribution with the project maintainer, a pull request is
+warranted, then you will be given access to the pull request system.
+
 Use of AI
 =========
 
