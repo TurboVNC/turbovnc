@@ -11,6 +11,10 @@ server-side key mapping was enabled.
 view-only mode, and the TurboVNC Server no longer allows remote desktop
 resizing if `-viewonly` was passed to Xvnc.
 
+3. The TurboVNC Server no longer allows extended input device events if
+`-viewonly` was passed to Xvnc or the viewer authenticated with view-only
+credentials.
+
 
 3.3.1
 =====

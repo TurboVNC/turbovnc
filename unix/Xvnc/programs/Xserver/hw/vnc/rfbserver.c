@@ -1854,8 +1854,10 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
                                                             "release");
                   fflush(stderr);
                 }
-                ExtInputAddEvent(dev, eventType == rfbGIIButtonPress ?
-                                 ButtonPress : ButtonRelease, b.buttonNumber);
+                if (!rfbViewOnly && !cl->viewOnly)
+                  ExtInputAddEvent(dev, eventType == rfbGIIButtonPress ?
+                                   ButtonPress : ButtonRelease,
+                                   b.buttonNumber);
                 break;
               }
 
@@ -1985,7 +1987,8 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
                                        dev->values[3] < 6 ?
                                      touch_type_string[dev->values[3]] : "");
                           }
-                          ExtInputAddEvent(dev, MotionNotify, 0);
+                          if (!rfbViewOnly && !cl->viewOnly)
+                            ExtInputAddEvent(dev, MotionNotify, 0);
                           dev->active_touches_uvnc[t][2] = -1;
                         }
                       }
@@ -2076,7 +2079,8 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
 
                     dev->valFirst = 0;
                     dev->valCount = 4;
-                    ExtInputAddEvent(dev, MotionNotify, 0);
+                    if (!rfbViewOnly && !cl->viewOnly)
+                      ExtInputAddEvent(dev, MotionNotify, 0);
                   }
                   break;
                 }
@@ -2106,7 +2110,8 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
                   dev->valCount = v.count;
                   dev->mode = eventType == rfbGIIValuatorAbsolute ?
                               Absolute : Relative;
-                  ExtInputAddEvent(dev, MotionNotify, 0);
+                  if (!rfbViewOnly && !cl->viewOnly)
+                    ExtInputAddEvent(dev, MotionNotify, 0);
                 }
                 break;
               }
