@@ -683,7 +683,7 @@ public final class CConn extends CConnection implements UserPasswdGetter,
   public void sendDesktopSize(int width, int height, boolean fromListener) {
     ScreenSet layout;
 
-    if (!cp.supportsSetDesktopSize)
+    if (!cp.supportsSetDesktopSize || params.viewOnly.get())
       return;
 
     if (params.desktopSize.getMode() == DesktopSize.AUTO)
@@ -706,7 +706,7 @@ public final class CConn extends CConnection implements UserPasswdGetter,
 
   public void sendDesktopSize(int width, int height, ScreenSet layout,
                               boolean fromListener) {
-    if (!cp.supportsSetDesktopSize)
+    if (!cp.supportsSetDesktopSize || params.viewOnly.get())
       return;
 
     if (!layout.validate(width, height, true)) {
