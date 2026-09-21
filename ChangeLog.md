@@ -80,6 +80,10 @@ resizing if `-viewonly` was passed to Xvnc.
 `-viewonly` was passed to Xvnc or the viewer authenticated with view-only
 credentials.
 
+18. Fixed an issue in the TurboVNC Viewer whereby the saved options for listen
+mode were not applied unless the user opened the TurboVNC Viewer Options dialog
+and clicked "OK" prior to the first connection.
+
 
 3.1.4
 =====
