@@ -7,6 +7,10 @@
 press/release events to be transmitted incorrectly to the VNC server when
 server-side key mapping was enabled.
 
+2. The TurboVNC Viewer no longer attempts to resize the remote desktop in
+view-only mode, and the TurboVNC Server no longer allows remote desktop
+resizing if `-viewonly` was passed to Xvnc.
+
 
 3.3.1
 =====
