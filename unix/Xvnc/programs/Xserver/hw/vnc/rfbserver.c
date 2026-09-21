@@ -2,7 +2,7 @@
  * rfbserver.c - deal with server-side of the RFB protocol.
  */
 
-/* Copyright (C) 2009-2022, 2024-2025 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2009-2022, 2024-2026 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2021, 2024 AnatoScope SA.  All Rights Reserved.
  * Copyright (C) 2015 Pierre Ossman for Cendio AB.  All Rights Reserved.
  * Copyright (C) 2011 Joel Martin
@@ -1462,7 +1462,7 @@ static void rfbProcessClientNormalMessage(rfbClientPtr cl)
           rfbAddScreen(&newScreens, screen);
       }
 
-      if (cl->viewOnly) {
+      if (rfbViewOnly || cl->viewOnly) {
         RFBLOGID("NOTICE: Ignoring remote desktop resize request from a view-only client.\n");
         result = rfbEDSResultProhibited;
       } else if (result == rfbEDSResultSuccess) {

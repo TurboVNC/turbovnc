@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2025 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2011-2026 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2015 Brian P. Hinz
  * Copyright 2009-2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
@@ -656,7 +656,7 @@ public final class CConn extends CConnection implements UserPasswdGetter,
   public void sendDesktopSize(int width, int height, boolean fromListener) {
     ScreenSet layout;
 
-    if (!cp.supportsSetDesktopSize)
+    if (!cp.supportsSetDesktopSize || opts.viewOnly)
       return;
 
     if (opts.desktopSize.mode == Options.SIZE_AUTO)
@@ -679,7 +679,7 @@ public final class CConn extends CConnection implements UserPasswdGetter,
 
   public void sendDesktopSize(int width, int height, ScreenSet layout,
                               boolean fromListener) {
-    if (!cp.supportsSetDesktopSize)
+    if (!cp.supportsSetDesktopSize || opts.viewOnly)
       return;
 
     if (!layout.validate(width, height, true)) {

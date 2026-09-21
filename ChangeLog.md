@@ -163,6 +163,10 @@ Python 3.12 and later when using TLS encryption.
 34. Fixed an issue whereby the TurboVNC Viewer became unresponsive if the
 TigerVNC Server intentionally disconnected a TLS-encrypted connection.
 
+35. The TurboVNC Viewer no longer attempts to resize the remote desktop in
+view-only mode, and the TurboVNC Server no longer allows remote desktop
+resizing if `-viewonly` was passed to Xvnc.
+
 
 3.0.3
 =====
