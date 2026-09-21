@@ -171,6 +171,10 @@ resizing if `-viewonly` was passed to Xvnc.
 `-viewonly` was passed to Xvnc or the viewer authenticated with view-only
 credentials.
 
+37. Fixed an issue in the TurboVNC Server that caused Chrome/Chromium to
+misdetect the pointer device and thus ignore CSS rules gated by a
+`@media (hover: hover)` query.
+
 
 3.0.3
 =====
