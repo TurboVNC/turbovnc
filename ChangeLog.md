@@ -19,6 +19,10 @@ credentials.
 mode were not applied unless the user opened the TurboVNC Viewer Options dialog
 and clicked "OK" prior to the first connection.
 
+5. Fixed an issue in the TurboVNC Server that caused Chrome/Chromium to
+misdetect the pointer device and thus ignore CSS rules gated by a
+`@media (hover: hover)` query.
+
 
 3.3.1
 =====

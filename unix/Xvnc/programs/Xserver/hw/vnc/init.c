@@ -4,7 +4,7 @@
  * Modified for XFree86 4.x by Alan Hourihane <alanh@fairlite.demon.co.uk>
  */
 
-/* Copyright (C) 2009-2024 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2009-2024, 2026 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2021 Steffen Kieß
  * Copyright (C) 2016-2017 Pierre Ossman for Cendio AB.  All Rights Reserved.
  * Copyright (C) 2010 University Corporation for Atmospheric Research.
@@ -1201,6 +1201,8 @@ void InitInput(int argc, char *argv[])
   if (AllocDevicePair(serverClient, "TurboVNC", &p, &k, rfbMouseProc,
                       rfbKeybdProc, FALSE) != Success)
     FatalError("Could not initialize TurboVNC input devices");
+  p->xinput_type = MakeAtom(XI_MOUSE, strlen(XI_MOUSE), TRUE);
+  k->xinput_type = MakeAtom(XI_KEYBOARD, strlen(XI_KEYBOARD), TRUE);
 
   if (ActivateDevice(p, TRUE) != Success || ActivateDevice(k, TRUE) != Success)
     FatalError("Could not activate TurboVNC input devices");
