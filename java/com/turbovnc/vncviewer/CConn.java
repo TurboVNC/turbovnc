@@ -96,6 +96,7 @@ public final class CConn extends CConnection implements UserPasswdGetter,
       String name = sock.getPeerEndpoint();
       vlog.info("Accepted connection from " + name);
       options.setNode(".listen");
+      UserPreferences.load(".listen", params);
     } else if (!benchmark) {
       String host = null;
       int port = -1;
