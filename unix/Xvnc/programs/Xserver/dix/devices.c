@@ -1162,6 +1162,40 @@ UndisplayDevices(void)
         screen->DisplayCursor(dev, screen, NullCursor);
 }
 
+static Bool
+GrabReferencesDevice(void *value, XID id, void *cdata)
+{
+    GrabPtr grab = value;
+    DeviceIntPtr dev = cdata;
+
+    return grab->device == dev || grab->modifierDevice == dev;
+}
+
+/**
+ * Remove all passive grabs that reference the given device, either as
+ * the grabbed device or as the modifier device. This must be called
+ * before the device is freed to avoid dangling pointers in GrabRec.
+ */
+static void
+RemovePassiveGrabsForDevice(DeviceIntPtr dev)
+{
+    int i;
+
+    for (i = 0; i < currentMaxClients; i++) {
+        GrabPtr grab;
+
+        if (!clients[i])
+            continue;
+
+        while ((grab = LookupClientResourceComplex(clients[i],
+                                                   RT_PASSIVEGRAB,
+                                                   GrabReferencesDevice,
+                                                   dev))) {
+            FreeResource(grab->resource, RT_NONE);
+        }
+    }
+}
+
 /**
  * Remove a device from the device list, closes it and thus frees all
  * resources.
@@ -1200,6 +1234,8 @@ RemoveDevice(DeviceIntPtr dev, BOOL sendevent)
         DisableDevice(dev, sendevent);
         flags[dev->id] = XIDeviceDisabled;
     }
+
+    RemovePassiveGrabsForDevice(dev);
 
     input_lock();
 
