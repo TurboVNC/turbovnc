@@ -404,7 +404,7 @@ public final class Params {
     reconcile();
   }
 
-  public void load(String filename) {
+  public void load(String filename, boolean advancedParameters) {
     if (filename == null)
       return;
 
@@ -417,6 +417,10 @@ public final class Params {
                                  e.getMessage());
     }
 
+    if (System.getProperty("turbovnc.advancedconninfo") != null)
+      advancedParameters =
+        Utils.getBooleanProperty("turbovnc.advancedconninfo", false);
+
     for (Enumeration<?> i = props.propertyNames();  i.hasMoreElements();) {
       String name = (String)i.nextElement();
 
@@ -424,6 +428,10 @@ public final class Params {
         // skip the section delimiters
         continue;
       } else {
+        if ((name.equalsIgnoreCase("ExtSSHCommand") ||
+             name.equalsIgnoreCase("ExtSSHTemplate")) && !advancedParameters)
+          throw new WarningException(name +
+                                     " not allowed in connection info file");
         set(name, props.getProperty(name), true);
       }
     }

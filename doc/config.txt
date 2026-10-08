@@ -182,6 +182,18 @@ to start the TurboVNC Viewer with the TurboVNC Session Manager disabled.  The
 Java system properties listed below can also be specified in
 {file: ~/.vnc/default.turbovnc}.
 
+| Java System Property | {pcode: turbovnc.advancedconninfo = __0 \| 1__} |
+| Summary | Disallow/allow ''ExtSSHCommand'' and ''ExtSSHTemplate'' \
+	parameters in TurboVNC connection info ({file: .turbovnc}) files |
+| Default Value | Allowed when passing a TurboVNC connection info file to the \
+	TurboVNC Viewer using the command line, disallowed otherwise |
+#OPT: hiCol=first
+
+	Description :: Since ''ExtSSHCommand'' and ''ExtSSHTemplate'' can potentially
+	be used to launch arbitrary applications, the default is to disallow those
+	parameters in TurboVNC connection info files unless the file is passed to the
+	TurboVNC Viewer using the command line.
+
 | Java System Property | {pcode: turbovnc.fshidedock = __0 \| 1__} |
 | Summary | Always show/always hide the menu bar and dock in full-screen mode |
 | Platforms | Mac |

@@ -27,6 +27,13 @@ misdetect the pointer device and thus ignore CSS rules gated by a
 specify the full path of a connection info file passed to
 `/opt/TurboVNC/bin/vncviewer` on the command line.
 
+7. Because `ExtSSHCommand` and `ExtSSHTemplate` can potentially be used to
+launch arbitrary applications, the TurboVNC Viewer now disallows those
+parameters in TurboVNC connection info (**.turbovnc**) files by default unless
+the file is passed to the TurboVNC Viewer using the command line.  A new Java
+system property (`turbovnc.advancedconninfo`) can be used to override the
+default behavior.
+
 
 3.3.1
 =====
