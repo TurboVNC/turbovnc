@@ -13,8 +13,8 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/stamp
 )
 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/viewer_parameters.txt
-	COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncviewer -?
-		>viewer_parameters.txt || true
+	COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncviewer -? |
+		sed -n '/^USAGE/,$$p' >viewer_parameters.txt || true
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	DEPENDS java
 	COMMENT "Generating TurboVNC Viewer parameter list"
