@@ -175,6 +175,10 @@ credentials.
 misdetect the pointer device and thus ignore CSS rules gated by a
 `@media (hover: hover)` query.
 
+38. Fixed an issue in the Mac TurboVNC Viewer whereby it was necessary to
+specify the full path of a connection info file passed to
+`/opt/TurboVNC/bin/vncviewer` on the command line.
+
 
 3.0.3
 =====
