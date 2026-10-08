@@ -175,6 +175,18 @@ variable.  For instance, on Linux/Un*x and Mac systems, you could execute:
 
 to start the TurboVNC Viewer with the TurboVNC Session Manager disabled.
 
+| Java System Property | {pcode: turbovnc.advancedconninfo = __0 \| 1__} |
+| Summary | Disallow/allow ''ExtSSHCommand'' parameter in TurboVNC connection \
+	info ({file: .turbovnc}) files |
+| Default Value | Allowed when passing a TurboVNC connection info file to the \
+	TurboVNC Viewer using the command line, disallowed otherwise |
+#OPT: hiCol=first
+
+	Description :: Since ''ExtSSHCommand'' can potentially be used to launch
+	arbitrary applications, the default is to disallow that parameter in TurboVNC
+	connection info files unless the file is passed to the TurboVNC Viewer using
+	the command line.
+
 | Java System Property | ''turbovnc.ciphersuites'' |
 | Summary | Available cipher suites for TLS encryption |
 | Default Value | System-dependent |

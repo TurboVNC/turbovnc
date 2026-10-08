@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2018, 2020-2025 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2011-2018, 2020-2026 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011-2013, 2016 Brian P. Hinz
  * Copyright 2011 Pierre Ossman <ossman@cendio.se> for Cendio AB
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
@@ -133,7 +133,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
                 if (fName.toLowerCase().endsWith(".vnc"))
                   viewer.getParams().loadLegacy(fName);
                 else
-                  viewer.getParams().load(fName);
+                  viewer.getParams().load(fName, false);
               } catch (Exception e) {
                 viewer.reportException(e);
                 return null;
@@ -149,6 +149,25 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
       }
       return null;
     }
+  }
+
+  // This will return false if the TurboVNC Viewer was launched using
+  // javaw.exe on Windows or by opening the macOS application.
+  static boolean hasCommandLine() {
+    Console console = System.console();
+
+    if (console == null)
+      return false;
+    else if (Utils.JAVA_VERSION >= 22) {
+      try {
+        Method isTerminal = Console.class.getMethod("isTerminal");
+        return (boolean)isTerminal.invoke(console);
+      } catch (Exception e) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   static void enableFileHandler() throws Exception {
@@ -370,10 +389,10 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
             if (fileName.toLowerCase().endsWith(".vnc"))
               viewer.getParams().loadLegacy(fileName);
             else
-              viewer.getParams().load(fileName);
+              viewer.getParams().load(fileName, false);
           } catch (Exception e) {
             viewer.reportException(e);
-            return;
+            System.exit(1);
           }
           setGlobalInsets();
           fileName = null;
@@ -448,7 +467,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
             if (argv[i].toLowerCase().endsWith(".vnc"))
               params.loadLegacy(argv[i]);
             else
-              params.load(argv[i]);
+              params.load(argv[i], hasCommandLine());
           } catch (Exception e) {
             reportException(e);
             exit(1);
@@ -515,7 +534,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
         }
 
         if (argv[i].toLowerCase().endsWith(".turbovnc")) {
-          params.load(argv[i]);
+          params.load(argv[i], hasCommandLine());
           continue;
         }
 
