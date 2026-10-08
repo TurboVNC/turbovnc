@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2018, 2020-2025 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012-2018, 2020-2026 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2021 Steffen Kieß
  * Copyright (C) 2011-2012, 2016 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
@@ -385,7 +385,7 @@ public final class Params {
     reconcile();
   }
 
-  public void load(String filename) {
+  public void load(String filename, boolean advancedParameters) {
     if (filename == null)
       return;
 
@@ -398,6 +398,10 @@ public final class Params {
                                  e.getMessage());
     }
 
+    if (System.getProperty("turbovnc.advancedconninfo") != null)
+      advancedParameters =
+        Utils.getBooleanProperty("turbovnc.advancedconninfo", false);
+
     for (Enumeration<?> i = props.propertyNames();  i.hasMoreElements();) {
       String name = (String)i.nextElement();
 
@@ -405,6 +409,10 @@ public final class Params {
         // skip the section delimiters
         continue;
       } else {
+        if ((name.equalsIgnoreCase("ExtSSHCommand") ||
+             name.equalsIgnoreCase("ExtSSHTemplate")) && !advancedParameters)
+          throw new WarningException(name +
+                                     " not allowed in connection info file");
         set(name, props.getProperty(name), true);
       }
     }

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 <meta name="language" content="en">
-<meta name="date" content="2026-04-03T10:09:52">
+<meta name="date" content="2026-10-08T15:37:42">
 <meta name="generator" content="deplate.rb 0.8.5">
 <title>User&rsquo;s Guide for TurboVNC 3.2.2</title>
 <link rel="start" href="index.html" title="Frontpage">
@@ -2941,6 +2941,34 @@ JAVA_TOOL_OPTIONS=-Dturbovnc.sessmgr=0&nbsp;/opt/TurboVNC/bin/vncviewer
 <p>to start the TurboVNC Viewer with the TurboVNC Session Manager disabled.  
 The Java system properties listed below can also be specified in 
 <strong class="filename">~/.vnc/default.turbovnc</strong>.</p>
+
+<div class="table">
+<table class="standard">
+  <tr class="standard">
+    <td class="high standard">Java System Property</td>
+    <td class="standard"><code>turbovnc.advancedconninfo = <em>0 | 1</em></code></td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Summary</td>
+    <td class="standard">Disallow/allow <code>ExtSSHCommand</code> and <code>ExtSSHTemplate</code> parameters in TurboVNC connection info (<strong class="filename">.turbovnc</strong>) files</td>
+  </tr>
+  <tr class="standard">
+    <td class="high standard">Default Value</td>
+    <td class="standard">Allowed when passing a TurboVNC connection info file to the TurboVNC Viewer using the command line, disallowed otherwise</td>
+  </tr>
+</table>
+</div>
+
+
+<dl class="Description">
+    <dt class="Description-1 Description">Description</dt>
+    <dd class="Description-1 Description">
+        Since <code>ExtSSHCommand</code> and <code>ExtSSHTemplate</code> can 
+        potentially be used to launch arbitrary applications, the default is to 
+        disallow those parameters in TurboVNC connection info files unless the 
+        file is passed to the TurboVNC Viewer using the command line.
+    </dd>
+</dl>
 
 <div class="table">
 <table class="standard">
