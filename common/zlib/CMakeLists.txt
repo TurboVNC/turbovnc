@@ -3,7 +3,7 @@ if(WIN32)
 else()
 	add_definitions(-DHAVE_UNISTD_H)
 endif()
-add_definitions(-DHAVE_STDARG_H)
+add_definitions(-DHAVE_STDARG_H -Dz_errmsg=turbovnc_z_errmsg)
 
 if(CPU_TYPE STREQUAL "x86_64")
 	if(NOT WIN32)
