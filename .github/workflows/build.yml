@@ -66,7 +66,7 @@ jobs:
           aws s3 sync --acl public-read --delete $HOME/src/vnc.nightly/latest/files/ s3://turbovnc-pr/${{env.BRANCH}}/${{github.job}}/
   linux-non-default-options:
     if: ${{!contains(github.ref, 'refs/tags/')}}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Set global environment variables
         run: |
