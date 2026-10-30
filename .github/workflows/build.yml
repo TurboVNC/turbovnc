@@ -54,7 +54,7 @@ jobs:
           mv $HOME/src/vnc.nightly/latest/log-${{github.job}}.txt $HOME/src/vnc.nightly/latest/files/
   linux-non-default-options:
     if: ${{!contains(github.ref, 'refs/tags/')}}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Set global environment variables
         run: |
