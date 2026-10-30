@@ -34,6 +34,12 @@ the file is passed to the TurboVNC Viewer using the command line.  A new Java
 system property (`turbovnc.advancedconninfo`) can be used to override the
 default behavior.
 
+8. The TurboVNC Server now includes various security fixes (CVE-2026-33999,
+CVE-2026-34000, CVE-2026-34001, CVE-2026-34002, CVE-2026-34003, CVE-2026-88812,
+CVE-2026-93515, CVE-2026-93516, CVE-2026-93517, CVE-2026-93518, CVE-2026-93519,
+CVE-2026-93520, CVE-2026-93521, CVE-2026-93523, and CVE-2026-93524) from the
+xorg-server 21.1.x code base.
+
 
 3.3.1
 =====
