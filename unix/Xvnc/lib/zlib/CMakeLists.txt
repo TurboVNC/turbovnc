@@ -7,7 +7,7 @@ if(HAVE_OFF64_T)
 endif()
 set(CMAKE_REQUIRED_DEFINITIONS)
 
-add_definitions(-DHAVE_UNISTD_H -DHAVE_STDARG_H)
+add_definitions(-DHAVE_UNISTD_H -DHAVE_STDARG_H -Dz_errmsg=turbovnc_z_errmsg)
 
 set(ZLIB_PUBLIC_HDRS
 	zconf.h
