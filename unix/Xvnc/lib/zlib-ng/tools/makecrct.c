@@ -15,9 +15,9 @@
     and writes out the tables for the case that z_word_t is 32 bits.
 */
 
-#define W 8 /* Need a 64-bit integer type in order to generate crc32 tables. */
-
-#include "crc32_braid_p.h"
+#define POLY 0xedb88320         /* p(x) reflected, with x^32 implied */
+#define BRAID_W 8 /* Need a 64-bit integer type in order to generate crc32 tables. */
+typedef uint64_t z_word_t;
 
 static uint32_t crc_table[256];
 static z_word_t crc_big_table[256];
@@ -156,32 +156,31 @@ static void print_crc_table(void) {
     printf("};\n\n");
 
     /* print big-endian CRC table for 64-bit z_word_t */
-    printf("#ifdef W\n\n");
-    printf("#if W == 8\n\n");
+    printf("#ifdef BRAID_W\n");
+    printf("#  if BRAID_W == 8\n\n");
     printf("static const z_word_t crc_big_table[] = {\n");
     printf("    ");
     write_table64(crc_big_table, 256);
     printf("};\n\n");
 
     /* print big-endian CRC table for 32-bit z_word_t */
-    printf("#else /* W == 4 */\n\n");
+    printf("#  else /* BRAID_W == 4 */\n\n");
     printf("static const z_word_t crc_big_table[] = {\n");
     printf("    ");
     write_table32hi(crc_big_table, 256);
     printf("};\n\n");
-    printf("#endif\n\n");
-    printf("#endif /* W */\n\n");
+    printf("#  endif\n");
+    printf("#endif /* BRAID_W */\n\n");
 
     /* write out braid tables for each value of N */
     for (n = 1; n <= 6; n++) {
-        printf("#if N == %d\n", n);
+        printf("#if BRAID_N == %d\n", n);
 
         /* compute braid tables for this N and 64-bit word_t */
         braid(ltl, big, n, 8);
 
         /* write out braid tables for 64-bit z_word_t */
-        printf("\n");
-        printf("#if W == 8\n\n");
+        printf("#  if BRAID_W == 8\n\n");
         printf("static const uint32_t crc_braid_table[][256] = {\n");
         for (k = 0; k < 8; k++) {
             printf("   {");
@@ -202,7 +201,7 @@ static void print_crc_table(void) {
 
         /* write out braid tables for 32-bit z_word_t */
         printf("\n");
-        printf("#else /* W == 4 */\n\n");
+        printf("#  else /* BRAID_W == 4 */\n\n");
         printf("static const uint32_t crc_braid_table[][256] = {\n");
         for (k = 0; k < 4; k++) {
             printf("   {");
@@ -217,9 +216,8 @@ static void print_crc_table(void) {
             printf("}%s", k < 3 ? ",\n" : "");
         }
         printf("};\n\n");
-        printf("#endif /* W */\n\n");
-
-        printf("#endif /* N == %d */\n", n);
+        printf("#  endif /* BRAID_W */\n");
+        printf("#endif /* BRAID_N == %d */\n", n);
     }
     printf("\n");
 
