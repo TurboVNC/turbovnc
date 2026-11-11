@@ -34,11 +34,11 @@ the file is passed to the TurboVNC Viewer using the command line.  A new Java
 system property (`turbovnc.advancedconninfo`) can be used to override the
 default behavior.
 
-8. The TurboVNC Server now includes various security fixes (CVE-2026-33999,
-CVE-2026-34000, CVE-2026-34001, CVE-2026-34002, CVE-2026-34003, CVE-2026-88812,
-CVE-2026-93515, CVE-2026-93516, CVE-2026-93517, CVE-2026-93518, CVE-2026-93519,
-CVE-2026-93520, CVE-2026-93521, CVE-2026-93523, and CVE-2026-93524) from the
-xorg-server 21.1.x code base.
+8. The TurboVNC Server now includes various security fixes (CVE-2023-5380,
+CVE-2026-33999, CVE-2026-34000, CVE-2026-34001, CVE-2026-34002, CVE-2026-34003,
+CVE-2026-88812, CVE-2026-93515, CVE-2026-93516, CVE-2026-93517, CVE-2026-93518,
+CVE-2026-93519, CVE-2026-93520, CVE-2026-93521, CVE-2026-93523, and
+CVE-2026-93524) from the xorg-server 21.1.x code base.
 
 9. The TurboVNC Server's in-tree version of zlib-ng has been upgraded to
 v2.3.3, which includes multiple bug fixes and performance enhancements.

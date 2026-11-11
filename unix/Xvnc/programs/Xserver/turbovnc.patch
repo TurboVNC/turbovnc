@@ -1219,6 +1219,19 @@ index a2f625b..72a953f 100644
      btlen = bytes_to_int32(btlen);
      len = sizeof(xXIFocusInEvent) + btlen * 4;
  
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dix/enterleave.h b/Xserver/dix/enterleave.h
+index 4b833d8..e8af924 100644
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dix/enterleave.h
++++ b/Xserver/dix/enterleave.h
+@@ -58,8 +58,6 @@ extern void DeviceFocusEvent(DeviceIntPtr dev,
+ 
+ extern void EnterWindow(DeviceIntPtr dev, WindowPtr win, int mode);
+ 
+-extern void LeaveWindow(DeviceIntPtr dev);
+-
+ extern void CoreFocusEvent(DeviceIntPtr kbd,
+                            int type, int mode, int detail, WindowPtr pWin);
+ 
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dix/events.c b/Xserver/dix/events.c
 index 427b891..0f32bd8 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dix/events.c
@@ -1451,6 +1464,18 @@ index 2e00bab..a16e1bc 100644
  
  /* Temporary define to allow building without a dri_interface.h from
   * updated Mesa.  Some day when we don't care about Mesa that old any
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/include/eventstr.h b/Xserver/include/eventstr.h
+index bf3b95f..2bae3b0 100644
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/include/eventstr.h
++++ b/Xserver/include/eventstr.h
+@@ -296,4 +296,7 @@ union _InternalEvent {
+ #endif
+ };
+ 
++extern void
++LeaveWindow(DeviceIntPtr dev);
++
+ #endif
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/include/extinit.h b/Xserver/include/extinit.h
 index 46081ad..9b3a4d5 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/include/extinit.h
@@ -1541,6 +1566,34 @@ index b7c7021..0e28272 100644
  };
  
  Bool
+diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/mi/mipointer.c b/Xserver/mi/mipointer.c
+index 75be1ae..b12ae9b 100644
+--- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/mi/mipointer.c
++++ b/Xserver/mi/mipointer.c
+@@ -397,8 +397,21 @@ miPointerWarpCursor(DeviceIntPtr pDev, ScreenPtr pScreen, int x, int y)
+ #ifdef PANORAMIX
+         && noPanoramiXExtension
+ #endif
+-        )
+-        UpdateSpriteForScreen(pDev, pScreen);
++        ) {
++            DeviceIntPtr master = GetMaster(pDev, MASTER_POINTER);
++            /* Hack for CVE-2023-5380: if we're moving
++             * screens PointerWindows[] keeps referring to the
++             * old window. If that gets destroyed we have a UAF
++             * bug later. Only happens when jumping from a window
++             * to the root window on the other screen.
++             * Enter/Leave events are incorrect for that case but
++             * too niche to fix.
++             */
++            LeaveWindow(pDev);
++            if (master)
++                LeaveWindow(master);
++            UpdateSpriteForScreen(pDev, pScreen);
++    }
+ }
+ 
+ /**
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/miext/sync/misync.c b/Xserver/miext/sync/misync.c
 index 0931803..9a6fbbd 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/miext/sync/misync.c
