@@ -12,9 +12,16 @@ username if the SSH username is unspecified.
 3. The TurboVNC Server now includes various security fixes (CVE-2022-2319,
 CVE-2022-2320, CVE-2022-4283, CVE-2022-46340, CVE-2022-46341, CVE-2022-46342,
 CVE-2022-46343, CVE-2022-46344, CVE-2023-0494, CVE-2023-1393, CVE-2023-5367,
-CVE-2023-6377, CVE-2023-6478, CVE-2023-6816, CVE-2024-0229, CVE-2024-0408,
-CVE-2024-9632, CVE-2024-21885, CVE-2024-21886, CVE-2024-31080, CVE-2024-31081,
-and CVE-2024-31083) from the xorg-server 21.1.x code base.
+CVE-2023-5380, CVE-2023-6377, CVE-2023-6478, CVE-2023-6816, CVE-2024-0229,
+CVE-2024-0408, CVE-2024-9632, CVE-2024-21885, CVE-2024-21886, CVE-2024-31080,
+CVE-2024-31081, CVE-2024-31083, CVE-2025-26594, CVE-2025-26595, CVE-2025-26596,
+CVE-2025-26597, CVE-2025-26598, CVE-2025-26599, CVE-2025-26600, CVE-2025-26601,
+CVE-2025-49175, CVE-2025-49176, CVE-2025-49178, CVE-2025-49179, CVE-2025-49180,
+CVE-2025-62229, CVE-2025-62230, CVE-2025-62231, CVE-2026-33999, CVE-2026-34000,
+CVE-2026-34001, CVE-2026-34002, CVE-2026-34003, CVE-2026-88812, CVE-2026-93515,
+CVE-2026-93516, CVE-2026-93517, CVE-2026-93518, CVE-2026-93519, CVE-2026-93520,
+CVE-2026-93521, CVE-2026-93523, and CVE-2026-93524) from the xorg-server 21.1.x
+code base.
 
 4. By default, each instance of the Linux TurboVNC Server now listens on the
 abstract Unix domain socket, in addition to the pathname Unix domain socket
@@ -151,39 +158,27 @@ Size/Position" feature did not work properly in full-screen mode if
 message, rather than throwing a fatal error, if it cannot parse an entry in the
 SSH known hosts file.  This mimics the behavior of OpenSSH.
 
-32. The TurboVNC Server now includes various security fixes (CVE-2025-26594,
-CVE-2025-26595, CVE-2025-26596, CVE-2025-26597, CVE-2025-26598, CVE-2025-26599,
-CVE-2025-26600, CVE-2025-26601, CVE-2025-49175, CVE-2025-49176, CVE-2025-49178,
-CVE-2025-49179, CVE-2025-49180, CVE-2025-62229, CVE-2025-62230, and
-CVE-2025-62231) from the xorg-server 21.1.x code base.
-
-33. The simple web server for noVNC (part of the TurboVNC Server) now supports
+32. The simple web server for noVNC (part of the TurboVNC Server) now supports
 Python 3.12 and later when using TLS encryption.
 
-34. Fixed an issue whereby the TurboVNC Viewer became unresponsive if the
+33. Fixed an issue whereby the TurboVNC Viewer became unresponsive if the
 TigerVNC Server intentionally disconnected a TLS-encrypted connection.
 
-35. The TurboVNC Viewer no longer attempts to resize the remote desktop in
+34. The TurboVNC Viewer no longer attempts to resize the remote desktop in
 view-only mode, and the TurboVNC Server no longer allows remote desktop
 resizing if `-viewonly` was passed to Xvnc.
 
-36. The TurboVNC Server no longer allows extended input device events if
+35. The TurboVNC Server no longer allows extended input device events if
 `-viewonly` was passed to Xvnc or the viewer authenticated with view-only
 credentials.
 
-37. Fixed an issue in the TurboVNC Server that caused Chrome/Chromium to
+36. Fixed an issue in the TurboVNC Server that caused Chrome/Chromium to
 misdetect the pointer device and thus ignore CSS rules gated by a
 `@media (hover: hover)` query.
 
-38. Fixed an issue in the Mac TurboVNC Viewer whereby it was necessary to
+37. Fixed an issue in the Mac TurboVNC Viewer whereby it was necessary to
 specify the full path of a connection info file passed to
 `/opt/TurboVNC/bin/vncviewer` on the command line.
-
-39. The TurboVNC Server now includes various security fixes (CVE-2026-33999,
-CVE-2026-34000, CVE-2026-34001, CVE-2026-34002, CVE-2026-34003, CVE-2026-88812,
-CVE-2026-93515, CVE-2026-93516, CVE-2026-93517, CVE-2026-93518, CVE-2026-93519,
-CVE-2026-93520, CVE-2026-93521, CVE-2026-93523, and CVE-2026-93524) from the
-xorg-server 21.1.x code base.
 
 
 3.0.3
