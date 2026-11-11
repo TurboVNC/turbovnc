@@ -264,7 +264,7 @@ index c520c7d..5f4c174 100644
              }
              if (!tpn->client)
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xi/exevents.c b/Xserver/Xi/exevents.c
-index 659816a..3d34721 100644
+index 659816a..1930089 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xi/exevents.c
 +++ b/Xserver/Xi/exevents.c
 @@ -561,22 +561,25 @@ DeepCopyPointerClasses(DeviceIntPtr from, DeviceIntPtr to)
@@ -300,45 +300,6 @@ index 659816a..3d34721 100644
  
          memcpy(to->button->labels, from->button->labels,
                 from->button->numButtons * sizeof(Atom));
-@@ -2607,9 +2610,8 @@ InputClientGone(WindowPtr pWin, XID id)
- }
- 
- /**
-- * Search for window in each touch trace for each device. Remove the window
-- * and all its subwindows from the trace when found. The initial window
-- * order is preserved.
-+ * Search for window in each touch and gesture trace for each device.
-+ * Truncate the trace when the window is found.
-  */
- void
- WindowGone(WindowPtr win)
-@@ -2620,11 +2622,22 @@ WindowGone(WindowPtr win)
-         TouchClassPtr t = dev->touch;
-         int i;
- 
--        if (!t)
--            continue;
-+        if (t) {
-+            for (i = 0; i < t->num_touches; i++) {
-+                SpritePtr sprite = &t->touches[i].sprite;
-+                int j;
-+
-+                for (j = 0; j < sprite->spriteTraceGood; j++) {
-+                    if (sprite->spriteTrace[j] == win) {
-+                        sprite->spriteTraceGood = j;
-+                        break;
-+                    }
-+                }
-+            }
-+        }
- 
--        for (i = 0; i < t->num_touches; i++) {
--            SpritePtr sprite = &t->touches[i].sprite;
-+        if (dev->gesture) {
-+            SpritePtr sprite = &dev->gesture->gesture.sprite;
-             int j;
- 
-             for (j = 0; j < sprite->spriteTraceGood; j++) {
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xi/xibarriers.c b/Xserver/Xi/xibarriers.c
 index 1926762..d676ce6 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xi/xibarriers.c
