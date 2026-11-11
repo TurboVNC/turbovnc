@@ -213,7 +213,6 @@ GlxExtensionInit(void)
 {
     ExtensionEntry *extEntry;
     GlxExtensionEntry = NULL;
-    int i;
 
     // Init private keys, per-screen data
     if (!dixRegisterPrivateKey(&glvXGLVScreenPrivKey, PRIVATE_SCREEN, 0))
@@ -245,7 +244,7 @@ GlxExtensionInit(void)
     CallCallbacks(&vndInitCallbackListPtr, extEntry);
 
     /* We'd better have found at least one vendor */
-    for (i = 0; i < screenInfo.numScreens; i++)
+    for (int i = 0; i < screenInfo.numScreens; i++)
         if (GlxGetVendorForScreen(serverClient, screenInfo.screens[i]))
             return;
     extEntry->base = 0;

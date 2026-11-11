@@ -1211,7 +1211,7 @@ shm_tmpfile(void)
         "/var/tmp",
         "/tmp",
     };
-    int	fd, i;
+    int	fd;
 
 #ifdef HAVE_MEMFD_CREATE
     fd = memfd_create("xorg", MFD_CLOEXEC|MFD_ALLOW_SEALING);
@@ -1223,7 +1223,7 @@ shm_tmpfile(void)
 #endif
 
 #ifdef O_TMPFILE
-    for (i = 0; i < ARRAY_SIZE(shmdirs); i++) {
+    for (int i = 0; i < ARRAY_SIZE(shmdirs); i++) {
         fd = open(shmdirs[i], O_TMPFILE|O_RDWR|O_CLOEXEC|O_EXCL, 0666);
         if (fd >= 0) {
             DebugF ("Using O_TMPFILE\n");
@@ -1233,7 +1233,7 @@ shm_tmpfile(void)
     ErrorF ("Not using O_TMPFILE\n");
 #endif
 
-    for (i = 0; i < ARRAY_SIZE(shmdirs); i++) {
+    for (int i = 0; i < ARRAY_SIZE(shmdirs); i++) {
         char template[PATH_MAX];
         snprintf(template, ARRAY_SIZE(template), "%s/shmfd-XXXXXX", shmdirs[i]);
 #ifdef HAVE_MKOSTEMP
