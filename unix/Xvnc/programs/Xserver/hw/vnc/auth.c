@@ -238,10 +238,20 @@ static RFBSecTypeData *rfbSecTypes[] = {
 
 typedef void (*AuthFunc) (rfbClientPtr cl);
 
+#if defined(__has_attribute)
+#if __has_attribute(nonstring)
+#define NONSTRING __attribute((nonstring))
+#else
+#define NONSTRING
+#endif
+#else
+#define NONSTRING
+#endif
+
 typedef struct {
   int authType;
-  CARD8 vendorSignature[4];
-  CARD8 nameSignature[8];
+  NONSTRING CARD8 vendorSignature[4];
+  NONSTRING CARD8 nameSignature[8];
   AuthFunc startFunc;
   AuthFunc rspFunc;
 } AuthCapData;
