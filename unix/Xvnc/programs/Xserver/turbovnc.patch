@@ -1451,26 +1451,6 @@ index 2e00bab..a16e1bc 100644
  
  /* Temporary define to allow building without a dri_interface.h from
   * updated Mesa.  Some day when we don't care about Mesa that old any
-diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/glx/glxscreens.h b/Xserver/glx/glxscreens.h
-index 40649f8..5f89e5d 100644
---- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/glx/glxscreens.h
-+++ b/Xserver/glx/glxscreens.h
-@@ -37,6 +37,7 @@
- 
- #include "extension_string.h"
- #include "glxvndabi.h"
-+#include "glx_extinit.h"
- 
- typedef struct __GLXconfig __GLXconfig;
- struct __GLXconfig {
-@@ -116,7 +117,6 @@ GLint glxConvertToXVisualType(int visualType);
- ** and DDX layers of the GLX server extension.  The methods provide an
- ** interface for context management on a screen.
- */
--typedef struct __GLXscreen __GLXscreen;
- struct __GLXscreen {
-     void (*destroy) (__GLXscreen * screen);
- 
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/include/extinit.h b/Xserver/include/extinit.h
 index 46081ad..9b3a4d5 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/include/extinit.h
@@ -1922,38 +1902,6 @@ index 456f156..a8c2da0 100644
      cursors = xallocarray(ncursor, sizeof(CursorPtr) + sizeof(CARD32));
      if (!cursors)
          return BadAlloc;
-diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/xfixes/xfixes.c b/Xserver/xfixes/xfixes.c
-index 53a6bd6..28248d4 100644
---- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/xfixes/xfixes.c
-+++ b/Xserver/xfixes/xfixes.c
-@@ -221,7 +221,27 @@ XFixesExtensionInit(void)
-         return;
- 
-     if (XFixesSelectionInit() && XFixesCursorInit() && XFixesRegionInit() &&
-+#ifdef TURBOVNC
-+        /* Ubuntu 12.04 (precise) shipped a proposed/experimental patch
-+         * (https://patchwork.freedesktop.org/patch/8884) to the XFixes
-+         * protocol that extended the functionality of pointer barriers.  This
-+         * patch was apparently never accepted upstream and was removed in
-+         * 13.10 (raring).  Basically everything on Ubuntu 12.04 (probably
-+         * 12.10 and 13.04 as well) that uses XFixes, including the window
-+         * managers, believes that there are 3 XFixes events, but our server
-+         * (and anything else built against the official X.org fixesproto)
-+         * believes that there are only 2.  Since X RandR events come
-+         * immediately after XFixes events in the sequence, when the TurboVNC
-+         * Server sends those events to the window manager and other X clients,
-+         * the X clients misinterpret the events, and desktop resizing fails.
-+         * Easiest way to work around the issue is to add a slot for the
-+         * unofficial XFixes event.  Refer also to
-+         * https://lists.x.org/archives/xorg-devel/2012-April/030484.html
-+         */
-+        (extEntry = AddExtension(XFIXES_NAME, XFixesNumberEvents + 1,
-+#else
-         (extEntry = AddExtension(XFIXES_NAME, XFixesNumberEvents,
-+#endif
-                                  XFixesNumberErrors,
-                                  ProcXFixesDispatch, SProcXFixesDispatch,
-                                  NULL, StandardMinorOpcode)) != 0) {
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/xkb/XKBAlloc.c b/Xserver/xkb/XKBAlloc.c
 index 18557b8..335fbbd 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/xkb/XKBAlloc.c
