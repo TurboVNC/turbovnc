@@ -11,37 +11,6 @@ index c23907d..05b9ca3 100644
      pPriv->attr = pAttr;
      pAttr->resource = FakeClientID(client->index);
      if (!AddResource(pAttr->resource, AttrType, (void *) pAttr))
-diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xext/shm.c b/Xserver/Xext/shm.c
-index 24c6b10..be2be20 100644
---- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xext/shm.c
-+++ b/Xserver/Xext/shm.c
-@@ -1211,7 +1211,7 @@ shm_tmpfile(void)
-         "/var/tmp",
-         "/tmp",
-     };
--    int	fd;
-+    int	fd, i;
- 
- #ifdef HAVE_MEMFD_CREATE
-     fd = memfd_create("xorg", MFD_CLOEXEC|MFD_ALLOW_SEALING);
-@@ -1223,7 +1223,7 @@ shm_tmpfile(void)
- #endif
- 
- #ifdef O_TMPFILE
--    for (int i = 0; i < ARRAY_SIZE(shmdirs); i++) {
-+    for (i = 0; i < ARRAY_SIZE(shmdirs); i++) {
-         fd = open(shmdirs[i], O_TMPFILE|O_RDWR|O_CLOEXEC|O_EXCL, 0666);
-         if (fd >= 0) {
-             DebugF ("Using O_TMPFILE\n");
-@@ -1233,7 +1233,7 @@ shm_tmpfile(void)
-     ErrorF ("Not using O_TMPFILE\n");
- #endif
- 
--    for (int i = 0; i < ARRAY_SIZE(shmdirs); i++) {
-+    for (i = 0; i < ARRAY_SIZE(shmdirs); i++) {
-         char template[PATH_MAX];
-         snprintf(template, ARRAY_SIZE(template), "%s/shmfd-XXXXXX", shmdirs[i]);
- #ifdef HAVE_MKOSTEMP
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xext/sync.c b/Xserver/Xext/sync.c
 index fd2ceb0..e2f2c27 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xext/sync.c
@@ -521,45 +490,9 @@ index 1926762..d676ce6 100644
          if (pbd->barrier_event_id == event_id)
              pbd->release_event_id = event_id;
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xi/xichangehierarchy.c b/Xserver/Xi/xichangehierarchy.c
-index 504defe..cb0c6df 100644
+index 504defe..535328a 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/Xi/xichangehierarchy.c
 +++ b/Xserver/Xi/xichangehierarchy.c
-@@ -140,7 +140,7 @@ add_master(ClientPtr client, xXIAddMasterInfo * c, int flags[MAXDEVICES])
- {
-     DeviceIntPtr ptr, keybd, XTestptr, XTestkeybd;
-     char *name;
--    int rc;
-+    int i, rc;
- 
-     name = calloc(c->name_len + 1, sizeof(char));
-     if (name == NULL) {
-@@ -194,7 +194,7 @@ add_master(ClientPtr client, xXIAddMasterInfo * c, int flags[MAXDEVICES])
-     flags[XTestptr->id] |= XISlaveAttached;
-     flags[XTestkeybd->id] |= XISlaveAttached;
- 
--    for (int i = 0; i < currentMaxClients; i++)
-+    for (i = 0; i < currentMaxClients; i++)
-         XIBarrierNewMasterDevice(clients[i], ptr->id);
- 
-  unwind:
-@@ -219,7 +219,7 @@ static int
- remove_master(ClientPtr client, xXIRemoveMasterInfo * r, int flags[MAXDEVICES])
- {
-     DeviceIntPtr ptr, keybd, XTestptr, XTestkeybd;
--    int rc = Success;
-+    int i, rc = Success;
- 
-     if (r->return_mode != XIAttachToMaster && r->return_mode != XIFloating)
-         return BadValue;
-@@ -301,7 +301,7 @@ remove_master(ClientPtr client, xXIRemoveMasterInfo * r, int flags[MAXDEVICES])
-         }
-     }
- 
--    for (int i = 0; i < currentMaxClients; i++)
-+    for (i = 0; i < currentMaxClients; i++)
-         XIBarrierRemoveMasterDevice(clients[i], ptr->id);
- 
-     /* disable the remove the devices, XTest devices must be done first
 @@ -416,6 +416,11 @@ ProcXIChangeHierarchy(ClientPtr client)
      size_t len;			/* length of data remaining in request */
      int rc = Success;
@@ -1466,58 +1399,6 @@ index d46103f..67509d4 100644
      else if (rc == Success && pSel->window != None) {
          event.u.u.type = SelectionRequest;
          event.u.selectionRequest.owner = pSel->window;
-diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dri3/dri3_request.c b/Xserver/dri3/dri3_request.c
-index 958877e..98d2e7d 100644
---- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/dri3/dri3_request.c
-+++ b/Xserver/dri3/dri3_request.c
-@@ -49,6 +49,8 @@ dri3_screen_can_one_point_two(ScreenPtr screen)
- static int
- proc_dri3_query_version(ClientPtr client)
- {
-+    int i;
-+
-     REQUEST(xDRI3QueryVersionReq);
-     xDRI3QueryVersionReply rep = {
-         .type = X_Reply,
-@@ -60,14 +62,14 @@ proc_dri3_query_version(ClientPtr client)
- 
-     REQUEST_SIZE_MATCH(xDRI3QueryVersionReq);
- 
--    for (int i = 0; i < screenInfo.numScreens; i++) {
-+    for (i = 0; i < screenInfo.numScreens; i++) {
-         if (!dri3_screen_can_one_point_two(screenInfo.screens[i])) {
-             rep.minorVersion = 0;
-             break;
-         }
-     }
- 
--    for (int i = 0; i < screenInfo.numGPUScreens; i++) {
-+    for (i = 0; i < screenInfo.numGPUScreens; i++) {
-         if (!dri3_screen_can_one_point_two(screenInfo.gpuscreens[i])) {
-             rep.minorVersion = 0;
-             break;
-diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/fb/fbimage.c b/Xserver/fb/fbimage.c
-index bd24728..801df20 100644
---- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/fb/fbimage.c
-+++ b/Xserver/fb/fbimage.c
-@@ -210,7 +210,7 @@ fbGetImage(DrawablePtr pDrawable,
- {
-     FbBits *src;
-     FbStride srcStride;
--    int srcBpp;
-+    int i, srcBpp;
-     int srcXoff, srcYoff;
-     FbStip *dst;
-     FbStride dstStride;
-@@ -240,7 +240,7 @@ fbGetImage(DrawablePtr pDrawable,
-                   dst, dstStride, 0, w * srcBpp, h, GXcopy, FB_ALLONES, srcBpp);
- 
-         if (pm != FB_ALLONES) {
--            for (int i = 0; i < dstStride * h; i++)
-+            for (i = 0; i < dstStride * h; i++)
-                 dst[i] &= pm;
-         }
-     }
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/glx/glxcmds.c b/Xserver/glx/glxcmds.c
 index c82ce2c..11de0b7 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/glx/glxcmds.c
@@ -1590,27 +1471,6 @@ index 40649f8..5f89e5d 100644
  struct __GLXscreen {
      void (*destroy) (__GLXscreen * screen);
  
-diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/glx/vndext.c b/Xserver/glx/vndext.c
-index 0513733..aa93900 100644
---- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/glx/vndext.c
-+++ b/Xserver/glx/vndext.c
-@@ -213,6 +213,7 @@ GlxExtensionInit(void)
- {
-     ExtensionEntry *extEntry;
-     GlxExtensionEntry = NULL;
-+    int i;
- 
-     // Init private keys, per-screen data
-     if (!dixRegisterPrivateKey(&glvXGLVScreenPrivKey, PRIVATE_SCREEN, 0))
-@@ -244,7 +245,7 @@ GlxExtensionInit(void)
-     CallCallbacks(&vndInitCallbackListPtr, extEntry);
- 
-     /* We'd better have found at least one vendor */
--    for (int i = 0; i < screenInfo.numScreens; i++)
-+    for (i = 0; i < screenInfo.numScreens; i++)
-         if (GlxGetVendorForScreen(serverClient, screenInfo.screens[i]))
-             return;
-     extEntry->base = 0;
 diff --git a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/include/extinit.h b/Xserver/include/extinit.h
 index 46081ad..9b3a4d5 100644
 --- a/xserver-dbf6d1c24a00a1f598756c71028876ff2b3db17f/include/extinit.h

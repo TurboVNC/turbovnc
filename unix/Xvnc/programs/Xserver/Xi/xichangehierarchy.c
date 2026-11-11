@@ -140,7 +140,7 @@ add_master(ClientPtr client, xXIAddMasterInfo * c, int flags[MAXDEVICES])
 {
     DeviceIntPtr ptr, keybd, XTestptr, XTestkeybd;
     char *name;
-    int i, rc;
+    int rc;
 
     name = calloc(c->name_len + 1, sizeof(char));
     if (name == NULL) {
@@ -194,7 +194,7 @@ add_master(ClientPtr client, xXIAddMasterInfo * c, int flags[MAXDEVICES])
     flags[XTestptr->id] |= XISlaveAttached;
     flags[XTestkeybd->id] |= XISlaveAttached;
 
-    for (i = 0; i < currentMaxClients; i++)
+    for (int i = 0; i < currentMaxClients; i++)
         XIBarrierNewMasterDevice(clients[i], ptr->id);
 
  unwind:
@@ -219,7 +219,7 @@ static int
 remove_master(ClientPtr client, xXIRemoveMasterInfo * r, int flags[MAXDEVICES])
 {
     DeviceIntPtr ptr, keybd, XTestptr, XTestkeybd;
-    int i, rc = Success;
+    int rc = Success;
 
     if (r->return_mode != XIAttachToMaster && r->return_mode != XIFloating)
         return BadValue;
@@ -301,7 +301,7 @@ remove_master(ClientPtr client, xXIRemoveMasterInfo * r, int flags[MAXDEVICES])
         }
     }
 
-    for (i = 0; i < currentMaxClients; i++)
+    for (int i = 0; i < currentMaxClients; i++)
         XIBarrierRemoveMasterDevice(clients[i], ptr->id);
 
     /* disable the remove the devices, XTest devices must be done first

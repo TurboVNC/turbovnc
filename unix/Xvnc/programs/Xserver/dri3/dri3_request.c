@@ -49,8 +49,6 @@ dri3_screen_can_one_point_two(ScreenPtr screen)
 static int
 proc_dri3_query_version(ClientPtr client)
 {
-    int i;
-
     REQUEST(xDRI3QueryVersionReq);
     xDRI3QueryVersionReply rep = {
         .type = X_Reply,
@@ -62,14 +60,14 @@ proc_dri3_query_version(ClientPtr client)
 
     REQUEST_SIZE_MATCH(xDRI3QueryVersionReq);
 
-    for (i = 0; i < screenInfo.numScreens; i++) {
+    for (int i = 0; i < screenInfo.numScreens; i++) {
         if (!dri3_screen_can_one_point_two(screenInfo.screens[i])) {
             rep.minorVersion = 0;
             break;
         }
     }
 
-    for (i = 0; i < screenInfo.numGPUScreens; i++) {
+    for (int i = 0; i < screenInfo.numGPUScreens; i++) {
         if (!dri3_screen_can_one_point_two(screenInfo.gpuscreens[i])) {
             rep.minorVersion = 0;
             break;
