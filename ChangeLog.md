@@ -24,11 +24,14 @@ is useful in conjunction with wildcard `Host` entries.
 message, rather than throwing a fatal error, if it cannot parse an entry in the
 SSH known hosts file.  This mimics the behavior of OpenSSH.
 
-5. The TurboVNC Server now includes various security fixes (CVE-2025-26594,
-CVE-2025-26595, CVE-2025-26596, CVE-2025-26597, CVE-2025-26598, CVE-2025-26599,
-CVE-2025-26600, CVE-2025-26601, CVE-2025-49175, CVE-2025-49176, CVE-2025-49178,
-CVE-2025-49179, CVE-2025-49180, CVE-2025-62229, CVE-2025-62230, and
-CVE-2025-62231) from the xorg-server 21.1.x code base.
+5. The TurboVNC Server now includes various security fixes (CVE-2023-5380,
+CVE-2025-26594, CVE-2025-26595, CVE-2025-26596, CVE-2025-26597, CVE-2025-26598,
+CVE-2025-26599, CVE-2025-26600, CVE-2025-26601, CVE-2025-49175, CVE-2025-49176,
+CVE-2025-49178, CVE-2025-49179, CVE-2025-49180, CVE-2025-62229, CVE-2025-62230,
+CVE-2025-62231, CVE-2026-33999, CVE-2026-34000, CVE-2026-34001, CVE-2026-34002,
+CVE-2026-34003, CVE-2026-88812, CVE-2026-93515, CVE-2026-93516, CVE-2026-93517,
+CVE-2026-93518, CVE-2026-93519, CVE-2026-93520, CVE-2026-93521, CVE-2026-93523,
+and CVE-2026-93524) from the xorg-server 21.1.x code base.
 
 6. The simple web server for noVNC (part of the TurboVNC Server) now supports
 Python 3.12 and later when using TLS encryption.
@@ -67,13 +70,7 @@ the file is passed to the TurboVNC Viewer using the command line.  A new Java
 system property (`turbovnc.advancedconninfo`) can be used to override the
 default behavior.
 
-15. The TurboVNC Server now includes various security fixes (CVE-2026-33999,
-CVE-2026-34000, CVE-2026-34001, CVE-2026-34002, CVE-2026-34003, CVE-2026-88812,
-CVE-2026-93515, CVE-2026-93516, CVE-2026-93517, CVE-2026-93518, CVE-2026-93519,
-CVE-2026-93520, CVE-2026-93521, CVE-2026-93523, and CVE-2026-93524) from the
-xorg-server 21.1.x code base.
-
-16. The TurboVNC Server's in-tree version of zlib-ng has been upgraded to
+15. The TurboVNC Server's in-tree version of zlib-ng has been upgraded to
 v2.2.5, which fixes several minor bugs.
 
 
