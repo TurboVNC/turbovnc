@@ -4,7 +4,8 @@
  * This file implements authentication when setting up an RFB connection.
  */
 
-/* Copyright (C) 2010, 2012-2022, 2024 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2010, 2012-2022, 2024, 2026 D. R. Commander.
+ *                                           All Rights Reserved.
  * Copyright (C) 2010 University Corporation for Atmospheric Research.
  *                    All Rights Reserved.
  * Copyright (C) 2003-2006 Constantin Kaplinsky.  All Rights Reserved.
@@ -72,7 +73,7 @@ static int preferenceLimit = 1;  /* Force one iteration of the loop in
 
 char *rfbAuthOTPValue = NULL;
 int rfbAuthOTPValueLen = 0;
-#if USETLS
+#ifdef USETLS
 char *rfbAuthX509Cert = NULL;
 char *rfbAuthX509Key = NULL;
 char *rfbAuthCipherSuites = NULL;
@@ -292,7 +293,7 @@ typedef struct {
  * line.
  */
 static SecTypeData secTypes[] = {
-#if USETLS
+#ifdef USETLS
 /*  name         enabled  permitted  preference  requiredData */
   { "tlsnone",   FALSE,   TRUE,      -1,         FALSE,
 /*  secType           authCap            subType */
@@ -916,7 +917,7 @@ static void rfbSendSecurityTypeList(rfbClientPtr cl)
 }
 
 
-#if USETLS
+#ifdef USETLS
 #define TLS_INIT(anon)  \
   if ((ctx = rfbssl_init(cl, anon)) == NULL) {  \
     reply = 0;  \
@@ -973,7 +974,7 @@ void rfbVeNCryptAuthenticate(rfbClientPtr cl)
   int i, j;
   SecTypeData *s;
   CARD32 subTypes[MAX_VENCRYPT_SUBTYPES], chosenType = 0;
-#if USETLS
+#ifdef USETLS
   rfbSslCtx *ctx;
   int ret;
 #endif
@@ -1053,7 +1054,7 @@ void rfbVeNCryptAuthenticate(rfbClientPtr cl)
       AuthPAMUserPwdRspFunc(cl);
       break;
 #endif
-#if USETLS
+#ifdef USETLS
     case rfbVeNCryptTLSNone:
       cl->selectedAuthType = rfbAuthNone;
       TLS_INIT(TRUE);

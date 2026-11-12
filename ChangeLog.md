@@ -101,6 +101,9 @@ connection info (**.turbovnc**) files by default unless the file is passed to
 the TurboVNC Viewer using the command line.  A new Java system property
 (`turbovnc.advancedconninfo`) can be used to override the default behavior.
 
+22. The TurboVNC Server's built-in WebSocket proxy now works on big-endian
+systems.
+
 
 3.1.4
 =====
