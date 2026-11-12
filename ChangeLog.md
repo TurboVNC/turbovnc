@@ -73,6 +73,9 @@ default behavior.
 15. The TurboVNC Server's in-tree version of zlib-ng has been upgraded to
 v2.2.5, which fixes several minor bugs.
 
+16. The TurboVNC Server's built-in WebSocket proxy now works on big-endian
+systems.
+
 
 3.2.1
 =====
