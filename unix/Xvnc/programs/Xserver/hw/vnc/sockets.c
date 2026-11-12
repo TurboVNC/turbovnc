@@ -18,7 +18,8 @@
  * not EWOULDBLOCK.
  */
 
-/* Copyright (C) 2012-2020, 2022, 2024 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012-2020, 2022, 2024, 2026 D. R. Commander.
+ *                                           All Rights Reserved.
  * Copyright (C) 2021 Steffen Kieß
  * Copyright (C) 2011 Joel Martin
  * Copyright (C) 2011 Gernot Tenchio
@@ -312,7 +313,7 @@ void rfbCloseClient(rfbClientPtr cl)
 {
   int sock = cl->sock;
 
-#if USETLS
+#ifdef USETLS
   if (cl->sslctx) {
     shutdown(sock, SHUT_RDWR);
     rfbssl_destroy(cl);
@@ -381,7 +382,7 @@ int ReadExactTimeout(rfbClientPtr cl, char *buf, int len, int timeout)
     do {
       if (cl->wsctx)
         n = webSocketsDecode(cl, buf, len);
-#if USETLS
+#ifdef USETLS
       else if (cl->sslctx)
         n = rfbssl_read(cl, buf, len);
 #endif
@@ -399,10 +400,10 @@ int ReadExactTimeout(rfbClientPtr cl, char *buf, int len, int timeout)
       return 0;
 
     } else {
-      if (errno != EWOULDBLOCK && errno != EAGAIN)
+      if (!ETEST(errno))
         return n;
 
-#if USETLS
+#ifdef USETLS
       if (cl->sslctx) {
         if (rfbssl_pending(cl))
           continue;
@@ -479,7 +480,7 @@ int PeekExactTimeout(rfbClientPtr cl, char *buf, int len, int timeout)
 
   while (len > 0) {
     do {
-#if USETLS
+#ifdef USETLS
       if (cl->sslctx)
         n = rfbssl_peek(cl, buf, len);
       else
@@ -496,10 +497,10 @@ int PeekExactTimeout(rfbClientPtr cl, char *buf, int len, int timeout)
       return 0;
 
     } else {
-      if (errno != EWOULDBLOCK && errno != EAGAIN)
+      if (!ETEST(errno))
         return n;
 
-#if USETLS
+#ifdef USETLS
       if (cl->sslctx) {
         if (rfbssl_pending(cl))
           continue;
@@ -530,7 +531,7 @@ int PeekExactTimeout(rfbClientPtr cl, char *buf, int len, int timeout)
          not removed any data from the queue.  We need to loop back in order to
          give the client an opportunity to send more data, but we can't do that
          forever. */
-      if (errno == EWOULDBLOCK || errno == EAGAIN) {
+      if (ETEST(errno)) {
         now = GetTimeInMillis();
         if (now - start >= (CARD32)timeout) {
           errno = ETIMEDOUT;
@@ -568,7 +569,7 @@ int WriteExact(rfbClientPtr cl, char *buf, int len)
 
   while (len > 0) {
     do {
-#if USETLS
+#ifdef USETLS
       if (cl->sslctx)
         n = rfbssl_write(cl, buf, len);
       else
@@ -589,7 +590,7 @@ int WriteExact(rfbClientPtr cl, char *buf, int len)
       exit(1);
 
     } else {
-      if (errno != EWOULDBLOCK && errno != EAGAIN && errno != 0)
+      if (!ETEST(errno) && errno != 0)
         return n;
 
       /* Retry every 5 seconds until we exceed rfbMaxClientWait.  We

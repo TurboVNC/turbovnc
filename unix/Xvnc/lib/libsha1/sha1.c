@@ -49,6 +49,10 @@ extern "C"
 
 #define bswap_32(x) ((rotr32((x), 24) & 0x00ff00ff) | (rotr32((x), 8) & 0xff00ff00))
 
+#include <X11/Xarch.h>
+#define PLATFORM_BYTE_ORDER X_BYTE_ORDER
+#define IS_LITTLE_ENDIAN X_LITTLE_ENDIAN
+
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
 #define bsw_32(p,n) \
     { int _i = (n); while(_i--) ((uint32_t*)p)[_i] = bswap_32(((uint32_t*)p)[_i]); }

@@ -43,6 +43,9 @@ CVE-2026-93524) from the xorg-server 21.1.x code base.
 9. The TurboVNC Server's in-tree version of zlib-ng has been upgraded to
 v2.3.3, which includes multiple bug fixes and performance enhancements.
 
+10. The TurboVNC Server's built-in WebSocket proxy now works on big-endian
+systems.
+
 
 3.3.1
 =====
