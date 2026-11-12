@@ -180,6 +180,9 @@ misdetect the pointer device and thus ignore CSS rules gated by a
 specify the full path of a connection info file passed to
 `/opt/TurboVNC/bin/vncviewer` on the command line.
 
+38. The TurboVNC Server's built-in WebSocket proxy now works on big-endian
+systems.
+
 
 3.0.3
 =====

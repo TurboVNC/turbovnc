@@ -657,7 +657,7 @@ void rfbProcessClientMessage(rfbClientPtr cl)
     case RFB_AUTH_TYPE:         /* protocol versions 3.7t, 3.8t */
       rfbProcessClientAuthType(cl);
       break;
-#if USETLS
+#ifdef USETLS
     case RFB_TLS_HANDSHAKE:
       rfbAuthTLSHandshake(cl);
       break;

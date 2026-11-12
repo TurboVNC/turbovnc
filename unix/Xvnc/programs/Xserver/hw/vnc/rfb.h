@@ -2,7 +2,7 @@
  * rfb.h - header file for RFB DDX implementation.
  */
 
-/* Copyright (C) 2010-2022, 2024 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2010-2022, 2024, 2026 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2011, 2015 Pierre Ossman for Cendio AB.  All Rights Reserved.
  * Copyright (C) 2011 Joel Martin
  * Copyright (C) 2011 Gernot Tenchio
@@ -39,6 +39,7 @@
 #include "scrnintstr.h"
 #include "colormapst.h"
 #include "gcstruct.h"
+#include <errno.h>
 #include "osdep.h"
 #include "list.h"
 #include <rfbproto.h>
@@ -255,7 +256,7 @@ typedef struct {
  * Per-client structure.
  */
 
-#if USETLS
+#ifdef USETLS
 typedef struct _rfbSslCtx rfbSslCtx;
 #endif
 typedef struct _wsCtx wsCtx;
@@ -277,7 +278,7 @@ typedef struct rfbClientRec {
     RFB_TUNNELING_TYPE,         /* establishing tunneling (RFB v.3.7t) */
     RFB_AUTH_TYPE,              /* negotiating authentication (RFB v.3.7t) */
     RFB_AUTHENTICATION,         /* authenticating (VNC authentication) */
-#if USETLS
+#ifdef USETLS
     RFB_TLS_HANDSHAKE,          /* waiting for TLS handshake to complete */
 #endif
     RFB_INITIALISATION,         /* sending initialisation messages */
@@ -470,7 +471,7 @@ typedef struct rfbClientRec {
   Bool pendingDesktopResize, pendingExtDesktopResize;
   int reason, result;
 
-#if USETLS
+#ifdef USETLS
   rfbSslCtx *sslctx;
 #endif
   wsCtx     *wsctx;
@@ -644,7 +645,7 @@ extern void rfbAuthRevokeUser(const char *name);
 #endif
 
 extern char *rfbAuthPasswdFile;
-#if USETLS
+#ifdef USETLS
 extern char *rfbAuthX509Cert;
 extern char *rfbAuthX509Key;
 extern char *rfbAuthCipherSuites;
@@ -655,7 +656,7 @@ extern void rfbProcessClientSecurityType(rfbClientPtr cl);
 extern void rfbProcessClientTunnelingType(rfbClientPtr cl);
 extern void rfbProcessClientAuthType(rfbClientPtr cl);
 extern void rfbVncAuthProcessResponse(rfbClientPtr cl);
-#if USETLS
+#ifdef USETLS
 extern void rfbAuthTLSHandshake(rfbClientPtr cl);
 #endif
 
@@ -925,7 +926,7 @@ extern void rfbSendBell(void);
 extern void rfbSendServerCutText(char *str, int len);
 
 
-#if USETLS
+#ifdef USETLS
 
 /* rfbssl_*.c */
 

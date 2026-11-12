@@ -676,7 +676,7 @@ int ddxProcessArgument(int argc, char *argv[], int i)
     return 2;
   }
 
-#if USETLS
+#ifdef USETLS
   if (strcasecmp(argv[i], "-x509cert") == 0) {
     REQUIRE_ARG();
     rfbAuthX509Cert = argv[i + 1];
@@ -1827,7 +1827,7 @@ void ddxUseMsg(void)
   ErrorF("-rfbauth passwd-file   specify password file for VNC Password authentication\n");
   ErrorF("-securitytypes types   list of security types that the server should support\n");
   rfbAuthListAvailableSecurityTypes();
-#if USETLS
+#ifdef USETLS
   ErrorF("-x509cert file         specify filename of X.509 signed certificate\n");
   ErrorF("-x509key file          specify filename of X.509 private key\n");
 #endif
