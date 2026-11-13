@@ -4,7 +4,7 @@
  *
  */
 
-/* Copyright (C) 2014-2016, 2019, 2021-2022, 2024-2025 D. R. Commander.
+/* Copyright (C) 2014-2016, 2019, 2021-2022, 2024-2026 D. R. Commander.
  *                                                     All Rights Reserved.
  * Copyright (C) 2013, 2017-2018 Pierre Ossman for Cendio AB.
  *                               All Rights Reserved.
@@ -251,7 +251,8 @@ void KeyEvent(CARD32 keysym, Bool down)
      * This can happen quite often as we ignore some
      * key presses.
      */
-    LogMessage(X_DEBUG, "Unexpected release of keysym 0x%x\n", keysym);
+    LogMessage(X_DEBUG, "Unexpected release of keysym 0x%x\n",
+               (unsigned int)keysym);
 
     return;
   }
@@ -356,7 +357,7 @@ void KeyEvent(CARD32 keysym, Bool down)
     unsigned new_state2;
 
     LogMessage(X_DEBUG, "Finding alternative to keysym 0x%x to avoid fake shift for numpad\n",
-               keysym);
+               (unsigned int)keysym);
 
     for (i = 0; i < sizeof(altKeysym) / sizeof(altKeysym[0]); i++) {
       KeySym altsym;
