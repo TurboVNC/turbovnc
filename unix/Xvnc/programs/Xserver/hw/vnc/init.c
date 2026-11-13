@@ -147,7 +147,9 @@ static int rfbMouseProc(DeviceIntPtr pDevice, int onoff);
 static int rfbExtInputProc(DeviceIntPtr pDevice, int onoff);
 static Bool CheckDisplayNumber(int n);
 
-static Bool rfbAlwaysTrue(void);
+static Bool rfbSaveScreen(ScreenPtr pScreen, int on);
+static Bool rfbDisplayCursor(DeviceIntPtr pDev, ScreenPtr pScreen,
+                             CursorPtr pCursor);
 char *rfbAllocateFramebufferMemory(rfbFBInfoPtr prfb);
 static Bool rfbCursorOffScreen(ScreenPtr *ppScreen, int *x, int *y);
 static void rfbCrossScreen(ScreenPtr pScreen, Bool entering);
@@ -1067,12 +1069,12 @@ static Bool rfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
   pScreen->UninstallColormap = rfbUninstallColormap;
   pScreen->ListInstalledColormaps = rfbListInstalledColormaps;
   pScreen->StoreColors = rfbStoreColors;
-  pScreen->SaveScreen = (SaveScreenProcPtr)rfbAlwaysTrue;
+  pScreen->SaveScreen = (SaveScreenProcPtr)rfbSaveScreen;
 
   rfbDCInitialize(pScreen, &rfbPointerCursorFuncs);
 
   if (noCursor) {
-    pScreen->DisplayCursor = (DisplayCursorProcPtr)rfbAlwaysTrue;
+    pScreen->DisplayCursor = (DisplayCursorProcPtr)rfbDisplayCursor;
     prfb->cursorIsDrawn = TRUE;
   }
 
@@ -1660,7 +1662,14 @@ int rfbBitsPerPixel(int depth)
 }
 
 
-static Bool rfbAlwaysTrue(void)
+static Bool rfbSaveScreen(ScreenPtr pScreen, int on)
+{
+  return TRUE;
+}
+
+
+static Bool rfbDisplayCursor(DeviceIntPtr pDev, ScreenPtr pScreen,
+                             CursorPtr pCursor)
 {
   return TRUE;
 }
