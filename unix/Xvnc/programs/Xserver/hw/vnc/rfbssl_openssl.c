@@ -2,7 +2,7 @@
  * rfbssl_openssl.c - Secure socket funtions (openssl version)
  */
 
-/* Copyright (C) 2015, 2017-2020, 2022, 2024 D. R. Commander
+/* Copyright (C) 2015, 2017-2020, 2022, 2024, 2026 D. R. Commander
  * Copyright (C) 2011 Gernot Tenchio
  *
  * This is free software; you can redistribute it and/or modify
@@ -31,7 +31,7 @@
 #include <dlfcn.h>
 #endif
 
-static void rfbErr(const char *format, ...);
+static void rfbErr(Bool log, const char *format, ...);
 
 CARD32 rfbTLSKeyLength = 2048;
 
@@ -191,9 +191,9 @@ static const char *suffix[SUFFIXES] = { "3", "1.1", "111", "1.0.2", "1.0.1",
     if ((lib.sym = (sym##_type)dlsym(lib##Handle, #sym)) == NULL) {  \
       char *err = dlerror();  \
       if (err)  \
-        rfbErr("Could not load symbol: %s\n", err);  \
+        rfbErr(TRUE, "Could not load symbol: %s\n", err);  \
       else  \
-        rfbErr("Could not load symbol "#sym" from %s\n", libName);  \
+        rfbErr(TRUE, "Could not load symbol "#sym" from %s\n", libName);  \
       return -1;  \
     }  \
 }
@@ -217,9 +217,9 @@ static int loadFunctions(void)
     if ((sslHandle = dlopen(libName, RTLD_NOW)) == NULL) {
       char *err = dlerror();
       if (err)
-        rfbErr("Could not load libssl: %s\n", err);
+        rfbErr(TRUE, "Could not load libssl: %s\n", err);
       else
-        rfbErr("Could not load libssl\n");
+        rfbErr(TRUE, "Could not load libssl\n");
       return -1;
     }
 #else
@@ -230,7 +230,7 @@ static int loadFunctions(void)
         break;
     }
     if (i >= SUFFIXES) {
-      rfbErr("Could not load libssl\n");
+      rfbErr(TRUE, "Could not load libssl\n");
       return -1;
     }
 #endif
@@ -278,9 +278,9 @@ static int loadFunctions(void)
     if ((cryptoHandle = dlopen(libName, RTLD_NOW)) == NULL) {
       char *err = dlerror();
       if (err)
-        rfbErr("Could not load libcrypto: %s\n", err);
+        rfbErr(TRUE, "Could not load libcrypto: %s\n", err);
       else
-        rfbErr("Could not load libcrypto\n");
+        rfbErr(TRUE, "Could not load libcrypto\n");
       return -1;
     }
 #else
@@ -291,7 +291,7 @@ static int loadFunctions(void)
         break;
     }
     if (i >= SUFFIXES) {
-      rfbErr("Could not load libcrypto\n");
+      rfbErr(TRUE, "Could not load libcrypto\n");
       return -1;
     }
 #endif
@@ -321,7 +321,7 @@ struct rfbssl_ctx {
 };
 
 
-static void rfbErr(const char *format, ...)
+static void rfbErr(Bool log, const char *format, ...)
 {
   va_list args;
 
@@ -329,17 +329,18 @@ static void rfbErr(const char *format, ...)
   snprintf(errStr, BUFSIZE, "Server TLS ERROR: ");
   vsnprintf(&errStr[strlen(errStr)], BUFSIZE - strlen(errStr), format, args);
   va_end(args);
-  rfbLog("%s", &errStr[18]);
+  if (log)
+    rfbLog("%s\n", &errStr[18]);
 }
 
 
-static void rfbssl_error(const char *function)
+static void rfbssl_error(Bool log, const char *function)
 {
   char buf[BUFSIZE];
   unsigned long e = crypto.ERR_get_error();
 
   while (e) {
-    rfbErr("%s failed: %s (%d)\n", function,
+    rfbErr(log, "%s failed: %s (%d)", function,
            crypto.ERR_error_string(e, buf), e);
     e = crypto.ERR_get_error();
   }
@@ -377,32 +378,32 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
 
   ctx = rfbAlloc0(sizeof(struct rfbssl_ctx));
   if ((ctx->ssl_ctx = ssl.SSL_CTX_new(ssl.SSLv23_server_method())) == NULL) {
-    rfbssl_error("SSL_CTX_new()");
+    rfbssl_error(TRUE, "SSL_CTX_new()");
     goto bailout;
   }
   ssl.SSL_CTX_ctrl(ctx->ssl_ctx, SSL_CTRL_OPTIONS, flags, NULL);
   if (anon) {
     if ((dsa = crypto.DSA_new()) == NULL) {
-      rfbssl_error("DSA_new()");
+      rfbssl_error(TRUE, "DSA_new()");
       goto bailout;
     }
     if (!crypto.DSA_generate_parameters_ex(dsa, rfbTLSKeyLength, NULL, 0, NULL,
                                            NULL, NULL)) {
-      rfbssl_error("DSA_generate_paramters_ex()");
+      rfbssl_error(TRUE, "DSA_generate_paramters_ex()");
       goto bailout;
     }
     if (!(dh = crypto.DSA_dup_DH(dsa))) {
-      rfbssl_error("DSA_dup_DH()");
+      rfbssl_error(TRUE, "DSA_dup_DH()");
       goto bailout;
     }
     crypto.DSA_free(dsa);  dsa = NULL;
     if (!crypto.DH_generate_key(dh)) {
-      rfbssl_error("DH_generate_key()");
+      rfbssl_error(TRUE, "DH_generate_key()");
       goto bailout;
     }
     RFBLOGID("Anonymous TLS key length: %d bits\n", crypto.DH_size(dh) * 8);
     if (!ssl.SSL_CTX_ctrl(ctx->ssl_ctx, SSL_CTRL_SET_TMP_DH, 0, (char *)dh)) {
-      rfbssl_error("SSL_CTX_set_tmp_dh()");
+      rfbssl_error(TRUE, "SSL_CTX_set_tmp_dh()");
       goto bailout;
     }
     crypto.DH_free(dh);
@@ -410,38 +411,39 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
     if (!ssl.SSL_CTX_set_cipher_list(ctx->ssl_ctx, rfbAuthCipherSuites ?
                                                    rfbAuthCipherSuites :
                                                    "aNULL")) {
-      rfbssl_error("SSL_CTX_set_cipher_list()");
+      rfbssl_error(TRUE, "SSL_CTX_set_cipher_list()");
       goto bailout;
     }
     if (ssl.SSL_CTX_set_security_level)
       ssl.SSL_CTX_set_security_level(ctx->ssl_ctx, 0);
   } else {
     if (!rfbAuthX509Cert || !rfbAuthX509Cert[0]) {
-      rfbErr("No X.509 certificate specified\n");
+      rfbErr(TRUE, "No X.509 certificate specified\n");
       goto bailout;
     }
     if (ssl.SSL_CTX_use_certificate_file(ctx->ssl_ctx, rfbAuthX509Cert,
                                          SSL_FILETYPE_PEM) <= 0) {
-      rfbErr("Unable to load X.509 certificate file %s\n", rfbAuthX509Cert);
+      rfbErr(TRUE, "Unable to load X.509 certificate file %s\n",
+             rfbAuthX509Cert);
       goto bailout;
     }
     RFBLOGID("Using X.509 certificate file %s\n", rfbAuthX509Cert);
     if (ssl.SSL_CTX_use_PrivateKey_file(ctx->ssl_ctx, keyfile,
                                         SSL_FILETYPE_PEM) <= 0) {
-      rfbErr("Unable to load X.509 private key file %s\n", keyfile);
+      rfbErr(TRUE, "Unable to load X.509 private key file %s\n", keyfile);
       goto bailout;
     }
     RFBLOGID("Using X.509 private key file %s\n", keyfile);
     if (rfbAuthCipherSuites) {
       if (!ssl.SSL_CTX_set_cipher_list(ctx->ssl_ctx, rfbAuthCipherSuites)) {
-        rfbssl_error("SSL_CTX_set_cipher_list()");
+        rfbssl_error(TRUE, "SSL_CTX_set_cipher_list()");
         goto bailout;
       }
     }
   }
   ssl.SSL_CTX_ctrl(ctx->ssl_ctx, SSL_CTRL_SET_ECDH_AUTO, 1, NULL);
   if ((ctx->ssl = ssl.SSL_new(ctx->ssl_ctx)) == NULL) {
-    rfbssl_error("SSL_new()");
+    rfbssl_error(TRUE, "SSL_new()");
     goto bailout;
   }
   snprintf(buf, BUFSIZE, "Available cipher suites: ");
@@ -452,9 +454,9 @@ rfbSslCtx *rfbssl_init(rfbClientPtr cl, Bool anon)
     if (list) snprintf(&buf[strlen(buf)], BUFSIZE - strlen(buf), ":");
   }
   snprintf(&buf[strlen(buf)], BUFSIZE - strlen(buf), "\n");
-  RFBLOGID("%s", buf);
+  RFBLOGID("%s\n", buf);
   if (!(ssl.SSL_set_fd(ctx->ssl, cl->sock))) {
-    rfbssl_error("SSL_set_fd()");
+    rfbssl_error(TRUE, "SSL_set_fd()");
     goto bailout;
   }
 
@@ -489,9 +491,9 @@ int rfbssl_accept(rfbClientPtr cl)
     if (err == SSL_ERROR_WANT_READ)
       return 1;
     else if (err == SSL_ERROR_SYSCALL)
-      rfbErr("SSL_accept() failed: errno=%d\n", errno);
+      rfbErr(TRUE, "SSL_accept() failed: errno=%d\n", errno);
     else
-      rfbssl_error("SSL_accept()");
+      rfbssl_error(TRUE, "SSL_accept()");
     return -1;
   }
   RFBLOGID("Negotiated cipher suite: %s\n",
@@ -512,8 +514,10 @@ int rfbssl_write(rfbClientPtr cl, const char *buf, int bufsize)
 #endif
 
   while ((ret = ssl.SSL_write(ctx->ssl, buf, bufsize)) <= 0) {
-    if (ssl.SSL_get_error(ctx->ssl, ret) != SSL_ERROR_WANT_WRITE)
+    if (ssl.SSL_get_error(ctx->ssl, ret) != SSL_ERROR_WANT_WRITE) {
+      rfbssl_error(FALSE, "SSL_write()");
       break;
+    }
   }
 
   return ret;
@@ -531,8 +535,10 @@ int rfbssl_peek(rfbClientPtr cl, char *buf, int bufsize)
 #endif
 
   while ((ret = ssl.SSL_peek(ctx->ssl, buf, bufsize)) <= 0) {
-    if (ssl.SSL_get_error(ctx->ssl, ret) != SSL_ERROR_WANT_READ)
+    if (ssl.SSL_get_error(ctx->ssl, ret) != SSL_ERROR_WANT_READ) {
+      rfbssl_error(FALSE, "SSL_peek()");
       break;
+    }
   }
 
   return ret;
@@ -550,8 +556,10 @@ int rfbssl_read(rfbClientPtr cl, char *buf, int bufsize)
 #endif
 
   while ((ret = ssl.SSL_read(ctx->ssl, buf, bufsize)) <= 0) {
-    if (ssl.SSL_get_error(ctx->ssl, ret) != SSL_ERROR_WANT_READ)
+    if (ssl.SSL_get_error(ctx->ssl, ret) != SSL_ERROR_WANT_READ) {
+      rfbssl_error(FALSE, "SSL_read()");
       break;
+    }
   }
 
   return ret;

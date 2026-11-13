@@ -6,7 +6,7 @@
  *   http://www.whatwg.org/specs/web-socket-protocol/
  */
 
-/* Copyright (C) 2018-2020, 2024 D. R. Commander
+/* Copyright (C) 2018-2020, 2024, 2026 D. R. Commander
  * Copyright (C) 2010 Joel Martin
  *
  * This is free software; you can redistribute it and/or modify
@@ -135,6 +135,10 @@ Bool webSocketsCheck(rfbClientPtr cl)
       return FALSE;
     }
     ret = PeekExactTimeout(cl, bbuf, 4, WEBSOCKETS_CLIENT_CONNECT_WAIT_MS);
+    if (ret < 0) {
+      RFBLOGID("webSocketsHandshake: %s\n", rfbssl_geterr());
+      return FALSE;
+    }
     scheme = "wss";
 #endif
   } else {
