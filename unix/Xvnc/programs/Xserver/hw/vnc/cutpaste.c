@@ -2,7 +2,7 @@
  * cutpaste.c - routines to deal with cut & paste buffers / selection.
  */
 
-/* Copyright (C) 2014, 2017-2019, 2022, 2024-2025 D. R. Commander.
+/* Copyright (C) 2014, 2017-2019, 2022, 2024-2026 D. R. Commander.
  *                                                All Rights Reserved.
  * Copyright 2016-2017, 2019-2021 Pierre Ossman for Cendio AB
  * Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
@@ -551,7 +551,7 @@ static void HandleClipboardProvide(rfbClientPtr cl, CARD32 flags,
 {
   if (!(flags & rfbExtClipUTF8)) {
     LogMessage(X_DEBUG, "Ignoring Extended Clipboard provide message with unsupported formats 0x%x\n",
-               flags);
+               (unsigned int)flags);
     return;
   }
 
@@ -564,7 +564,7 @@ static void HandleClipboardProvide(rfbClientPtr cl, CARD32 flags,
 
   LogMessage(X_DEBUG, "Received client clipboard: '%.*s%s' (%u bytes)\n",
              lengths[0] <= 20 ? (int)lengths[0] : 20, cl->clientClipboard,
-             lengths[0] <= 20 ? "" : "...", lengths[0]);
+             lengths[0] <= 20 ? "" : "...", (unsigned int)lengths[0]);
 
   /* FIXME: Should probably verify that this data was actually requested */
   HandleClipboardData(cl, cl->clientClipboard);
@@ -587,7 +587,7 @@ static void HandleClipboardRequest(rfbClientPtr cl, CARD32 flags)
   if (flags) {
     if (!(flags & rfbExtClipUTF8)) {
       LogMessage(X_DEBUG, "Ignoring clipboard request for unsupported formats 0x%x\n",
-                 flags);
+                 (unsigned int)flags);
       return;
     }
     if (!cl->hasLocalClipboard) {
@@ -877,7 +877,7 @@ static void SendClipboardData(rfbClientPtr cl, const char *data)
       cl->unsolicitedClipboardAttempt = FALSE;
       if (lengths[0] > cl->clipSizes[rfbExtClipUTF8]) {
         LogMessage(X_DEBUG, "%u-byte clipboard was too large for unsolicited transfer\n",
-                   lengths[0]);
+                   (unsigned int)lengths[0]);
         if (cl->clipFlags & rfbExtClipNotify)
           SendClipboardMessage(cl, rfbExtClipNotify, rfbExtClipUTF8);
         free(filtered);
