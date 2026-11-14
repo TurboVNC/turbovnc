@@ -147,7 +147,7 @@ typedef struct _FontNames {
 /* External view of font paths */
 typedef struct _FontPathElement {
     int         name_length;
-#if FONT_PATH_ELEMENT_NAME_CONST
+#ifdef FONT_PATH_ELEMENT_NAME_CONST
     const
 #endif
     char        *name;
