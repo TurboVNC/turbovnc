@@ -2,7 +2,7 @@
 
 PROJECT=mesa-20.3.5
 FILE=$PROJECT.tar.xz
-URL=https://mesa.freedesktop.org/archive
+URL=https://archive.mesa3d.org/older-versions/20.x
 SRCDIR=`dirname $0`
 
 . $SRCDIR/../../genpatch >$SRCDIR/turbovnc.patch
