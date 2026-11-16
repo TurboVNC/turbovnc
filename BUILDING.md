@@ -30,6 +30,12 @@ Build Requirements
       Use `ccmake` or `cmake-gui`, as described below, to view documentation
     for those variables.
 
+- OpenJDK 16 or later [if building the TurboVNC Viewer]
+
+  * Most modern Linux and *BSD distributions include OpenJDK.  For other
+    systems, pre-built OpenJDK binaries can be obtained from
+    [Adoptium](https://adoptium.net/temurin/releases).
+
 
 ### Linux and other Un*x O/S's (except Mac)
 
@@ -38,14 +44,6 @@ Build Requirements
 - X11 development kit
 
 - PAM development kit [if building the TurboVNC Server]
-
-- JDK/OpenJDK 16 or later [if building the TurboVNC Viewer]
-  * For systems that do not provide a JDK, download the
-    [Oracle Java Development Kit](http://www.oracle.com/technetwork/java/javase/downloads)
-    or [OpenJDK](https://jdk.java.net)
-  * [OpenJDK](https://jdk.java.net) 16 or later must be used if building
-    an installer with a custom JRE (if the `TVNC_INCLUDEJRE` CMake variable is
-    set to `1`)
 
 
 ### Windows
@@ -74,26 +72,10 @@ Build Requirements
   Start Menu link that can be used to launch a command prompt with the
   appropriate compiler paths automatically set.
 
-- JDK/OpenJDK 16 or later
-  * Download the
-    [Oracle Java Development Kit](http://www.oracle.com/technetwork/java/javase/downloads)
-    or [OpenJDK](https://jdk.java.net)
-  * [OpenJDK](https://jdk.java.net) 16 or later must be used if building
-    an installer with a custom JRE (if the `TVNC_INCLUDEJRE` CMake variable is
-    set to `1`)
-
 
 ### Mac
 
 - Xcode 4.1 or later (OS X/macOS 10.7.x or later SDK required)
-
-- JDK/OpenJDK 16 or later
-  * Download the
-    [Oracle Java Development Kit](http://www.oracle.com/technetwork/java/javase/downloads)
-    or [OpenJDK](https://jdk.java.net)
-  * [OpenJDK](https://jdk.java.net) 16 or later must be used if building
-    a Mac package/disk image with a custom JRE (if the `TVNC_INCLUDEJRE` CMake
-    variable is set to `1`)
 
 
 Out-of-Tree Builds
