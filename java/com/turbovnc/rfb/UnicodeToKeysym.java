@@ -20,7 +20,7 @@
 
 /*
  * Derived from keysym2ucs.c:
- * Author: Markus G. Kuhn <http://www.cl.cam.ac.uk/~mgk25/>,
+ * Author: Markus G. Kuhn <https://www.cl.cam.ac.uk/~mgk25/>,
  *         University of Cambridge, April 2001
  */
 

@@ -8,7 +8,7 @@ Build Requirements
 
 ### All Systems
 
-- [CMake](http://www.cmake.org) v2.8.12 or later
+- [CMake](https://cmake.org) v2.8.12 or later
   * CMake 3.12 or later is required if it is desirable or necessary to use
     Python 3 to run the simple web server for noVNC (part of the TurboVNC
     Server.)
@@ -67,7 +67,7 @@ Build Requirements
 
 - MinGW
 
-  [MSYS2](http://msys2.github.io/) or [tdm-gcc](http://tdm-gcc.tdragon.net/)
+  [MSYS2](https://msys2.org) or [tdm-gcc](https://jmeubank.github.io/tdm-gcc)
   recommended if building on a Windows machine.  Both distributions install a
   Start Menu link that can be used to launch a command prompt with the
   appropriate compiler paths automatically set.
@@ -331,8 +331,8 @@ configuration you built (such as __{build_directory}\Debug__ or
 __{build_directory}\Release__).
 
 Building a Windows installer requires
-[Inno Setup](http://www.jrsoftware.org/isinfo.php).
-__iscc.exe__ should be in your `PATH`.
+[Inno Setup](https://jrsoftware.org/inno-setup).  __iscc.exe__ should be in
+your `PATH`.
 
 A custom JRE based on OpenJDK can be included in the Windows installer package
 by setting the `TVNC_INCLUDEJRE` CMake variable to `1`.  If this variable is

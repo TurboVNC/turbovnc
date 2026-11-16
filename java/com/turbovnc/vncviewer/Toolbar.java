@@ -90,7 +90,7 @@ public final class Toolbar extends JToolBar implements ActionListener {
           (i == 5 && (!cc.params.viewOnly.get() ||
                       !cc.params.noNewConn.get())) ||
           (i == 9 && !cc.params.noNewConn.get())) {
-        // ref http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4346610
+        // ref https://bugs.openjdk.org/browse/JDK-4346610
         add(new JSeparator(JSeparator.VERTICAL) {
           public Dimension getMaximumSize() {
             return new Dimension(getPreferredSize().width,

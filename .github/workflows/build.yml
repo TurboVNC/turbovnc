@@ -31,7 +31,7 @@ jobs:
           popd
           mkdir $HOME/rpmkeys
           wget --no-check-certificate "$LJT_GPG_KEY" -O $HOME/rpmkeys/LJT-GPG-KEY
-          wget --no-check-certificate http://www.virtualgl.org/key/VGLPR-GPG-KEY -O $HOME/rpmkeys/VGLPR-GPG-KEY
+          wget --no-check-certificate https://www.virtualgl.org/key/VGLPR-GPG-KEY -O $HOME/rpmkeys/VGLPR-GPG-KEY
       - name: Configure GPG signing
         if: ${{github.event_name != 'pull_request'}}
         run: |

@@ -1,6 +1,6 @@
 // JRSwizzle.m semver:1.1.0
-//   Copyright (c) 2007-2016 Jonathan 'Wolf' Rentzsch: http://rentzsch.com
-//   Some rights reserved: http://opensource.org/licenses/mit
+//   Copyright (c) 2007-2016 Jonathan 'Wolf' Rentzsch: https://rentzsch.com
+//   Some rights reserved: https://opensource.org/licenses/mit
 //   https://github.com/rentzsch/jrswizzle
 
 #import "JRSwizzle.h"

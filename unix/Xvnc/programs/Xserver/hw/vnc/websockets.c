@@ -3,7 +3,7 @@
  *
  * This code should be independent of any changes in the RFB protocol. It is
  * an additional handshake and framing of normal sockets:
- *   http://www.whatwg.org/specs/web-socket-protocol/
+ *   https://www.rfc-editor.org/info/rfc6455
  */
 
 /* Copyright (C) 2018-2020, 2024, 2026 D. R. Commander
