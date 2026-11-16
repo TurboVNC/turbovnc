@@ -26,6 +26,15 @@ Build Requirements
     instance, `-DTJPEG_LIBRARY="-L/opt/libjpeg-turbo/lib64 -lturbojpeg"` or
     `-DTJPEG_LIBRARY="-libpath:c:/libjpeg-turbo64/lib turbojpeg.lib"`.)
 
+- JDK 8 or OpenJDK 1.7 or later [if building the TurboVNC Viewer]
+  * Most modern Un*x distributions include JDK or OpenJDK.  For other systems,
+    pre-built JDK binaries can be obtained from
+    [Oracle](https://oracle.com/java/technologies/downloads) or
+    [Adoptium](https://adoptium.net/temurin/releases).
+  * OpenJDK 11 or later must be used if including a custom JRE with the
+    TurboVNC Viewer (if the `TVNC_INCLUDEJRE` CMake variable is set to `1`.)
+  * If using JDK 11 or later, CMake 3.11.x or later must also be used.
+
 
 ### Linux and other Un*x O/S's (except Mac)
 
@@ -34,15 +43,6 @@ Build Requirements
 - X11 development kit
 
 - PAM development kit [if building the TurboVNC Server]
-
-- JDK 8 or OpenJDK 1.7 or later [if building the TurboVNC Viewer]
-  * For systems that do not provide a JDK, download the
-    [Oracle Java Development Kit](http://www.oracle.com/technetwork/java/javase/downloads)
-    or [OpenJDK](https://jdk.java.net)
-  * [OpenJDK](https://jdk.java.net) 11 or later must be used if building
-    an installer with a custom JRE (if the `TVNC_INCLUDEJRE` CMake variable is
-    set to `1`)
-  * If using JDK 11 or later, CMake 3.11.x or later must also be used
 
 
 ### Windows
@@ -72,28 +72,10 @@ Build Requirements
   Start Menu link that can be used to launch a command prompt with the
   appropriate compiler paths automatically set.
 
-- JDK 8 or OpenJDK 1.8 or later
-  * Download the
-    [Oracle Java Development Kit](http://www.oracle.com/technetwork/java/javase/downloads)
-    or [OpenJDK](https://jdk.java.net)
-  * [OpenJDK](https://jdk.java.net) 11 or later must be used if building
-    an installer with a custom JRE (if the `TVNC_INCLUDEJRE` CMake variable is
-    set to `1`)
-  * If using JDK 11 or later, CMake 3.11.x or later must also be used
-
 
 ### Mac
 
 - Xcode 4.1 or later (OS X/macOS 10.7.x or later SDK required)
-
-- JDK 8 or OpenJDK 8 or later
-  * Download the
-    [Oracle Java Development Kit](http://www.oracle.com/technetwork/java/javase/downloads)
-    or [OpenJDK](https://jdk.java.net)
-  * [OpenJDK](https://jdk.java.net) 11 or later must be used if building
-    a Mac package/disk image with a custom JRE (if the `TVNC_INCLUDEJRE` CMake
-    variable is set to `1`)
-  * If using JDK 11 or later, CMake 3.11.x or later must also be used
 
 
 Out-of-Tree Builds
