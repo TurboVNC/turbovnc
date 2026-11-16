@@ -26,7 +26,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This file was part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * from http://www.drjava.org/ or https://sourceforge.net/projects/drjava/
  */
 
 package com.turbovnc.vncviewer;

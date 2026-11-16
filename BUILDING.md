@@ -8,7 +8,7 @@ Build Requirements
 
 ### All Systems
 
-- [CMake](http://www.cmake.org) v3.16 or later
+- [CMake](https://cmake.org) v3.16 or later
 
 - The TurboJPEG SDK from
   [libjpeg-turbo](https://github.com/libjpeg-turbo/libjpeg-turbo/releases) v1.2
@@ -67,7 +67,7 @@ Build Requirements
 
 - MinGW
 
-  [MSYS2](http://msys2.github.io/) or [tdm-gcc](http://tdm-gcc.tdragon.net/)
+  [MSYS2](https://msys2.org) or [tdm-gcc](https://jmeubank.github.io/tdm-gcc)
   recommended if building on a Windows machine.  Both distributions install a
   Start Menu link that can be used to launch a command prompt with the
   appropriate compiler paths automatically set.
@@ -307,8 +307,8 @@ configuration you built (such as __{build_directory}\Debug__ or
 __{build_directory}\Release__).
 
 Building a Windows installer requires
-[Inno Setup](http://www.jrsoftware.org/isinfo.php) v6.3 or later.
-__iscc.exe__ should be in your `PATH`.
+[Inno Setup](https://jrsoftware.org/inno-setup) v6.3 or later.  __iscc.exe__
+should be in your `PATH`.
 
 A custom JRE based on OpenJDK can be included in the Windows installer package
 by setting the `TVNC_INCLUDEJRE` CMake variable to `1`.  If this variable is
