@@ -10,8 +10,8 @@ set(PKGNAME ${DEFAULT_PKGNAME} CACHE STRING
 	"Distribution package name (default: ${DEFAULT_PKGNAME})")
 set(PKGVENDOR "The VirtualGL Project" CACHE STRING
 	"Vendor name to be included in distribution package descriptions (default: The VirtualGL Project)")
-set(PKGURL "http://www.${CMAKE_PROJECT_NAME}.org" CACHE STRING
-	"URL of project web site to be included in distribution package descriptions (default: http://www.${CMAKE_PROJECT_NAME}.org)")
+set(PKGURL "https://${CMAKE_PROJECT_NAME}.org" CACHE STRING
+	"URL of project web site to be included in distribution package descriptions (default: https://${CMAKE_PROJECT_NAME}.org)")
 set(PKGEMAIL "information@${CMAKE_PROJECT_NAME}.org" CACHE STRING
 	"E-mail of project maintainer to be included in distribution package descriptions (default: information@${CMAKE_PROJECT_NAME}.org")
 string(TOLOWER ${PKGNAME} PKGNAME_LC)

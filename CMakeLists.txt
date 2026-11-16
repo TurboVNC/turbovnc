@@ -18,7 +18,7 @@ set(VERSION 3.0.4)
 set(DOCVERSION 3.0.4)
 set(COPYRIGHT_YEAR "1999-2025")
 set(COPYRIGHT "The VirtualGL Project and many others (see README.txt)")
-set(URLTEXT "Visit http://www.TurboVNC.org for more information on TurboVNC")
+set(URLTEXT "Visit https://TurboVNC.org for more information on TurboVNC")
 
 set(USEC 0)
 

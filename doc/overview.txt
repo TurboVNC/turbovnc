@@ -2,7 +2,7 @@
 
 TurboVNC is a derivative of VNC (Virtual Network Computing) that is tuned to
 provide peak performance for 3D and video workloads.  TurboVNC was originally a
-fork of [[http://www.tightvnc.com][TightVNC]] 1.3.x, and on the surface, the
+fork of [[https://tightvnc.com][TightVNC]] 1.3.x, and on the surface, the
 TurboVNC Server still behaves similarly to its parent.  However, the current
 version of TurboVNC contains a much more modern X server code base (based on
 X.org) and a variety of other features and fixes, including a high-performance
@@ -47,7 +47,7 @@ permutations of the TightVNC encoder were benchmarked at the low level against
 a variety of RFB session captures that simulate real-world application
 workloads, both 2D and 3D.  For more information on the research leading to
 TurboVNC's encoder design, see
-[[http://www.TurboVNC.org/pmwiki/uploads/About/tighttoturbo.pdf][this report]].
+[[https://TurboVNC.org/pmwiki/uploads/About/tighttoturbo.pdf][this report]].
 
 In addition to high performance, other notable features of TurboVNC include:
 
