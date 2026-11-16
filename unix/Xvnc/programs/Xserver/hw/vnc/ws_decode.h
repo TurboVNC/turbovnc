@@ -105,7 +105,7 @@ typedef union ws_mask_s {
 /* XXX: The union and the structs do not need to be named.
  *      We are working around a bug present in GCC < 4.6 which prevented
  *      it from recognizing anonymous structs and unions.
- *      See http://gcc.gnu.org/bugzilla/show_bug.cgi?id=4784
+ *      See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=4784
  */
 typedef struct
 #if defined(__GNUC__) || defined(__SUNPRO_C)

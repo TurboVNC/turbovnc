@@ -10,7 +10,7 @@ set(VERSION 3.2.2)
 set(DOCVERSION 3.2.2)
 set(COPYRIGHT_YEAR "1999-2026")
 set(COPYRIGHT "The VirtualGL Project and many others (see README.md)")
-set(URLTEXT "Visit http://www.TurboVNC.org for more information on TurboVNC")
+set(URLTEXT "Visit https://TurboVNC.org for more information on TurboVNC")
 
 macro(boolean_number var)
 	if(${var})

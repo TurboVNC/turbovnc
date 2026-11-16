@@ -4,7 +4,7 @@ Note that within this directory the name RFB is still used instead of VNC.
 NOTE:
 
 This version of TurboVNC contains code from the xf4vnc project
-(http://xf4vnc.sourceforge.net) by Alan Hourihane <alanh@fairlite.demon.co.uk>.
+(https://xf4vnc.sourceforge.net) by Alan Hourihane <alanh@fairlite.demon.co.uk>.
 Mostly, we merged only the code that was necessary to implement the features
 we needed, such as the X Rendering and X Input Extensions, FreeType support,
 etc.  However, this involved some systemic changes, such as replacing cfb and

@@ -23,7 +23,7 @@
  * encoded in UTF-8, so for viewing and editing best use an editor in
  * UTF-8 mode.
  *
- * Author: Markus G. Kuhn <http://www.cl.cam.ac.uk/~mgk25/>,
+ * Author: Markus G. Kuhn <https://www.cl.cam.ac.uk/~mgk25/>,
  *         University of Cambridge, April 2001
  *
  * Special thanks to Richard Verhoeven <river@win.tue.nl> for preparing
