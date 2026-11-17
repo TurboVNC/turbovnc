@@ -4,7 +4,7 @@
  * Routines to implement Tight Encoding
  */
 
-/* Copyright (C) 2010-2012, 2014, 2017, 2022, 2024-2025 D. R. Commander.
+/* Copyright (C) 2010-2012, 2014, 2017, 2022, 2024-2026 D. R. Commander.
  *                                                      All Rights Reserved.
  * Copyright (C) 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
  * Copyright (C) 2004 Landmark Graphics Corporation.  All Rights Reserved.
@@ -101,7 +101,7 @@ static int qualityLevel;
 static int subsampLevel;
 
 static const int subsampLevel2tjsubsamp[TVNC_SAMPOPT] = {
-  TJ_444, TJ_420, TJ_422, TJ_GRAYSCALE
+  TJSAMP_444, TJSAMP_420, TJSAMP_422, TJSAMP_GRAY
 };
 
 
@@ -537,7 +537,7 @@ static Bool SendRectEncodingTight(threadparam *t, int x, int y, int w, int h)
 
       if (CheckSolidTile(cl, dx, dy, dw, dh, &colorValue, FALSE)) {
 
-        if (subsampLevel == TJ_GRAYSCALE && qualityLevel != -1) {
+        if (subsampLevel == TJSAMP_GRAY && qualityLevel != -1) {
           CARD32 r = (colorValue >> 16) & 0xFF;
           CARD32 g = (colorValue >> 8) & 0xFF;
           CARD32 b = (colorValue) & 0xFF;
@@ -817,7 +817,7 @@ static Bool SendSubrect(threadparam *t, int x, int y, int w, int h)
   fbptr =
     (cl->fb + (rfbFB.paddedWidthInBytes * y) + (x * (rfbFB.bitsPerPixel / 8)));
 
-  if (subsampLevel == TJ_GRAYSCALE && qualityLevel != -1 &&
+  if (subsampLevel == TJSAMP_GRAY && qualityLevel != -1 &&
       rfbFB.bitsPerPixel > 8)
     return SendJpegRect(t, x, y, w, h, qualityLevel);
 
@@ -1674,9 +1674,9 @@ static Bool SendJpegRect(threadparam *t, int x, int y, int w, int h,
   unsigned char *srcbuf;
   int ps = rfbServerFormat.bitsPerPixel / 8;
   int subsamp = subsampLevel2tjsubsamp[subsampLevel];
-  unsigned long size = 0;
-  int flags = 0, pitch;
-  unsigned char *tmpbuf = NULL;
+  unsigned long size = 0, worstCaseSize;
+  int pixelFormat, pitch;
+  unsigned char *tmpbuf = NULL, *jpegBuf;
   unsigned long jpegDstDataLen;
   rfbClientPtr cl = t->cl;
 
@@ -1685,7 +1685,9 @@ static Bool SendJpegRect(threadparam *t, int x, int y, int w, int h,
     return SendFullColorRect(t, w, h);
   }
 
-  if (ps < 2) {
+  if (rfbServerFormat.bitsPerPixel != 16 &&
+      rfbServerFormat.bitsPerPixel != 24 &&
+      rfbServerFormat.bitsPerPixel != 32) {
     rfbLog("Error: JPEG requires 16-bit, 24-bit, or 32-bit pixel format.\n");
     return 0;
   }
@@ -1696,37 +1698,53 @@ static Bool SendJpegRect(threadparam *t, int x, int y, int w, int h,
     }
   }
 
-  if (t->tightAfterBufSize < TJBUFSIZE(w, h)) {
+  worstCaseSize = tjBufSize(w, h, subsamp);
+  if (t->tightAfterBufSize < worstCaseSize) {
     if (t->tightAfterBuf == NULL)
-      t->tightAfterBuf = (char *)rfbAlloc(TJBUFSIZE(w, h));
+      t->tightAfterBuf = (char *)rfbAlloc(worstCaseSize);
     else
-      t->tightAfterBuf = (char *)rfbRealloc(t->tightAfterBuf, TJBUFSIZE(w, h));
-    t->tightAfterBufSize = TJBUFSIZE(w, h);
+      t->tightAfterBuf = (char *)rfbRealloc(t->tightAfterBuf, worstCaseSize);
+    t->tightAfterBufSize = worstCaseSize;
   }
 
   if (ps == 2) {
     tmpbuf = ConvertRGB16(cl, x, y, w, h);
     srcbuf = tmpbuf;
     pitch = w * 3;
-    ps = 3;
+    pixelFormat = TJPF_RGB;
   } else if (rfbServerFormat.depth == 30) {
     tmpbuf = ConvertRGB32(cl, x, y, w, h);
     srcbuf = tmpbuf;
     pitch = w * 3;
-    ps = 3;
+    pixelFormat = TJPF_RGB;
   } else {
-    if (rfbServerFormat.bigEndian && ps == 4) flags |= TJ_ALPHAFIRST;
-    if (rfbServerFormat.redShift == 16 && rfbServerFormat.blueShift == 0)
-      flags |= TJ_BGR;
-    if (rfbServerFormat.bigEndian) flags ^= TJ_BGR;
+    if (rfbServerFormat.bigEndian && ps == 4) {
+      if ((rfbServerFormat.redShift == 16 && rfbServerFormat.blueShift == 0) ==
+          rfbServerFormat.bigEndian)
+        pixelFormat = TJPF_XRGB;
+      else
+        pixelFormat = TJPF_XBGR;
+    } else if (ps == 4) {
+      if ((rfbServerFormat.redShift == 16 && rfbServerFormat.blueShift == 0) ==
+          rfbServerFormat.bigEndian)
+        pixelFormat = TJPF_RGBX;
+      else
+        pixelFormat = TJPF_BGRX;
+    } else {
+      if ((rfbServerFormat.redShift == 16 && rfbServerFormat.blueShift == 0) ==
+          rfbServerFormat.bigEndian)
+        pixelFormat = TJPF_RGB;
+      else
+        pixelFormat = TJPF_BGR;
+    }
     srcbuf = (unsigned char *)
              &cl->fb[y * rfbFB.paddedWidthInBytes + x * ps];
     pitch = rfbFB.paddedWidthInBytes;
   }
 
-  if (tjCompress(t->j, srcbuf, w, pitch, h, ps,
-                 (unsigned char *)t->tightAfterBuf, &size, subsamp, quality,
-                 flags) == -1) {
+  jpegBuf = (unsigned char *)t->tightAfterBuf;
+  if (tjCompress2(t->j, srcbuf, w, pitch, h, pixelFormat, &jpegBuf, &size,
+                  subsamp, quality, TJFLAG_NOREALLOC) == -1) {
     RFBLOGID("JPEG Error: %s\n", tjGetErrorStr());
     free(tmpbuf);  tmpbuf = NULL;
     return 0;
