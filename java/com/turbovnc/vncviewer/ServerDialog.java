@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2015, 2018, 2020, 2022, 2024-2025 D. R. Commander.
+/* Copyright (C) 2012-2015, 2018, 2020, 2022, 2024-2026 D. R. Commander.
  *                                                      All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
@@ -44,9 +44,9 @@ class ServerDialog extends Dialog implements ActionListener {
     JLabel serverLabel = new JLabel("VNC server:", JLabel.RIGHT);
     String valueStr = null;
     if ((valueStr = UserPreferences.get("ServerDialog", "history")) != null) {
-      server = new JComboBox(valueStr.split(","));
+      server = new JComboBox<String>(valueStr.split(","));
     } else {
-      server = new JComboBox();
+      server = new JComboBox<String>();
     }
     JLabel sessionLabel =
       new JLabel(Utils.getBooleanProperty("turbovnc.sessmgr", true) ?
@@ -270,7 +270,7 @@ class ServerDialog extends Dialog implements ActionListener {
   Window win;
   CConn cc;
   Params params;
-  JComboBox server;
+  JComboBox<String> server;
   ComboBoxEditor editor;
   JPanel topPanel, buttonPanel;
   JButton aboutButton, optionsButton, okButton, cancelButton, trashButton;

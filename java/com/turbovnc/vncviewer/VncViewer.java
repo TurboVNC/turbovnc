@@ -126,13 +126,14 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
       try {
         if (method.getName().equals("openFiles") && args[0] != null) {
           synchronized (VncViewer.class) {
-            Class ofEventClass = Utils.JAVA_VERSION >= 9 ?
+            Class<?> ofEventClass = Utils.JAVA_VERSION >= 9 ?
                 Class.forName("java.awt.desktop.OpenFilesEvent") :
                 Class.forName("com.apple.eawt.AppEvent$OpenFilesEvent");
             Method getFiles = ofEventClass.getMethod("getFiles",
                                                      (Class[])null);
-            List<File> files = (List<File>)getFiles.invoke(args[0]);
-            String fName = files.iterator().next().getAbsolutePath();
+            List<?> files = (List<?>)getFiles.invoke(args[0]);
+            List<?> next = (List<?>)files.iterator().next();
+            String fName = ((File)next.get(0)).getAbsolutePath();
             if (nViewers == 0)
               fileName = fName;
             else {
@@ -179,7 +180,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
   }
 
   static void enableFileHandler() throws Exception {
-    Class appClass, fileHandlerClass;
+    Class<?> appClass, fileHandlerClass;
     Object obj;
 
     if (Utils.JAVA_VERSION >= 9) {
@@ -196,7 +197,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
 
     InvocationHandler handler = new MyInvocationHandler();
     Object proxy = Proxy.newProxyInstance(fileHandlerClass.getClassLoader(),
-                                          new Class[]{ fileHandlerClass },
+                                          new Class<?>[]{ fileHandlerClass },
                                           handler);
     Method setOpenFileHandler =
       appClass.getMethod("setOpenFileHandler", fileHandlerClass);
@@ -230,7 +231,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
         enableFileHandler();
 
         try {
-          Class appClass;
+          Class<?> appClass;
           Object obj;
 
           if (Utils.JAVA_VERSION >= 9) {
@@ -245,7 +246,7 @@ public final class VncViewer implements Runnable, OptionsDialogCallback {
             obj = getApplication.invoke(appClass);
           }
 
-          Class[] paramTypes = new Class[1];
+          Class<?>[] paramTypes = new Class<?>[1];
           paramTypes[0] = Image.class;
           Method setDockIconImage = Utils.JAVA_VERSION >= 9 ?
             appClass.getMethod("setIconImage", paramTypes) :

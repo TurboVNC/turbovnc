@@ -44,7 +44,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
   private JTabbedPane tabPane;
   private JPanel buttonPane, encodingPanel, connPanel, globalPanel, secPanel;
   private JCheckBox jpeg, interframe, turboVNCServer;
-  private JComboBox menuKey, scalingFactor, encMethodComboBox, span,
+  private JComboBox<String> menuKey, scalingFactor, encMethodComboBox, span,
     desktopSize, grabKeyboard;
   private JSlider jpegQualityLevel, subsamplingLevel, compressionLevel;
   private JCheckBox viewOnly, recvClipboard, sendClipboard, acceptBell,
@@ -95,14 +95,14 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     JPanel dummyPanel = new JPanel(new GridBagLayout());
 
     encMethodLabel = new JLabel("Encoding method:");
-    Object[] encMethod = {
+    String[] encMethod = {
       "Tight + Perceptually Lossless JPEG (LAN)",
       "Tight + Medium-Quality JPEG",
       "Tight + Low-Quality JPEG (WAN)",
       "Lossless Tight (Gigabit)",
       "Lossless Tight + Zlib (WAN)"
     };
-    encMethodComboBox = new JComboBox(encMethod);
+    encMethodComboBox = new JComboBox<String>(encMethod);
     encMethodComboBox.addActionListener(this);
 
     Dialog.addGBComponent(encMethodLabel, dummyPanel,
@@ -259,7 +259,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     displayPanel.setBorder(BorderFactory.createTitledBorder("Display"));
 
     JLabel scalingFactorLabel = new JLabel("Scaling factor:");
-    scalingFactor = new JComboBox(CB_MODEL);
+    scalingFactor = new JComboBox<String>(CB_MODEL);
     scalingFactor.setEditable(true);
     scalingFactor.addItemListener(this);
 
@@ -274,7 +274,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(4, 5, 0, 5));
 
-    Object[] desktopSizeOptions = {
+    String[] desktopSizeOptions = {
       "Auto", "Server", "480x320", "640x360", "640x480", "800x480", "800x600",
       "854x480", "960x540", "960x600", "960x640",
       "1024x640", "1024x640+0+0,1024x640+1024+0",
@@ -300,7 +300,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       "3840x2160", "3840x2160+0+0,3840x2160+3840+0"
     };
     JLabel desktopSizeLabel = new JLabel("Remote desktop size:");
-    desktopSize = new JComboBox(desktopSizeOptions);
+    desktopSize = new JComboBox<String>(desktopSizeOptions);
     desktopSize.setEditable(true);
     desktopSize.addItemListener(this);
     desktopSize.setMaximumSize(desktopSize.getPreferredSize());
@@ -325,7 +325,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
                           GridBagConstraints.FIRST_LINE_START,
                           new Insets(4, 5, 0, 5));
 
-    Object[] spanOptions = {
+    String[] spanOptions = {
       "Primary monitor only", "All monitors", "Automatic"
     };
     JLabel spanLabel;
@@ -333,7 +333,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       spanLabel = new JLabel("Full-screen span mode:");
     else
       spanLabel = new JLabel("Span mode:");
-    span = new JComboBox(spanOptions);
+    span = new JComboBox<String>(spanOptions);
     span.addItemListener(this);
     if (Utils.isX11() && !Helper.isAvailable()) {
       spanLabel.setEnabled(false);
@@ -422,7 +422,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
     String[] menuKeys = new String[MenuKey.getSymbolCount()];
     for (int i = 0; i < MenuKey.getSymbolCount(); i++)
       menuKeys[i] = MenuKey.getSymbols()[i].name;
-    menuKey  = new JComboBox(menuKeys);
+    menuKey  = new JComboBox<String>(menuKeys);
     menuKey.addItemListener(this);
 
     Dialog.addGBComponent(menuKeyLabel, inputPanel,
@@ -444,8 +444,8 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
         grabLabel = new JLabel("Keyboard/pointer grab mode:");
       else
         grabLabel = new JLabel("Keyboard grab mode:");
-      Object[] grabModes = { "Full-screen only", "Always", "Manual" };
-      grabKeyboard = new JComboBox(grabModes);
+      String[] grabModes = { "Full-screen only", "Always", "Manual" };
+      grabKeyboard = new JComboBox<String>(grabModes);
       grabKeyboard.addItemListener(this);
 
       Dialog.addGBComponent(grabLabel, inputPanel,
@@ -887,7 +887,7 @@ class OptionsDialog extends Dialog implements ActionListener, ChangeListener,
       if (ret == JFileChooser.APPROVE_OPTION)
         x509crl.setText(fc.getSelectedFile().toString());
     } else if (s instanceof JComboBox && (JComboBox)s == encMethodComboBox) {
-      JComboBox comboBox = (JComboBox)e.getSource();
+      JComboBox<?> comboBox = (JComboBox<?>)e.getSource();
       String encMethod = (String)comboBox.getSelectedItem();
       if (!encMethodComboBox.isEnabled()) return;
       if (encMethod.equals("Tight + Perceptually Lossless JPEG (LAN)")) {

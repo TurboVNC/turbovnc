@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012-2018 ymnk, JCraft,Inc. All rights reserved.
- * Copyright (c) 2018, 2023 D. R. Commander. All rights reserved.
+ * Copyright (c) 2018, 2023, 2026 D. R. Commander. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted
  * provided that the following conditions are met:
@@ -60,9 +60,9 @@ public class LocalIdentityRepository implements IdentityRepository {
   }
 
   public synchronized void copyFrom(IdentityRepository sourceRepo) {
-    Vector sourceIdentities = sourceRepo.getIdentities();
+    Vector<Identity> sourceIdentities = sourceRepo.getIdentities();
     for (int i = 0; i < sourceIdentities.size(); i++) {
-      Identity sourceIdentity = (Identity)sourceIdentities.elementAt(i);
+      Identity sourceIdentity = sourceIdentities.elementAt(i);
       identities.addElement(sourceIdentity);
     }
   }

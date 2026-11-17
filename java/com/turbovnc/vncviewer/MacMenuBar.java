@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2015, 2018, 2020-2025 D. R. Commander.
+/* Copyright (C) 2012-2015, 2018, 2020-2026 D. R. Commander.
  *                                          All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
@@ -47,7 +47,7 @@ public final class MacMenuBar extends JMenuBar implements ActionListener {
           cc.options.showDialog(cc.viewport);
       } else if (method.getName().equals("handleQuitRequestWith")) {
         try {
-          Class quitResponseClass;
+          Class<?> quitResponseClass;
 
           if (Utils.JAVA_VERSION >= 9)
             quitResponseClass = Class.forName("java.awt.desktop.QuitResponse");
@@ -76,7 +76,8 @@ public final class MacMenuBar extends JMenuBar implements ActionListener {
 
   void setupAppMenu() {
     try {
-      Class appClass, aboutHandlerClass, prefsHandlerClass, quitHandlerClass;
+      Class<?> appClass, aboutHandlerClass, prefsHandlerClass,
+        quitHandlerClass;
       Object obj;
 
       if (Utils.JAVA_VERSION >= 9) {
@@ -97,16 +98,17 @@ public final class MacMenuBar extends JMenuBar implements ActionListener {
       }
 
       InvocationHandler aboutHandler = new MyInvocationHandler(cc);
-      Object proxy = Proxy.newProxyInstance(aboutHandlerClass.getClassLoader(),
-                                            new Class[]{ aboutHandlerClass },
-                                            aboutHandler);
+      Object proxy =
+        Proxy.newProxyInstance(aboutHandlerClass.getClassLoader(),
+                               new Class<?>[]{ aboutHandlerClass },
+                               aboutHandler);
       Method setAboutHandler =
         appClass.getMethod("setAboutHandler", aboutHandlerClass);
       setAboutHandler.invoke(obj, new Object[]{ proxy });
 
       InvocationHandler prefsHandler = new MyInvocationHandler(cc);
       proxy = Proxy.newProxyInstance(prefsHandlerClass.getClassLoader(),
-                                     new Class[]{ prefsHandlerClass },
+                                     new Class<?>[]{ prefsHandlerClass },
                                      prefsHandler);
       Method setPreferencesHandler =
         appClass.getMethod("setPreferencesHandler", prefsHandlerClass);
@@ -114,7 +116,7 @@ public final class MacMenuBar extends JMenuBar implements ActionListener {
 
       InvocationHandler quitHandler = new MyInvocationHandler(cc);
       proxy = Proxy.newProxyInstance(quitHandlerClass.getClassLoader(),
-                                     new Class[]{ quitHandlerClass },
+                                     new Class<?>[]{ quitHandlerClass },
                                      quitHandler);
       Method setQuitHandler =
         appClass.getMethod("setQuitHandler", quitHandlerClass);

@@ -1,4 +1,4 @@
-/* Copyright (C) 2012-2013, 2015-2022, 2024-2025 D. R. Commander.
+/* Copyright (C) 2012-2013, 2015-2022, 2024-2026 D. R. Commander.
  *                                               All Rights Reserved.
  * Copyright (C) 2011-2013 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
@@ -294,8 +294,8 @@ public final class Viewport extends JFrame implements Runnable {
       if (major < 10 || (major == 10 && minor < 7))
         throw new Exception("Operating system version is " + version);
 
-      Class fsuClass = Class.forName("com.apple.eawt.FullScreenUtilities");
-      Class[] argClasses = new Class[]{ Window.class, Boolean.TYPE };
+      Class<?> fsuClass = Class.forName("com.apple.eawt.FullScreenUtilities");
+      Class<?>[] argClasses = new Class<?>[]{ Window.class, Boolean.TYPE };
 
       if (Utils.JAVA_VERSION < 9) {
         Method setWindowCanFullScreen =
@@ -303,13 +303,13 @@ public final class Viewport extends JFrame implements Runnable {
         setWindowCanFullScreen.invoke(fsuClass, this, true);
       }
 
-      Class fsListenerClass =
+      Class<?> fsListenerClass =
         Class.forName("com.apple.eawt.FullScreenListener");
       InvocationHandler fsHandler = new MyInvocationHandler(cc);
       Object proxy = Proxy.newProxyInstance(fsListenerClass.getClassLoader(),
-                                            new Class[]{ fsListenerClass },
+                                            new Class<?>[]{ fsListenerClass },
                                             fsHandler);
-      argClasses = new Class[]{ Window.class, fsListenerClass };
+      argClasses = new Class<?>[]{ Window.class, fsListenerClass };
       Method addFullScreenListenerTo =
         fsuClass.getMethod("addFullScreenListenerTo", argClasses);
       addFullScreenListenerTo.invoke(fsuClass, this, proxy);
@@ -323,7 +323,7 @@ public final class Viewport extends JFrame implements Runnable {
 
   public void toggleLionFS() {
     try {
-      Class appClass = Class.forName("com.apple.eawt.Application");
+      Class<?> appClass = Class.forName("com.apple.eawt.Application");
       Method getApplication = appClass.getMethod("getApplication",
                                                  (Class[])null);
       Object app = getApplication.invoke(appClass);
