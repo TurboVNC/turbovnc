@@ -1,5 +1,5 @@
-/* Copyright (C) 2014, 2018, 2020, 2022, 2024 D. R. Commander.
- *                                            All Rights Reserved.
+/* Copyright (C) 2014, 2018, 2020, 2022, 2024, 2026 D. R. Commander.
+ *                                                  All Rights Reserved.
  * Copyright (C) 2011 Brian P. Hinz
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
@@ -61,7 +61,7 @@ public final class TrayMenu extends PopupMenu implements ActionListener {
 
   void setDockMenu(PopupMenu menu) {
     try {
-      Class appClass;
+      Class<?> appClass;
       Object obj;
 
       if (Utils.JAVA_VERSION >= 9) {
@@ -75,7 +75,7 @@ public final class TrayMenu extends PopupMenu implements ActionListener {
           appClass.getMethod("getApplication", (Class[])null);
         obj = getApplication.invoke(appClass);
       }
-      Class[] paramTypes = new Class[1];
+      Class<?>[] paramTypes = new Class<?>[1];
       paramTypes[0] = PopupMenu.class;
       Method setDockMenu = Utils.JAVA_VERSION >= 9 ?
         appClass.getMethod("setMenu", paramTypes) :

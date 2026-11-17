@@ -1,5 +1,5 @@
-/* Copyright (C) 2012, 2015-2020, 2022, 2024 D. R. Commander.
- *                                           All Rights Reserved.
+/* Copyright (C) 2012, 2015-2020, 2022, 2024, 2026 D. R. Commander.
+ *                                                 All Rights Reserved.
  * Copyright (C) 2011-2012, 2015, 2017, 2019 Brian P. Hinz
  * Copyright (C) 2010 m-privacy GmbH
  * Copyright (C) 2010 TigerVNC Team
@@ -419,7 +419,7 @@ public class CSecurityTLS extends CSecurity {
 
     private void verifyHostname(X509Certificate cert) {
       try {
-        Collection sans = cert.getSubjectAlternativeNames();
+        Collection<?> sans = cert.getSubjectAlternativeNames();
         if (sans == null) {
           String dn = cert.getSubjectX500Principal().getName();
           LdapName ln = new LdapName(dn);
@@ -431,9 +431,9 @@ public class CSecurityTLS extends CSecurity {
             }
           }
         } else {
-          Iterator i = sans.iterator();
+          Iterator<?> i = sans.iterator();
           while (i.hasNext()) {
-            List nxt = (List)i.next();
+            List<?> nxt = (List<?>)i.next();
             if (((Integer)nxt.get(0)).intValue() == 2) {
               String peer = client.getServerName().toLowerCase();
               if (peer.equals(((String)nxt.get(1)).toLowerCase()))

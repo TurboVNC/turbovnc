@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2011 ymnk, JCraft,Inc. All rights reserved.
- * Copyright (c) 2018, 2025 D. R. Commander. All rights reserved.
+ * Copyright (c) 2018, 2025-2026 D. R. Commander. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted
  * provided that the following conditions are met:
@@ -44,7 +44,7 @@ class AgentIdentity implements Identity {
 
   private HASH genHash() {
     try {
-      Class c = Class.forName(JSch.getConfig("md5"));
+      Class<?> c = Class.forName(JSch.getConfig("md5"));
       hash = (HASH)(c.getDeclaredConstructor().newInstance());
       hash.init();
     } catch (Exception e) {

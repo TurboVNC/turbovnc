@@ -631,7 +631,7 @@ class DesktopWindow extends JPanel implements Runnable, MouseListener,
   public void mousePressed(MouseEvent e) {
     if (Utils.isMac()) {
       try {
-        Class appClass;
+        Class<?> appClass;
         Object obj;
 
         if (Utils.JAVA_VERSION >= 9) {
