@@ -47,7 +47,7 @@ else()
 	target_link_libraries(JavaAppLauncher "-framework Cocoa")
 endif()
 
-install(TARGETS turbovnchelper DESTINATION ${CMAKE_INSTALL_FULL_JAVADIR})
+install(TARGETS turbovnchelper DESTINATION ${CMAKE_INSTALL_JAVADIR})
 
 else() # APPLE
 
@@ -76,21 +76,21 @@ endif()
 target_link_libraries(turbovnchelper ${X11_LIBRARIES} ${X11_Xi_LIB} ${LIBDL}
 	${TJPEG_LIBRARY})
 
-install(TARGETS turbovnchelper DESTINATION ${CMAKE_INSTALL_FULL_JAVADIR})
+install(TARGETS turbovnchelper DESTINATION ${CMAKE_INSTALL_JAVADIR})
 
 install(FILES ${CMAKE_SOURCE_DIR}/java/com/turbovnc/vncviewer/turbovnc-128.png
-	DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/icons/hicolor/128x128/apps
+	DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/128x128/apps
 	RENAME turbovnc.png)
 install(FILES ${CMAKE_SOURCE_DIR}/java/com/turbovnc/vncviewer/turbovnc.png
-	DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/icons/hicolor/48x48/apps)
+	DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/48x48/apps)
 install(FILES ${CMAKE_SOURCE_DIR}/java/com/turbovnc/vncviewer/turbovnc-sm.png
-	DESTINATION ${CMAKE_INSTALL_FULL_DATADIR}/icons/hicolor/16x16/apps
+	DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/16x16/apps
 	RENAME turbovnc.png)
 
 endif() # APPLE
 
 install(PROGRAMS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncviewer
-	DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
+	DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-install(FILES vncviewer.man DESTINATION ${CMAKE_INSTALL_FULL_MANDIR}/man1
+install(FILES vncviewer.man DESTINATION ${CMAKE_INSTALL_MANDIR}/man1
 	RENAME vncviewer.1)
