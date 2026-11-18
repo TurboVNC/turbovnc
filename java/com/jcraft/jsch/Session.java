@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.Vector;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -680,7 +679,7 @@ public class Session {
     return false;
   }
 
-  private boolean checkServerExtInfo() {
+  boolean checkServerExtInfo() {
     Buffer sb = new Buffer(I_S);
     sb.setOffSet(17);
     byte[] sp = sb.getString(); // server proposal
@@ -690,8 +689,11 @@ public class Session {
     while (l < sp.length) {
       while (l < sp.length && sp[l] != ',')
         l++;
-      if (m == l)
+      if (m == l) {
+        l++;
+        m = l;
         continue;
+      }
       if ("ext-info-s".equals(Util.byte2str(sp, m, l - m))) {
         return true;
       }
@@ -2565,15 +2567,15 @@ public class Session {
   Forwarding parseForwarding(String conf) throws JSchException {
     String[] tmp = conf.split(" ");
     if (tmp.length > 1) { // "[bind_address:]port host:hostport"
-      Vector<String> foo = new Vector<>();
+      List<String> foo = new ArrayList<>();
       for (int i = 0; i < tmp.length; i++) {
         if (tmp[i].length() == 0)
           continue;
-        foo.addElement(tmp[i].trim());
+        foo.add(tmp[i].trim());
       }
       StringBuilder sb = new StringBuilder(); // join
       for (int i = 0; i < foo.size(); i++) {
-        sb.append(foo.elementAt(i));
+        sb.append(foo.get(i));
         if (i + 1 < foo.size())
           sb.append(":");
       }
@@ -3156,20 +3158,19 @@ public class Session {
     String cipherc2s = getConfig("cipher.c2s");
     String ciphers2c = getConfig("cipher.s2c");
 
-    Vector<String> result = new Vector<>();
+    List<String> result = new ArrayList<>();
     String[] _ciphers = Util.split(ciphers, ",");
     for (int i = 0; i < _ciphers.length; i++) {
       String cipher = _ciphers[i];
       if (ciphers2c.indexOf(cipher) == -1 && cipherc2s.indexOf(cipher) == -1)
         continue;
       if (!checkCipher(getConfig(cipher))) {
-        result.addElement(cipher);
+        result.add(cipher);
       }
     }
     if (result.size() == 0)
       return null;
-    String[] foo = new String[result.size()];
-    System.arraycopy(result.toArray(), 0, foo, 0, result.size());
+    String[] foo = result.toArray(new String[0]);
 
     if (getLogger().isEnabled(Logger.INFO)) {
       for (int i = 0; i < foo.length; i++) {
@@ -3202,20 +3203,19 @@ public class Session {
     String macc2s = getConfig("mac.c2s");
     String macs2c = getConfig("mac.s2c");
 
-    Vector<String> result = new Vector<>();
+    List<String> result = new ArrayList<>();
     String[] _macs = Util.split(macs, ",");
     for (int i = 0; i < _macs.length; i++) {
       String mac = _macs[i];
       if (macs2c.indexOf(mac) == -1 && macc2s.indexOf(mac) == -1)
         continue;
       if (!checkMac(getConfig(mac))) {
-        result.addElement(mac);
+        result.add(mac);
       }
     }
     if (result.size() == 0)
       return null;
-    String[] foo = new String[result.size()];
-    System.arraycopy(result.toArray(), 0, foo, 0, result.size());
+    String[] foo = result.toArray(new String[0]);
 
     if (getLogger().isEnabled(Logger.INFO)) {
       for (int i = 0; i < foo.length; i++) {
@@ -3245,17 +3245,21 @@ public class Session {
       getLogger().log(Logger.INFO, "CheckKexes: " + kexes);
     }
 
-    Vector<String> result = new Vector<>();
+    String kex = getConfig("kex");
+
+    List<String> result = new ArrayList<>();
     String[] _kexes = Util.split(kexes, ",");
     for (int i = 0; i < _kexes.length; i++) {
-      if (!checkKex(this, getConfig(_kexes[i]))) {
-        result.addElement(_kexes[i]);
+      String k = _kexes[i];
+      if (kex.indexOf(k) == -1)
+        continue;
+      if (!checkKex(this, getConfig(k))) {
+        result.add(k);
       }
     }
     if (result.size() == 0)
       return null;
-    String[] foo = new String[result.size()];
-    System.arraycopy(result.toArray(), 0, foo, 0, result.size());
+    String[] foo = result.toArray(new String[0]);
 
     if (getLogger().isEnabled(Logger.INFO)) {
       for (int i = 0; i < foo.length; i++) {
@@ -3285,7 +3289,7 @@ public class Session {
       getLogger().log(Logger.INFO, "CheckSignatures: " + sigs);
     }
 
-    Vector<String> result = new Vector<>();
+    List<String> result = new ArrayList<>();
     String[] _sigs = Util.split(sigs, ",");
     for (int i = 0; i < _sigs.length; i++) {
       try {
@@ -3294,13 +3298,13 @@ public class Session {
         final Signature sig = c.getDeclaredConstructor().newInstance();
         sig.init();
       } catch (Exception | LinkageError e) {
-        result.addElement(_sigs[i]);
+        result.add(_sigs[i]);
       }
     }
     if (result.size() == 0)
       return null;
-    String[] foo = new String[result.size()];
-    System.arraycopy(result.toArray(), 0, foo, 0, result.size());
+    String[] foo = result.toArray(new String[0]);
+
     if (getLogger().isEnabled(Logger.INFO)) {
       for (int i = 0; i < foo.length; i++) {
         getLogger().log(Logger.INFO, foo[i] + " is not available.");

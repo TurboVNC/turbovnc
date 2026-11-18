@@ -46,6 +46,9 @@ v2.3.3, which includes multiple bug fixes and performance enhancements.
 10. The TurboVNC Server's built-in WebSocket proxy now works on big-endian
 systems.
 
+11. The TurboVNC Viewer's built-in SSH client has been rebased on v2.27.9 of
+the JSch fork, which includes several minor bug fixes.
+
 
 3.3.1
 =====
