@@ -12,9 +12,9 @@ configure_file(vncviewerw.bat.in ${CMAKE_BINARY_DIR}/vncviewerw.bat
 	@ONLY)
 
 install(PROGRAMS ${CMAKE_BINARY_DIR}/vncviewer.bat
-	DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
+	DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(PROGRAMS ${CMAKE_BINARY_DIR}/vncviewerw.bat
-	DESTINATION ${CMAKE_INSTALL_FULL_BINDIR})
+	DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 find_package(JNI REQUIRED)
 
@@ -38,5 +38,4 @@ elseif(TURBOJPEG_TARGET)
 	target_link_libraries(turbovnchelper ${TURBOJPEG_TARGET})
 endif()
 
-install(TARGETS turbovnchelper RUNTIME
-	DESTINATION ${CMAKE_INSTALL_FULL_JAVADIR})
+install(TARGETS turbovnchelper RUNTIME DESTINATION ${CMAKE_INSTALL_JAVADIR})
