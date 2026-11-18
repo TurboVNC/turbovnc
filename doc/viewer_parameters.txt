@@ -147,6 +147,17 @@ INPUT PARAMETERS
 
     Toggle full-screen mode when Alt-Enter is pressed.
 
+--> GrabPointer
+    Values: 0, 1 (default = 1)
+
+    [Un*x] Grab the pointer whenever the keyboard is grabbed.  This allows
+    certain keyboard + pointer sequences, such as Alt-{drag}, to be passed to
+    the server.  The downside, however, is that grabbing the pointer prevents
+    any interaction with the local window manager.  (For instance, the window
+    can no longer be maximized or closed, and you cannot switch to other
+    running applications.)  Thus, this parameter is primarily useful with
+    GrabKeyboard=FS.
+
 --> MenuKey
     Values: F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, Pause, Print, ScrollLock, Escape, Insert, Delete, Home, PageUp, PageDown (default = F8)
 
@@ -238,8 +249,11 @@ DISPLAY PARAMETERS
 
     When using automatic desktop resizing, "Auto" has the same effect as
     "Primary" when in windowed mode and the same effect as "All" when in
-    full-screen mode.  This parameter has no effect on macOS unless "Displays
-    have separate Spaces" is disabled in the system settings.
+    full-screen mode.  [Un*x]  Due to general issues with spanning windows
+    across multiple monitors in X11, this parameter has no effect on Un*x/X11
+    platforms except in full-screen mode.  [Mac]  This parameter has no effect
+    on macOS unless "Displays have separate Spaces" is disabled in the system
+    settings.
 
 --> Toolbar
     Values: 0, 1 (default = 1)

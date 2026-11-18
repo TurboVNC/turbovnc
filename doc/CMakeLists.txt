@@ -13,7 +13,9 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/stamp
 )
 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/viewer_parameters.txt
-	COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncviewer -? |
+	COMMAND
+		${CMAKE_COMMAND} -E env JAVA_TOOL_OPTIONS=-Dturbovnc.documentusagescreens=1
+		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncviewer -? |
 		sed -n '/^USAGE/,$$p' >viewer_parameters.txt || true
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	DEPENDS java
@@ -22,7 +24,9 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/viewer_parameters.txt
 
 add_custom_command(OUTPUT
 	${CMAKE_CURRENT_SOURCE_DIR}/viewer_advanced_parameters.txt
-	COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncviewer -??
+	COMMAND
+		${CMAKE_COMMAND} -E env JAVA_TOOL_OPTIONS=-Dturbovnc.documentusagescreens=1
+		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vncviewer -??
 		>viewer_advanced_parameters.txt || true
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	DEPENDS java

@@ -540,6 +540,33 @@ public final class Params {
     UserPreferences.save(node);
   }
 
+  String x11Only(String str, String altStr) {
+    if (Utils.getBooleanProperty("turbovnc.documentusagescreens", false)) {
+      if (str.startsWith("  "))
+        return "  [Un*x]" + str;
+      else
+        return "[Un*x] " + str;
+    }
+    return Utils.isX11() ? str : altStr;
+  }
+
+  String macOnly(String str, String altStr) {
+    if (Utils.getBooleanProperty("turbovnc.documentusagescreens", false)) {
+      if (str.startsWith("  "))
+        return "  [Mac]" + str;
+      else
+        return "[Mac] " + str;
+    }
+    return Utils.isMac() ? str : altStr;
+  }
+
+  String windowsOnly(String str, String altStr) {
+    if (Utils.getBooleanProperty("turbovnc.documentusagescreens", false))
+      return "[Windows] " + str +
+             (altStr != null ? " [Un*x/Mac] " + altStr : "");
+    return Utils.isWindows() ? str : altStr;
+  }
+
   // CHECKSTYLE Indentation:OFF
   // CHECKSTYLE VisibilityModifier:OFF
 
@@ -697,13 +724,13 @@ public final class Params {
 
   public BoolParameter grabPointer =
   new BoolParameter("GrabPointer", this, false, false,
-  Utils.isX11() ? "Grab the pointer whenever the keyboard is grabbed.  This " +
-  "allows certain keyboard + pointer sequences, such as Alt-{drag}, to be " +
-  "passed to the server.  The downside, however, is that grabbing the " +
-  "pointer prevents any interaction with the local window manager.  (For " +
-  "instance, the window can no longer be maximized or closed, and you " +
-  "cannot switch to other running applications.)  Thus, this parameter is " +
-  "primarily useful with GrabKeyboard=FS." : null, true);
+  x11Only("Grab the pointer whenever the keyboard is grabbed.  This allows " +
+  "certain keyboard + pointer sequences, such as Alt-{drag}, to be passed " +
+  "to the server.  The downside, however, is that grabbing the pointer " +
+  "prevents any interaction with the local window manager.  (For instance, " +
+  "the window can no longer be maximized or closed, and you cannot switch " +
+  "to other running applications.)  Thus, this parameter is primarily " +
+  "useful with GrabKeyboard=FS.", null), true);
 
   public MenuKeyParameter menuKey =
   new MenuKeyParameter("MenuKey", this,
@@ -717,16 +744,15 @@ public final class Params {
 
   public BoolParameter noMacHotkeys =
   new BoolParameter("NoMacHotkeys", this, false, true,
-  Utils.isMac() ? "On macOS, the TurboVNC Viewer normally assigns " +
-  "equivalent Command hotkeys for most of its Ctrl-Alt-Shift hotkeys.  " +
-  "However, since the Command key maps to the Super/Meta key on Un*x " +
-  "systems, those Command hotkeys may interfere with hotkeys used by " +
-  "certain applications (such as Emacs) on the remote system.  Setting this " +
-  "parameter allows as many Command key sequences as possible to be " +
-  "transmitted to the VNC server as Super/Meta key sequences, although some " +
-  "Command key sequences (notably Command-F5, Command-Tab, Command-H, " +
-  "Command-Q, Command-Comma, and Command-Space) will still be intercepted " +
-  "by macOS." : null, false);
+  macOnly("On macOS, the TurboVNC Viewer normally assigns equivalent " +
+  "Command hotkeys for most of its Ctrl-Alt-Shift hotkeys.  However, since " +
+  "the Command key maps to the Super/Meta key on Un*x systems, those " +
+  "Command hotkeys may interfere with hotkeys used by certain applications " +
+  "(such as Emacs) on the remote system.  Setting this parameter allows as " +
+  "many Command key sequences as possible to be transmitted to the VNC " +
+  "server as Super/Meta key sequences, although some Command key sequences " +
+  "(notably Command-F5, Command-Tab, Command-H, Command-Q, Command-Comma, " +
+  "and Command-Space) will still be intercepted by macOS.", null), false);
 
   // Prevent the viewer from sending Ctrl-Alt-Del and Ctrl-Esc to the server
   public BoolParameter restricted =
@@ -870,12 +896,12 @@ public final class Params {
   "When using automatic desktop resizing, \"Auto\" has the same effect as " +
   "\"Primary\" when in windowed mode and the same effect as \"All\" when in " +
   "full-screen mode." +
-  (Utils.isX11() ? "  Due to general issues with spanning windows across " +
-   "multiple monitors in X11, this parameter has no effect on Un*x/X11 " +
-   "platforms except in full-screen mode." : "") +
-  (Utils.isMac() ? "  This parameter has no effect on macOS unless " +
-   "\"Displays have separate Spaces\" is disabled in the system settings." :
-   ""), SpanParameter.AUTO);
+  x11Only("  Due to general issues with spanning windows across multiple " +
+   "monitors in X11, this parameter has no effect on Un*x/X11 platforms " +
+   "except in full-screen mode.", "") +
+  macOnly("  This parameter has no effect on macOS unless \"Displays have " +
+   "separate Spaces\" is disabled in the system settings.", ""),
+  SpanParameter.AUTO);
 
   public BoolParameter toolbar =
   new BoolParameter("Toolbar", this, true, false,
@@ -1032,7 +1058,7 @@ public final class Params {
   public StringParameter extSSHCommand =
   new StringParameter("ExtSSHCommand", this, false, true,
   "The command that should be used to start the external SSH client",
-  (Utils.isWindows() ? "ssh.exe -ax" : "/usr/bin/env ssh -ax"));
+  windowsOnly("ssh.exe -ax", "/usr/bin/env ssh -ax"));
 
   public StringParameter extSSHTemplate =
   new StringParameter("ExtSSHTemplate", this, false, true,

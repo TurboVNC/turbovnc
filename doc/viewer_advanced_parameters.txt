@@ -64,9 +64,9 @@ INPUT PARAMETERS
 --> NoMacHotkeys
     Values: 0, 1 (default = 0)
 
-    On macOS, the TurboVNC Viewer normally assigns equivalent Command hotkeys
-    for most of its Ctrl-Alt-Shift hotkeys.  However, since the Command key
-    maps to the Super/Meta key on Un*x systems, those Command hotkeys may
+    [Mac] On macOS, the TurboVNC Viewer normally assigns equivalent Command
+    hotkeys for most of its Ctrl-Alt-Shift hotkeys.  However, since the Command
+    key maps to the Super/Meta key on Un*x systems, those Command hotkeys may
     interfere with hotkeys used by certain applications (such as Emacs) on the
     remote system.  Setting this parameter allows as many Command key sequences
     as possible to be transmitted to the VNC server as Super/Meta key
@@ -178,7 +178,7 @@ SECURITY AND AUTHENTICATION PARAMETERS
     domain socket connection to a remote host.
 
 --> ExtSSHCommand
-    (default = /usr/bin/env ssh -ax)
+    (default = [Windows] ssh.exe -ax [Un*x/Mac] /usr/bin/env ssh -ax)
 
     The command that should be used to start the external SSH client
 
