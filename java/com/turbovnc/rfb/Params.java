@@ -692,7 +692,7 @@ public final class Params {
   // INPUT PARAMETERS
 
   private HeaderParameter inputHeader =
-  new HeaderParameter("InputHeader", this, Utils.isMac(),
+  new HeaderParameter("InputHeader", this, true,
   "INPUT PARAMETERS");
 
   public BoolParameter emulate3 =
