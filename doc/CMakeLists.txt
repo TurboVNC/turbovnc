@@ -37,4 +37,4 @@ add_custom_target(doc DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/stamp
 	${CMAKE_CURRENT_SOURCE_DIR}/viewer_parameters.txt
 	${CMAKE_CURRENT_SOURCE_DIR}/viewer_advanced_parameters.txt)
 
-install(FILES ${DOC_FILES} DESTINATION ${CMAKE_INSTALL_FULL_DOCDIR})
+install(FILES ${DOC_FILES} DESTINATION ${CMAKE_INSTALL_DOCDIR})
