@@ -1,6 +1,12 @@
 if(TVNC_ZLIBNG)
 	include(ExternalProject)
 
+	# CMP0225 relates to the sub-project install directory, which isn't relevant
+	# because we link statically with zlib-ng rather than installing it.
+	if(POLICY CMP0225)
+		cmake_policy(SET CMP0225 NEW)
+	endif()
+
 	# WITH_NEW_STRATEGIES=0 makes zlib-ng compress as well as zlib when using
 	# Compression Level 1.
 	#
