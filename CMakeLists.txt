@@ -112,7 +112,7 @@ message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
 
 if((UNIX AND CMAKE_INSTALL_PREFIX STREQUAL "${CMAKE_INSTALL_DEFAULT_PREFIX}")
 	OR WIN32)
-	set(CMAKE_INSTALL_DEFAULT_DATAROOTDIR "")
+	set(CMAKE_INSTALL_DEFAULT_DATAROOTDIR ".")
 	set(CMAKE_INSTALL_DEFAULT_DOCDIR "<CMAKE_INSTALL_DATAROOTDIR>/doc")
 	set(CMAKE_INSTALL_DEFAULT_SYSCONFDIR "${CMAKE_INSTALL_PREFIX}/etc")
 endif()
@@ -120,9 +120,21 @@ if(WIN32)
 	set(CMAKE_INSTALL_DEFAULT_BINDIR ".")
 endif()
 
+# Resolve "." in install directories
+if(POLICY CMP0177)
+	cmake_policy(SET CMP0177 NEW)
+endif()
+
 include(cmakescripts/GNUInstallDirs.cmake)
 
 macro(report_directory var)
+	# CMAKE_INSTALL_*DIR cannot be blank, because either CMake will fail to
+	# configure the build, or install() will attempt to install files to the root
+	# directory.
+	if(NOT CMAKE_INSTALL_${var})
+		message(FATAL_ERROR
+			"CMAKE_INSTALL_${var} cannot be blank.  Set CMAKE_INSTALL_${var}=\"\.\" to install components into the top level of ${CMAKE_INSTALL_PREFIX}.")
+	endif()
 	if(CMAKE_INSTALL_${var} STREQUAL CMAKE_INSTALL_FULL_${var})
 		message(STATUS "CMAKE_INSTALL_${var} = ${CMAKE_INSTALL_${var}}")
 	else()
@@ -222,5 +234,5 @@ add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P cmake_uninstall.cmake)
 if(CMAKE_INSTALL_PREFIX STREQUAL "${CMAKE_INSTALL_DEFAULT_PREFIX}" OR WIN32)
 	install(FILES README.txt DESTINATION .)
 else()
-	install(FILES README.txt DESTINATION ${CMAKE_INSTALL_FULL_DOCDIR})
+	install(FILES README.txt DESTINATION ${CMAKE_INSTALL_DOCDIR})
 endif()
