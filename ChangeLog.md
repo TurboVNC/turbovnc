@@ -49,6 +49,13 @@ systems.
 11. The TurboVNC Viewer's built-in SSH client has been rebased on v2.27.9 of
 the JSch fork, which includes several minor bug fixes.
 
+12. Fixed an issue in the TurboVNC Viewer whereby the values of the
+`HotkeyModifiers` and `Emulate3Modifiers` parameters were saved in the per-host
+options when clicking OK in the TurboVNC Viewer Options dialog.  If the
+parameters were not explicitly specified for subsequent connections to the same
+host, then the saved values effectively became the default values, which could
+have caused confusion.
+
 
 3.3.1
 =====

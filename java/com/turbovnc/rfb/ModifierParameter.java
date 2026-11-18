@@ -26,7 +26,7 @@ public final class ModifierParameter extends IntParameter {
 
   public ModifierParameter(String name, Params params, String desc,
                            int defValue, boolean allowZero_) {
-    super(name, params, true, true, desc, defValue);
+    super(name, params, false, true, desc, defValue);
     allowZero = allowZero_;
   }
 
