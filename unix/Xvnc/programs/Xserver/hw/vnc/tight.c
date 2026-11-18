@@ -1718,18 +1718,18 @@ static Bool SendJpegRect(threadparam *t, int x, int y, int w, int h,
     pitch = w * 3;
     pixelFormat = TJPF_RGB;
   } else {
-    if (rfbServerFormat.bigEndian && ps == 4) {
-      if ((rfbServerFormat.redShift == 16 && rfbServerFormat.blueShift == 0) ==
-          rfbServerFormat.bigEndian)
-        pixelFormat = TJPF_XRGB;
-      else
-        pixelFormat = TJPF_XBGR;
-    } else if (ps == 4) {
-      if ((rfbServerFormat.redShift == 16 && rfbServerFormat.blueShift == 0) ==
-          rfbServerFormat.bigEndian)
-        pixelFormat = TJPF_RGBX;
-      else
-        pixelFormat = TJPF_BGRX;
+    if (ps == 4) {
+      if (rfbServerFormat.bigEndian) {
+        if (rfbServerFormat.redShift == 16 && rfbServerFormat.blueShift == 0)
+          pixelFormat = TJPF_XRGB;
+        else
+          pixelFormat = TJPF_XBGR;
+      } else {
+        if (rfbServerFormat.redShift == 16 && rfbServerFormat.blueShift == 0)
+          pixelFormat = TJPF_BGRX;
+        else
+          pixelFormat = TJPF_RGBX;
+      }
     } else {
       if ((rfbServerFormat.redShift == 16 && rfbServerFormat.blueShift == 0) ==
           rfbServerFormat.bigEndian)
