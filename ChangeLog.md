@@ -47,7 +47,10 @@ v2.3.3, which includes multiple bug fixes and performance enhancements.
 systems.
 
 11. The TurboVNC Viewer's built-in SSH client has been rebased on v2.27.9 of
-the JSch fork, which includes several minor bug fixes.
+the JSch fork, which includes several minor bug fixes as well as support for
+the built-in OpenSSH Authentication Agent (ssh-agent) on Windows.  A new
+parameter (`Pageant`) can be used to select Pageant or ssh-agent as the SSH
+authentication agent on Windows.
 
 12. Fixed an issue in the TurboVNC Viewer whereby the values of the
 `HotkeyModifiers` and `Emulate3Modifiers` parameters were saved in the per-host

@@ -1175,6 +1175,11 @@ public final class Params {
   "you want to override that preference for a particular connection (for " +
   "instance, to use a one-time password.)", false);
 
+  public BoolParameter pageant =
+  new BoolParameter("Pageant", this, false, false,
+  Utils.isWindows() ? "Use Pageant as an SSH authentication agent rather " +
+  "than the built-in OpenSSH Authentication Agent (ssh-agent.)" : null, true);
+
   public StringParameter password =
   new StringParameter("Password", this, false, true,
   "Plain-text password to use when authenticating with the VNC server.  It " +

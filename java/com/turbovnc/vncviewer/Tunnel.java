@@ -219,9 +219,12 @@ public class Tunnel {
     if (Helper.isAvailable()) {
       AgentConnector connector = null;
       try {
-        if (Utils.isWindows())
-          connector = new PageantConnector();
-        else
+        if (Utils.isWindows()) {
+          if (params.pageant.get())
+            connector = new PageantConnector();
+          else
+            connector = new WindowsSSHAgentConnector();
+        } else
           connector = new SSHAgentConnector(new UnixDomainSocketFactory());
         if (connector != null) {
           IdentityRepository repo = new AgentIdentityRepository(connector);
