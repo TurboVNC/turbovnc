@@ -66,7 +66,7 @@
 #define WEBSOCKETS_MAX_HANDSHAKE_LEN 4096
 #define SHA1_HASH_SIZE 20
 
-static Bool webSocketsHandshake(rfbClientPtr cl, char *scheme);
+static Bool webSocketsHandshake(rfbClientPtr cl, const char *scheme);
 
 static int webSocketsEncodeHybi(rfbClientPtr cl, const char *src, int len,
                                 char **dst);
@@ -83,7 +83,7 @@ static void webSocketsGenSha1Key(char *target, int size, char *key)
 
   iov[0].iov_base = key;
   iov[0].iov_len = strlen(key);
-  iov[1].iov_base = GUID;
+  iov[1].iov_base = (char *)GUID;
   iov[1].iov_len = sizeof(GUID) - 1;
   sha_ctx = x_sha1_init();
   if (!sha_ctx)
@@ -103,7 +103,8 @@ static void webSocketsGenSha1Key(char *target, int size, char *key)
 
 Bool webSocketsCheck(rfbClientPtr cl)
 {
-  char bbuf[4], *scheme;
+  char bbuf[4];
+  const char *scheme;
   int ret;
 
   ret = PeekExactTimeout(cl, bbuf, 4, WEBSOCKETS_CLIENT_CONNECT_WAIT_MS);
@@ -160,11 +161,12 @@ Bool webSocketsCheck(rfbClientPtr cl)
 }
 
 
-static Bool webSocketsHandshake(rfbClientPtr cl, char *scheme)
+static Bool webSocketsHandshake(rfbClientPtr cl, const char *scheme)
 {
   char *buf, *response, *line;
   int n, linestart = 0, len = 0, llen, base64 = FALSE;
-  char *path = NULL, *host = NULL, *origin = NULL, *protocol = NULL;
+  char *path = NULL, *host = NULL, *origin = NULL;
+  const char *protocol = NULL;
   Bool proto_binary, proto_base64;
   char *key1 = NULL, *key2 = NULL;
   char *sec_ws_origin = NULL;

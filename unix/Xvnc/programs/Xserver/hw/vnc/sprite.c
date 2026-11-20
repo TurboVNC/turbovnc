@@ -4,7 +4,8 @@
  * software sprite routines - based on misprite
  */
 
-/* Copyright (C) 2012-2014, 2017-2018 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2012-2014, 2017-2018, 2026 D. R. Commander.
+ *                                          All Rights Reserved.
  * Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -252,7 +253,7 @@ static void rfbSpriteSetCursor(DeviceIntPtr pDev, ScreenPtr pScreen,
 static void rfbSpriteMoveCursor(DeviceIntPtr pDev, ScreenPtr pScreen,
                                 int x, int y);
 
-miPointerSpriteFuncRec rfbSpritePointerFuncs = {
+static miPointerSpriteFuncRec rfbSpritePointerFuncs = {
     rfbSpriteRealizeCursor,
     rfbSpriteUnrealizeCursor,
     rfbSpriteSetCursor,

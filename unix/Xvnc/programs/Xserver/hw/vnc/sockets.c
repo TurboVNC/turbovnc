@@ -82,8 +82,6 @@ Bool rfbUDSCreated = FALSE;
 int rfbListenSock = -1;
 int rfbMaxClientConnections = DEFAULT_MAX_CONNECTIONS;
 
-extern unsigned long long sendBytes;
-
 static void rfbSockNotify(int fd, int ready, void *data);
 static int ListenOnTCPPort(int port);
 static int ListenOnUDS(const char *path, int mode);
@@ -150,7 +148,7 @@ void rfbInitSockets(void)
 
     rfbUDSCreated = TRUE;
 
-    SetNotifyFd(rfbListenSock, rfbSockNotify, X_NOTIFY_READ, "UNIX");
+    SetNotifyFd(rfbListenSock, rfbSockNotify, X_NOTIFY_READ, (char *)"UNIX");
     return;
   }
 

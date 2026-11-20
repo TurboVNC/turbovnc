@@ -2,7 +2,7 @@
  * stats.c
  */
 
-/* Copyright (C) 2014, 2024 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2014, 2024, 2026 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2002 Constantin Kaplinsky.  All Rights Reserved.
  * Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include "rfb.h"
 
-static char *encNames[MAX_ENCODINGS] = {
+static const char *encNames[MAX_ENCODINGS] = {
   "Raw", "CopyRect", "RRE", "[Encoding 3]", "CoRRE", "Hextile", "Zlib",
   "Tight", "[Encoding 8]", "[Encoding 9]", "[Encoding 10]", "[Encoding 11]",
   "[Encoding 12]", "[Encoding 13]", "[Encoding 14]", "[Encoding 15]", "ZRLE",

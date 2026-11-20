@@ -2,7 +2,7 @@
  * translate.c - translate between different pixel formats
  */
 
-/* Copyright (C) 2017, 2022, 2024 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2017, 2022, 2024, 2026 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -109,25 +109,25 @@ static const rfbPixelFormat BGR233Format = {
 typedef void (*rfbInitTableFnType) (char **table, rfbPixelFormat *in,
                                     rfbPixelFormat *out);
 
-rfbInitTableFnType rfbInitTrueColourSingleTableFns[3] = {
+static rfbInitTableFnType rfbInitTrueColourSingleTableFns[3] = {
   rfbInitTrueColourSingleTable8,
   rfbInitTrueColourSingleTable16,
   rfbInitTrueColourSingleTable32
 };
 
-rfbInitTableFnType rfbInitColourMapSingleTableFns[3] = {
+static rfbInitTableFnType rfbInitColourMapSingleTableFns[3] = {
   rfbInitColourMapSingleTable8,
   rfbInitColourMapSingleTable16,
   rfbInitColourMapSingleTable32
 };
 
-rfbInitTableFnType rfbInitTrueColourRGBTablesFns[3] = {
+static rfbInitTableFnType rfbInitTrueColourRGBTablesFns[3] = {
   rfbInitTrueColourRGBTables8,
   rfbInitTrueColourRGBTables16,
   rfbInitTrueColourRGBTables32
 };
 
-rfbTranslateFnType rfbTranslateWithSingleTableFns[3][3] = {
+static rfbTranslateFnType rfbTranslateWithSingleTableFns[3][3] = {
   { rfbTranslateWithSingleTable8to8,
     rfbTranslateWithSingleTable8to16,
     rfbTranslateWithSingleTable8to32 },
@@ -139,7 +139,7 @@ rfbTranslateFnType rfbTranslateWithSingleTableFns[3][3] = {
     rfbTranslateWithSingleTable32to32 }
 };
 
-rfbTranslateFnType rfbTranslateWithRGBTablesFns[3][3] = {
+static rfbTranslateFnType rfbTranslateWithRGBTablesFns[3][3] = {
   { rfbTranslateWithRGBTables8to8,
     rfbTranslateWithRGBTables8to16,
     rfbTranslateWithRGBTables8to32 },

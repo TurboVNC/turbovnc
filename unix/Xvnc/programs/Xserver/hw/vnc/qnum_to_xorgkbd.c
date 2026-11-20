@@ -4,6 +4,7 @@
  * To re-generate, run:
  *   keymap-gen code-map --lang=stdc keymaps.csv qnum xorgkbd
 */
+#include "qnum_to_xorgkbd.h"
 const unsigned short code_map_qnum_to_xorgkbd[254] = {
   [0x1] = 0x9, /* qnum:1 -> linux:1 (KEY_ESC) -> xorgkbd:9 */
   [0x2] = 0xa, /* qnum:2 -> linux:2 (KEY_1) -> xorgkbd:10 */
