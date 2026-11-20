@@ -51,7 +51,7 @@
 
 static XExtensionInfo _nvctrl_ext_info_data;
 static XExtensionInfo *nvctrl_ext_info = &_nvctrl_ext_info_data;
-static /* const */ char *nvctrl_extension_name = NV_CONTROL_NAME;
+static const char *nvctrl_extension_name = NV_CONTROL_NAME;
 
 #define XNVCTRLCheckExtension(dpy,i,val) \
   XextCheckExtension (dpy, i, nvctrl_extension_name, val)

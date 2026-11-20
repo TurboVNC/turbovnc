@@ -1,4 +1,4 @@
-/* Copyright (C) 2017, 2021 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2017, 2021, 2026 D. R. Commander.  All Rights Reserved.
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -32,9 +32,9 @@
 #include "vncExt.h"
 
 
-Display *dpy;
-char *displayname, *programName;
-int vncExtEventBase, vncExtErrorBase;
+static Display *dpy;
+static char *displayname, *programName;
+static int vncExtEventBase, vncExtErrorBase;
 
 
 static void FatalError(const char *format, ...)

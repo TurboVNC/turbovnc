@@ -64,9 +64,6 @@ from The Open Group.
 #include "rfb.h"
 
 
-extern DeviceIntPtr kbdDevice;
-
-
 /* From libX11 1.5.0 */
 
 static Bool XkbTranslateKeyCode(register XkbDescPtr xkb, KeyCode key,

@@ -60,7 +60,7 @@ static void rfbVeNCryptAuthenticate(rfbClientPtr cl);
 #define MAX_USER_LEN 64
 #define MAX_PWD_LEN 64
 
-char *rfbAuthConfigFile = AUTH_DEFAULT_CONF_FILE;
+const char *rfbAuthConfigFile = AUTH_DEFAULT_CONF_FILE;
 Bool rfbAuthDisableRemoteResize = FALSE;
 Bool rfbAuthDisableRevCon = FALSE;
 Bool rfbAuthDisableCBSend = FALSE;
@@ -94,7 +94,7 @@ static void AuthNoneRspFunc(rfbClientPtr cl)
 
 #include <pwd.h>
 
-static char *pamServiceName = AUTH_DEFAULT_PAM_SERVICE_NAME;
+static char *pamServiceName = (char *)AUTH_DEFAULT_PAM_SERVICE_NAME;
 
 typedef struct UserList {
   struct UserList *next;
@@ -103,7 +103,7 @@ typedef struct UserList {
 } UserList;
 
 static UserList *userACL = NULL;
-Bool rfbAuthUserACL = FALSE;
+static Bool rfbAuthUserACL = FALSE;
 
 
 void rfbAuthAddUser(const char *name, Bool viewOnly)
@@ -208,7 +208,7 @@ static void AuthPAMUserPwdRspFunc(rfbClientPtr cl)
     RFBLOGID("PAM authentication succeeded for user '%s'\n", userBuf);
   } else {
     RFBLOGID("PAM authentication failed for user '%s'\n", userBuf);
-    rfbClientAuthFailed(cl, (char *)emsg);
+    rfbClientAuthFailed(cl, emsg);
   }
 }
 
@@ -1474,7 +1474,7 @@ void rfbVncAuthProcessResponse(rfbClientPtr cl)
  * the authentication stage.
  */
 
-void rfbClientConnFailed(rfbClientPtr cl, char *reason)
+void rfbClientConnFailed(rfbClientPtr cl, const char *reason)
 {
   int headerLen, reasonLen;
   char buf[8];
@@ -1486,7 +1486,7 @@ void rfbClientConnFailed(rfbClientPtr cl, char *reason)
   buf32[1] = Swap32IfLE(reasonLen);
 
   if (WriteExact(cl, buf, headerLen) < 0 || WriteExact(cl, buf + 4, 4) < 0 ||
-      WriteExact(cl, reason, reasonLen) < 0)
+      WriteExact(cl, (char *)reason, reasonLen) < 0)
     rfbLogPerror("rfbClientConnFailed: write");
 
   rfbCloseClient(cl);
@@ -1498,7 +1498,7 @@ void rfbClientConnFailed(rfbClientPtr cl, char *reason)
  * string is defined in RFB 3.8 and above.
  */
 
-void rfbClientAuthFailed(rfbClientPtr cl, char *reason)
+void rfbClientAuthFailed(rfbClientPtr cl, const char *reason)
 {
   int reasonLen;
   char buf[8];
@@ -1515,7 +1515,8 @@ void rfbClientAuthFailed(rfbClientPtr cl, char *reason)
     if (WriteExact(cl, buf, 4) < 0)
       rfbLogPerror("rfbClientAuthFailed: write");
   } else {
-    if (WriteExact(cl, buf, 8) < 0 || WriteExact(cl, reason, reasonLen) < 0)
+    if (WriteExact(cl, buf, 8) < 0 ||
+        WriteExact(cl, (char *)reason, reasonLen) < 0)
       rfbLogPerror("rfbClientAuthFailed: write");
   }
 

@@ -4,6 +4,7 @@
  * To re-generate, run:
  *   keymap-gen code-map --lang=stdc keymaps.csv qnum xorgevdev
 */
+#include "qnum_to_xorgevdev.h"
 const unsigned short code_map_qnum_to_xorgevdev[254] = {
   [0x1] = 0x9, /* qnum:1 -> linux:1 (KEY_ESC) -> xorgevdev:9 */
   [0x2] = 0xa, /* qnum:2 -> linux:2 (KEY_1) -> xorgevdev:10 */

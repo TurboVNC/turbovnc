@@ -52,16 +52,16 @@
 
 
 static void usage(char *argv[]);
-static char *getenv_safe(char *name, size_t maxlen);
+static char *getenv_safe(const char *name, size_t maxlen);
 static void mkdir_and_check(char *dirname, int be_strict);
 static int read_password(char *result);
 static int ask_password(char *result);
 
-int alsoView;
+static int alsoView;
 
-int otp;
-int otpClear;
-char *displayname;
+static int otp;
+static int otpClear;
+static char *displayname;
 
 
 static int DoOTP(void)
@@ -150,9 +150,9 @@ static int DoOTP(void)
 }
 
 
-int addUser;
-int userList;
-char *user;
+static int addUser;
+static int userList;
+static char *user;
 
 #define MAXUSERLEN  63
 
@@ -393,7 +393,7 @@ static void usage(char *argv[])
 }
 
 
-static char *getenv_safe(char *name, size_t maxlen)
+static char *getenv_safe(const char *name, size_t maxlen)
 {
   char *result;
 

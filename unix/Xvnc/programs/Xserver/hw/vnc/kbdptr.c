@@ -52,9 +52,9 @@ DeviceIntPtr kbdDevice = NULL;
 static DeviceIntPtr ptrDevice = NULL;
 
 /* Avoid fake Shift presses for keys affected by NumLock */
-Bool avoidShiftNumLock = TRUE;
-Bool ignoreLockModifiers = TRUE;
-Bool fakeShift = TRUE;
+static Bool avoidShiftNumLock = TRUE;
+static Bool ignoreLockModifiers = TRUE;
+static Bool fakeShift = TRUE;
 Bool enableQEMUExtKeyEvent = TRUE;
 
 unsigned char ptrAcceleration = 50;
@@ -62,7 +62,9 @@ unsigned char ptrAcceleration = 50;
 #define NoSymbol4 NoSymbol, NoSymbol, NoSymbol, NoSymbol,
 #define NoSymbol16 NoSymbol4 NoSymbol4 NoSymbol4 NoSymbol4
 #define NoSymbol64 NoSymbol16 NoSymbol16 NoSymbol16 NoSymbol16
-KeySym pressedKeys[256] = { NoSymbol64 NoSymbol64 NoSymbol64 NoSymbol64 };
+static KeySym pressedKeys[256] = {
+  NoSymbol64 NoSymbol64 NoSymbol64 NoSymbol64
+};
 
 static const unsigned short *codeMap;
 static unsigned int codeMapLen;

@@ -117,7 +117,7 @@ DevPrivateKeyRec rfbGCKey;
 
 static Bool initOutputCalled = FALSE;
 static Bool noCursor = FALSE;
-char *desktopName = DEFAULT_DESKTOP_NAME;
+char *desktopName = (char *)DEFAULT_DESKTOP_NAME;
 int traceLevel = 0;
 int rfbLEDState = (int)rfbLEDUnknown;
 #ifdef DDXOSVERRORF
@@ -126,16 +126,16 @@ static Bool sysLog = FALSE;
 
 char rfbThisHost[256];
 
-Atom VNC_LAST_CLIENT_ID;
-Atom VNC_CONNECT;
-Atom VNC_OTP;
+static Atom VNC_LAST_CLIENT_ID;
+static Atom VNC_CONNECT;
+static Atom VNC_OTP;
 #ifdef NVCONTROL
-Atom VNC_NVCDISPLAY;
+static Atom VNC_NVCDISPLAY;
 #endif
 
 #ifdef XVNC_AuthPAM
 #define MAXUSERLEN 63
-Atom VNC_ACL;
+static Atom VNC_ACL;
 #endif
 
 static char primaryOrder[4] = "";
@@ -162,8 +162,10 @@ static miPointerScreenFuncRec rfbPointerCursorFuncs = {
   miPointerWarpCursor
 };
 
-XkbRMLVOSet rmlvo = { XKB_DFLT_RULES, XKB_DFLT_MODEL, XKB_DFLT_LAYOUT,
-                      XKB_DFLT_VARIANT, XKB_DFLT_OPTIONS };
+static XkbRMLVOSet rmlvo = {
+  (char *)XKB_DFLT_RULES, (char *)XKB_DFLT_MODEL, (char *)XKB_DFLT_LAYOUT,
+  (char *)XKB_DFLT_VARIANT, (char *)XKB_DFLT_OPTIONS
+};
 
 int inetdSock = -1;
 static char inetdDisplayNumStr[10];
@@ -1954,7 +1956,7 @@ void ddxUseMsg(void)
  * log.)
  */
 
-void rfbLog(char *format, ...)
+void rfbLog(const char *format, ...)
 {
   va_list args;
   char buf[256];
@@ -1984,7 +1986,7 @@ void rfbLog(char *format, ...)
 }
 
 
-void rfbLogPerror(char *str)
+void rfbLogPerror(const char *str)
 {
 #ifdef DDXOSVERRORF
   if (sysLog) {

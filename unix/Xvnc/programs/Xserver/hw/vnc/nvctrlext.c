@@ -1,4 +1,4 @@
-/* Copyright (C) 2015, 2020 D. R. Commander.  All Rights Reserved.
+/* Copyright (C) 2015, 2020, 2026 D. R. Commander.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,24 +31,24 @@
 #include <X11/X.h>
 #include <X11/Xfuncproto.h>
 #include "misc.h"
+#include "extinit.h"
 #include "extnsionst.h"
 #include "dixstruct.h"
 #include <X11/Xlib.h>
 #include "NVCtrlLib.h"
 #include "nv_control.h"
 
-extern void rfbLog(char *format, ...);
+extern void rfbLog(const char *format, ...);
 extern int rfbPort;
 static int ProcNVCTRLDispatch(ClientPtr client);
 static int SProcNVCTRLDispatch(ClientPtr client);
 
-void nvCtrlExtensionInit(void);
-
 static unsigned long nvCtrlGeneration = 0;
 
+extern char *nvCtrlDisplay;
 char *nvCtrlDisplay = NULL;
 Bool noNVCTRLExtension = True;
-int error_code;
+static int error_code;
 
 
 #define SWAP(index_a, index_b)  \

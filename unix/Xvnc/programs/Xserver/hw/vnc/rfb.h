@@ -716,7 +716,7 @@ void rfbAuthInit(void);
 void rfbAuthProcessResponse(rfbClientPtr cl);
 void rfbAuthParseCommandLine(char *buf);
 void rfbAuthListAvailableSecurityTypes(void);
-extern char *rfbAuthConfigFile;
+extern const char *rfbAuthConfigFile;
 
 extern Bool  rfbOptOtpAuth(void);
 extern Bool  rfbOptPamAuth(void);
@@ -751,8 +751,8 @@ extern void rfbVncAuthProcessResponse(rfbClientPtr cl);
 extern void rfbAuthTLSHandshake(rfbClientPtr cl);
 #endif
 
-extern void rfbClientConnFailed(rfbClientPtr cl, char *reason);
-extern void rfbClientAuthFailed(rfbClientPtr cl, char *reason);
+extern void rfbClientConnFailed(rfbClientPtr cl, const char *reason);
+extern void rfbClientAuthFailed(rfbClientPtr cl, const char *reason);
 extern void rfbClientAuthSucceeded(rfbClientPtr cl, CARD32 authType);
 
 /* Functions to prevent too many successive authentication failures */
@@ -804,6 +804,7 @@ extern Bool rfbSendCursorPos(rfbClientPtr cl, ScreenPtr pScreen);
 /* cutpaste.c */
 
 extern Bool rfbSyncPrimary;
+extern char *cachedData;
 extern struct xorg_list clipboardRequestors;
 
 extern void rfbHandleClientCutText(rfbClientPtr cl, const char *str, int len);
@@ -907,7 +908,6 @@ extern Bool rfbSendRectEncodingHextile(rfbClientPtr cl, int x, int y, int w,
 
 extern char *desktopName;
 extern char rfbThisHost[];
-extern Atom VNC_LAST_CLIENT_ID;
 
 extern rfbFBInfo rfbFB;
 extern DevPrivateKeyRec rfbGCKey;
@@ -924,8 +924,8 @@ extern int family;
 extern int rfbLEDState;
 
 extern int rfbBitsPerPixel(int depth);
-extern void rfbLog(char *format, ...);
-extern void rfbLogPerror(char *str);
+extern void rfbLog(const char *format, ...);
+extern void rfbLogPerror(const char *str);
 extern void rfbRootPropertyChange(PropertyPtr pProp);
 
 extern Bool AddExtInputDevice(rfbDevInfo *dev);
@@ -937,6 +937,8 @@ extern void *rfbRealloc(void *ptr, size_t size);
 
 
 /* kbdptr.c */
+
+extern DeviceIntPtr kbdDevice;
 
 extern Bool enableQEMUExtKeyEvent;
 extern unsigned char ptrAcceleration;
@@ -1009,6 +1011,7 @@ extern void IdleTimerCheck(void);
 extern Bool InterframeOn(rfbClientPtr cl);
 extern void InterframeOff(rfbClientPtr);
 extern BOOL rfbProfile;
+extern unsigned long long sendBytes;
 
 extern int rfbMaxWidth, rfbMaxHeight;
 

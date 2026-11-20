@@ -1,5 +1,5 @@
-/* Copyright (C) 2011, 2013-2015, 2017-2018, 2021 D. R. Commander.
- *                                                All Rights Reserved.
+/* Copyright (C) 2011, 2013-2015, 2017-2018, 2021, 2026 D. R. Commander.
+ *                                                      All Rights Reserved.
  * Copyright (C) 2002-2005 RealVNC Ltd.  All Rights Reserved.
  *
  * This is free software; you can redistribute it and/or modify
@@ -72,7 +72,7 @@ typedef struct _VncParam {
 
 #define NUM_PARAMS 9
 
-VncParam params[NUM_PARAMS] =
+static VncParam params[NUM_PARAMS] =
 {
   { "AlwaysShared", (void *)&rfbAlwaysShared, VNC_BOOL, 0.0, 1.0,
     "Always treat new connections as shared" },

@@ -2,6 +2,8 @@ include_directories(../miext/sync ../randr ../render)
 
 add_definitions(-DHAVE_XORG_CONFIG_H)
 
+disable_compiler_warnings()
+
 add_library(dri3 STATIC
 	dri3.c
 	dri3_request.c
