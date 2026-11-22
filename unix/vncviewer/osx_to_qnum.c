@@ -4,6 +4,7 @@
  * To re-generate, run:
  *   keymap-gen code-map --lang=stdc keymaps.csv osx qnum
 */
+#include "osx_to_qnum.h"
 const unsigned short code_map_osx_to_qnum[256] = {
   [0x0] = 0x1e, /* osx:0 (ANSI_A) -> linux:30 (KEY_A) -> qnum:30 */
   [0x1] = 0x1f, /* osx:1 (ANSI_S) -> linux:31 (KEY_S) -> qnum:31 */
