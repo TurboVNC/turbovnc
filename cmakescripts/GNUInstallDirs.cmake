@@ -396,6 +396,7 @@ macro(GNUInstallDirs_get_absolute_install_dir absvar var)
     set(${absvar} "${${var}}")
   endif()
   string(REGEX REPLACE "/$" "" ${absvar} "${${absvar}}")
+  get_filename_component(${absvar} "${${absvar}}" ABSOLUTE)
 endmacro()
 
 # Result directories
